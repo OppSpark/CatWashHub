@@ -45,20 +45,7 @@ public class WebSecurityConfig {
                                         .authenticationEntryPoint(new FailedAuthenticationEntryPoint())
                                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-
-                /*
-                .cors().and()
-                .csrf().disable()
-                .httpBasic().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeRequests()
-                .antMatchers("/","/api/v1/auth/**", "/api/v1/auth/search/**", "/api/v1/auth/file/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/v1/board/**", "/api/v1/auth/user/*").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .execptionHandling.authenticationEntryPoint(new FailedAuthenticationEntryPoint());
-                 */
+        
         return httpSecurity.build();
 
 
