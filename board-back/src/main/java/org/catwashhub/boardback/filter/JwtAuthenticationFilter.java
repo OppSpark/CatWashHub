@@ -3,7 +3,6 @@ package org.catwashhub.boardback.filter;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
-import java.security.Security;
 
 import org.catwashhub.boardback.provider.JwtProvider;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
