@@ -38,3 +38,6 @@ out/
 
 ### DB info ###
 application-MySQL.properties
+
+### JWT info ###
+application.properties.JWTkey
