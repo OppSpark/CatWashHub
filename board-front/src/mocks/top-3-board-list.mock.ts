@@ -1,0 +1,66 @@
+import { BoardListItem } from "types/interface";
+
+const top3BoardListMock: BoardListItem[] =[
+  {
+    boardNumber: 1,
+    title: "세차용품 잘 사는법",
+    content: "이 편지는 어쩌구 저ㅉ/ㅓ구",
+    boardTitleImage: 'https://velog.velcdn.com/images/picks5/post/d906aacd-6e4d-47da-8133-5de00ef9a199/image.jpg',
+    favoriteCount: 0,
+    commentCount: 0,
+    viewCount: 0,
+    writeDatetime: "2024. 09. 24, 14:32:12",
+    writerNickname: "허걱스파크",
+    writerProfileImage: 'http://coin.oppspark.net//favicon.ico',
+  },
+  {
+    boardNumber: 1,
+    title: "제목이 이미지가 없어요",
+    content: "기본 이미지?",
+    boardTitleImage: null,
+    favoriteCount: 0,
+    commentCount: 0,
+    viewCount: 0,
+    writeDatetime: "2024. 09. 24, 14:32:12",
+    writerNickname: "허걱스파크",
+    writerProfileImage: '',
+  },
+  {
+    boardNumber: 1,
+    title: "기본 제목",
+    content: "내용",
+    boardTitleImage: null,
+    favoriteCount: 0,
+    commentCount: 0,
+    viewCount: 0,
+    writeDatetime: "2024. 09. 24, 14:32:12",
+    writerNickname: "허거거더ㅇ스팍부",
+    writerProfileImage: 'https://iloa.gg/favicon.ico',
+  },
+  {
+    boardNumber: 1,
+    title: "오늘의 맛집 추천!",
+    content: "안창호 국가인권위원장 후보자가 3일 진행된 국회 운영위원회 인사청문회에서 이같이 답변을 회피한 질문들에는 공통점이 있다. 윤석열 대통령과 현 정부의 정책 기조가 인권 가치에 부합하느냐고 묻는 질문들이었다는 것이다.",
+    boardTitleImage: null,
+    favoriteCount: 6,
+    commentCount: 2,
+    viewCount: 344422,
+    writeDatetime: "2024. 09. 24, 14:32:12",
+    writerNickname: "닉네임길이가너무길어요제발",
+    writerProfileImage: 'https://iloa.gg/favicon.ico',
+  },
+  {
+    boardNumber: 1,
+    title: "기본 제목",
+    content: "내용",
+    boardTitleImage: null,
+    favoriteCount: 0,
+    commentCount: 0,
+    viewCount: 0,
+    writeDatetime: "2024. 09. 24, 14:32:12",
+    writerNickname: "허거거더ㅇ스팍부",
+    writerProfileImage: 'https://iloa.gg/favicon.ico',
+  }
+]
+
+export default top3BoardListMock;
