@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import DefaultProfileImage from "assets/image/default-profile-image.png";
 
 interface Props {
-  boardListItem: BoardListItem
+  boardListItem: BoardListItem;
 }
 
 // 컴포넌트 : Board List Item 컴포넌트
@@ -28,8 +28,7 @@ export default function BoardItem({ boardListItem }: Props) {
       <div className="board-list-item-main-box">
         <div className="board-list-item-top">
           <div className="board-list-item-profile-box">
-            
-          <div
+            <div
               className="board-list-item-profile-image"
               style={{
                 backgroundImage: `url(${
