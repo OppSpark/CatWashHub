@@ -6,6 +6,7 @@ import CommentItem from "components/CommentItem";
 import { commentListMock, latestBoardListMock, top3BoardListMock } from "mocks";
 import favoriteListMock from "mocks/favorite-list.mock";
 import FavoriteItem from "components/FavoriteItem";
+import InputBox from "components/InputBox";
 
 function App() {
   return (
@@ -45,6 +46,8 @@ function App() {
           <FavoriteItem favoriteListItem={favoriteListItem} />
         ))}
       </div>
+
+      <InputBox />
     </>
   );
 }
