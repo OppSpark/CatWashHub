@@ -1,0 +1,68 @@
+#footer{
+  padding: 40px 0 50px 0;
+  background-color: rgb(57,167,132,1);
+
+  display: flex;
+  justify-content: center;
+}
+
+.footer-container{
+  width: 1200px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-top{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-logo-box{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-logo-text{
+  /* 
+    추후에 폰트 모양 바꿔야함 
+    font-family: '';
+  */
+  color: rgba(255, 255,255, 1);
+
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: -0.4px;
+}
+
+.footer-link-box{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer-email-link{
+  /* 
+    추후에 폰트 모양 바꿔야함 
+    font-family: '';
+  */
+
+  color: rgba(255, 255,255, 1);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.footer-copyright{
+  /* 
+    추후에 폰트 모양 바꿔야함 
+    font-family: '';
+  */
+  
+  color: rgba(255, 255,255, 1);
+  font-size: 12px;
+  font-weight: 400;
+
+}

@@ -7,6 +7,7 @@ import { commentListMock, latestBoardListMock, top3BoardListMock } from "mocks";
 import favoriteListMock from "mocks/favorite-list.mock";
 import FavoriteItem from "components/FavoriteItem";
 import InputBox from "components/InputBox";
+import Footer from "layouts/Footer";
 
 function App() {
   //test 용도
@@ -59,6 +60,8 @@ function App() {
         setValue={setValue}
         message="hello"
       />
+
+      <Footer />
     </>
   );
 }
