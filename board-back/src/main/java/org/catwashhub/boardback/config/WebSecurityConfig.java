@@ -37,13 +37,12 @@ public class WebSecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .httpBasic(HttpBasicConfigurer::disable)
                 .sessionManagement(SessionManagement -> SessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                        .authorizeRequests(request -> request
-                                .requestMatchers("/","/api/v1/auth/**", "/api/v1/auth/search/**", "/api/v1/auth/file/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/board/**", "/api/v1/auth/user/*").permitAll()
-                                .anyRequest().authenticated())
-                                .exceptionHandling(exceptionHandling -> exceptionHandling
-                                        .authenticationEntryPoint(new FailedAuthenticationEntryPoint())
-                                )
+                .authorizeRequests(request -> request
+                        .requestMatchers("/","/api/v1/auth/**", "/api/v1/auth/search/**", "/api/v1/auth/file/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/board/**", "/api/v1/auth/user/*").permitAll()
+                        .anyRequest().authenticated())
+                        .exceptionHandling(exceptionHandling -> exceptionHandling
+                                .authenticationEntryPoint(new FailedAuthenticationEntryPoint()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return httpSecurity.build();
@@ -67,7 +66,6 @@ public class WebSecurityConfig {
 
 
 class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint{
-
     @Override
     public void commence(
             HttpServletRequest request,

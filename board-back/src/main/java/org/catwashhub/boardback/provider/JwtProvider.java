@@ -19,7 +19,6 @@ public class JwtProvider {
 
     // JWT 생성
     public String create(String email){
-
         Date expiredDate = Date.from(Instant.now().plus(1, ChronoUnit.HOURS));
 
         String jwt = Jwts.builder()
@@ -31,19 +30,15 @@ public class JwtProvider {
 
     // JWT 검증
     public String validate(String jwt){
-
         Claims claims = null;
 
         try{
-            claims = Jwts.parser().setSigningKey(secretKey)
-                    .parseClaimsJws(jwt).getBody();
+            claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwt).getBody();
         }
         catch (Exception exception){
             exception.printStackTrace();
-
             return null;
         }
-
         return  claims.getSubject();
     }
 }

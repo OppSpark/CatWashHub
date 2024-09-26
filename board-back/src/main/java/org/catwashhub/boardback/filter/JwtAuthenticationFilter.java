@@ -27,8 +27,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         try{
             String token = ParseBearerToken(request);
@@ -38,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String email = jwtProvider.validate(token);
+
             if(email == null){
                 filterChain.doFilter(request, response);
                 return;
@@ -45,6 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             AbstractAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(email, null, AuthorityUtils.NO_AUTHORITIES);
+
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
@@ -57,7 +62,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request,response);
-
     }
 
     private String ParseBearerToken(HttpServletRequest request){
