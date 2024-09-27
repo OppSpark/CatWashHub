@@ -1,10 +1,20 @@
 import { ChangeEvent, useRef, useState, KeyboardEvent, useEffect } from "react";
 import "./style.css";
 import { useNavigate, useParams } from "react-router-dom";
-import { MAIN_PATH, SEARCH_PATH } from "components";
+import { AUTH_PATH, MAIN_PATH, SEARCH_PATH, USER_PATH } from "components";
+import { useCookies } from "react-cookie";
+import { useLoginUserStore } from "stores";
 
 //컴포넌트 : Header Layout
 export default function Header() {
+  // 상태 : 로그인 유저 상태
+  const { loginUser, setLoginUser, resetLoginUser } = useLoginUserStore();
+
+  // 상태 : cookie 상태
+  const [cookies, setCookie] = useCookies();
+
+  // 상태 : 로그인 상태
+  const [isLogin, setLogin] = useState<boolean>(false);
 
   //함수 : 네비게이트 함수
   const navigate = useNavigate();
@@ -69,7 +79,7 @@ export default function Header() {
           <div className="icon search-light-icon"></div>
         </div>
       );
-      
+
     // 렌더 : 검색 버튼 컴포넌튼 렌더링 : true 상태
     return (
       <div className="header-search-input-box">
@@ -92,6 +102,52 @@ export default function Header() {
     );
   };
 
+  //컴포넌트 : 로그인, 로그아웃 또는 마이페이지 컴포넌트
+  const MyPageButton = () => {
+    // 상태 : userEmail Path variable 상태
+    const { userEmail } = useParams();
+
+    // 이벤트 헨들러 : 마이페이지 버튼 클릭 처리 함수
+    const onMyPageButtonClickHandler = () => {
+      if (!loginUser) return;
+      const { email } = loginUser;
+      navigate(USER_PATH(email));
+    };
+
+    // 이벤트 헨들러 : 로그인 버튼 클릭 처리 함수
+    const onSignInButtonClickHandler = () => {
+      navigate(AUTH_PATH());
+    };
+
+    // 이벤트 헨들러 : 로그아웃 버튼 클릭 처리 함수
+    const onSigOutButtonClickHandler = () => {
+      resetLoginUser();
+      navigate(MAIN_PATH());
+    };
+
+    if (isLogin && userEmail === loginUser?.email)
+      //렌더 : 로그아웃 버튼 렌더러 컴포넌트
+      return (
+        <div className="black-button" onClick={onSigOutButtonClickHandler}>
+          {"로그아웃"}
+        </div>
+      );
+    if (isLogin) {
+      //렌더 : 마이페이지 버튼
+      return (
+        <div className="white-button" onClick={onMyPageButtonClickHandler}>
+          {"마이페이지"}
+        </div>
+      );
+    }
+    //렌더 : 로그인 버튼 렌더러 컴포넌트
+    return (
+      <div className="black-button" onClick={onSignInButtonClickHandler}>
+        {"로그인"}
+      </div>
+    );
+  };
+
   //렌더 : Header Layout 렌더러 컴포넌트
   return (
     <div id="header">
@@ -104,6 +160,7 @@ export default function Header() {
         </div>
         <div className="header-right-box">
           <SearchButton></SearchButton>
+          <LoginMyPageButton></LoginMyPageButton>
         </div>
       </div>
     </div>
