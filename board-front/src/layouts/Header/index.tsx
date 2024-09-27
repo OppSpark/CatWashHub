@@ -160,7 +160,7 @@ export default function Header() {
         </div>
         <div className="header-right-box">
           <SearchButton></SearchButton>
-          <LoginMyPageButton></LoginMyPageButton>
+          <MyPageButton></MyPageButton>
         </div>
       </div>
     </div>
