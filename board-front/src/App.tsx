@@ -13,9 +13,9 @@ import Main from "views/Main";
 import Authentication from "views/Authentication";
 import Search from "views/Search";
 import User from "views/User";
-import BoardDetail from "views/Borad/Detail";
-import BoardWrite from "views/Borad/Write";
-import BoardUpdate from "views/Borad/Update";
+import BoardDetail from "views/Board/Detail";
+import BoardWrite from "views/Board/Write";
+import BoardUpdate from "views/Board/Update";
 import Container from "layouts/Container";
 import { AUTH_PATH, BOARD_DETAIL_PATH, BOARD_UPDATE_PATH, BOARD_WRITE_PATH, MAIN_PATH, SEARCH_PATH, USER_PATH, BOARD_PATH } from "constants/"
 

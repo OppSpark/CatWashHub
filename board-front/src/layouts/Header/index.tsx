@@ -12,7 +12,7 @@ import {
 } from "constants/";
 import { useCookies } from "react-cookie";
 import { useBoardStore, useLoginUserStore } from "stores";
-import BoardDetail from "views/Borad/Detail";
+import BoardDetail from "views/Board/Detail";
 import path from "path";
 import { BOARD_PATH } from "constants/";
 
