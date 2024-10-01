@@ -107,3 +107,5 @@ INNER JOIN user AS U
 ON B.writer_email = U.email
 LEFT JOIN (SELECT board_number, ANY_VALUE(image) AS image FROM image GROUP BY board_number) AS I
 ON B.board_number = I.board_number;
+
+ALTER TABLE `image` ADD COLUMN `sequence` INT PRIMARY KEY AUTO_INCREMENT COMMENT '이미지 번호';
