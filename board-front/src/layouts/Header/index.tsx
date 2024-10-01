@@ -1,9 +1,20 @@
 import { ChangeEvent, useRef, useState, KeyboardEvent, useEffect } from "react";
 import "./style.css";
-import { useNavigate, useParams } from "react-router-dom";
-import { AUTH_PATH, MAIN_PATH, SEARCH_PATH, USER_PATH } from "components";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  AUTH_PATH,
+  BOARD_DETAIL_PATH,
+  BOARD_UPDATE_PATH,
+  BOARD_WRITE_PATH,
+  MAIN_PATH,
+  SEARCH_PATH,
+  USER_PATH,
+} from "constants/";
 import { useCookies } from "react-cookie";
-import { useLoginUserStore } from "stores";
+import { useBoardStore, useLoginUserStore } from "stores";
+import BoardDetail from "views/Borad/Detail";
+import path from "path";
+import { BOARD_PATH } from "constants/";
 
 //컴포넌트 : Header Layout
 export default function Header() {
@@ -13,8 +24,26 @@ export default function Header() {
   // 상태 : cookie 상태
   const [cookies, setCookie] = useCookies();
 
+  // 상태 : path 상태
+  const { pathname } = useLocation();
+
   // 상태 : 로그인 상태
   const [isLogin, setLogin] = useState<boolean>(false);
+
+  // 상태 : 인증 페이지 상태
+  const [isAuthPage, setAuthPage] = useState<boolean>(false);
+  // 상태 : 메인 페이지 상태
+  const [isMainPage, setMainPage] = useState<boolean>(false);
+  // 상태 : 검색 페이지 상태
+  const [isSearchPage, setSearchPage] = useState<boolean>(false);
+  // 상태 : 게시물 상세 페이지 상태
+  const [isBoardDetailPage, setBoardDetailPage] = useState<boolean>(false);
+  // 상태 : 게시물 작성 페이지 상태
+  const [isBoardWritePage, setBoardWritePage] = useState<boolean>(false);
+  // 상태 : 게시물 수정 페이지 상태
+  const [isBoardUpdatePage, setBoardUpdatePage] = useState<boolean>(false);
+  // 상태 : 유저 페이지 상태
+  const [isUserPage, setUserPage] = useState<boolean>(false);
 
   //함수 : 네비게이트 함수
   const navigate = useNavigate();
@@ -148,6 +177,51 @@ export default function Header() {
     );
   };
 
+  //컴포넌트 : 업로드 버튼 컴포넌트
+  const UploadButton = () => {
+    //상태 : 게시물 상태
+    const { title, content, boardImageFileList, resetBoard } = useBoardStore();
+
+    //이벤트 헨들러 : 업로드 버튼 클릭 처리함수
+    const onUploadButtonClickHandler = () => {};
+
+    //렌더 : 업로드 버튼 렌더러
+    if (title && content)
+      return (
+        <div className="black-button" onClick={onUploadButtonClickHandler}>
+          {"업로드"}
+        </div>
+      );
+    //렌더 : 업로드 불가 버튼 렌더러
+    return <div className="disable-button">{"업로드"}</div>;
+  };
+
+  //이펙트 : 경로가 변경될 때 마다 실행되는 함수
+  useEffect(() => {
+    const isAuthPage = pathname.startsWith(AUTH_PATH());
+    setAuthPage(isAuthPage);
+
+    const isMainPage = pathname === MAIN_PATH();
+    setMainPage(isMainPage);
+
+    const isSearchPage = pathname.startsWith(SEARCH_PATH(""));
+    setSearchPage(isSearchPage);
+
+    const isBoardDetailPage = pathname.startsWith(
+      BOARD_PATH() + "/" + BOARD_DETAIL_PATH("")
+    );
+    setBoardDetailPage(isBoardDetailPage);
+
+    const isBoardWritePage = pathname.startsWith(BOARD_PATH() + "/" +BOARD_WRITE_PATH());
+    setBoardWritePage(isBoardWritePage);
+
+    const isBoardUpdatePage = pathname.startsWith(BOARD_PATH() + "/" +BOARD_UPDATE_PATH(""));
+    setBoardUpdatePage(isBoardUpdatePage);
+
+    const isUserPage = pathname.startsWith(USER_PATH(""));
+    setUserPage(isUserPage);
+  }, [pathname]);
+
   //렌더 : Header Layout 렌더러 컴포넌트
   return (
     <div id="header">
@@ -159,8 +233,13 @@ export default function Header() {
           <div className="header-logo">{"catWashHub"}</div>
         </div>
         <div className="header-right-box">
-          <SearchButton></SearchButton>
-          <MyPageButton></MyPageButton>
+          {(isAuthPage || isMainPage || isSearchPage || isBoardDetailPage) && (
+            <SearchButton />
+          )}
+          {(isMainPage || isSearchPage || isBoardDetailPage || isUserPage) && (
+            <MyPageButton />
+          )}
+          {(isBoardWritePage || isBoardUpdatePage) && <UploadButton />}
         </div>
       </div>
     </div>

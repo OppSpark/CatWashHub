@@ -3,7 +3,7 @@ import './style.css'
 import Footer from 'layouts/Footer'
 import { Outlet, useLocation } from 'react-router-dom'
 import Header from 'layouts/Header'
-import { AUTH_PATH } from 'components'
+import { AUTH_PATH } from 'constants/'
 
 // 캄포넌트 : 레이아웃
 export default function Container() {

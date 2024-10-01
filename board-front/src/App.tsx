@@ -17,7 +17,7 @@ import BoardDetail from "views/Borad/Detail";
 import BoardWrite from "views/Borad/Write";
 import BoardUpdate from "views/Borad/Update";
 import Container from "layouts/Container";
-import { AUTH_PATH, BOARD_DETAIL_PATH, BOARD_PATH, BOARD_UPDATE_PATH, BOARD_WRITE_PATH, MAIN_PATH, SEARCH_PATH, USER_PATH } from "components";
+import { AUTH_PATH, BOARD_DETAIL_PATH, BOARD_UPDATE_PATH, BOARD_WRITE_PATH, MAIN_PATH, SEARCH_PATH, USER_PATH, BOARD_PATH } from "constants/"
 
 // 컴포넌트 ; Application 컴포넌트
 function App() {
