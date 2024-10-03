@@ -40,4 +40,4 @@ out/
 application-MySQL.properties
 
 ### JWT info ###
-application.properties.JWTkey
+application-JwtKey.properties

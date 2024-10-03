@@ -3,7 +3,9 @@ package org.catwashhub.boardback.controller;
 import jakarta.persistence.Id;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.catwashhub.boardback.dto.request.auth.SignInRequestDto;
 import org.catwashhub.boardback.dto.request.auth.SignUpRequestDto;
+import org.catwashhub.boardback.dto.response.SignInResponseDto;
 import org.catwashhub.boardback.dto.response.auth.SignUpResponseDto;
 import org.catwashhub.boardback.service.AuthService;
 import org.springframework.http.ResponseEntity;
@@ -28,4 +30,15 @@ public class AuthController {
         ResponseEntity<? super  SignUpResponseDto> response = authService.signUp(requestBody);
         return response;
     }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<? super SignInResponseDto> signIn(
+            @RequestBody
+            @Valid
+            SignInRequestDto requestBody
+    ){
+        ResponseEntity<? super SignInResponseDto> response = authService.signIn(requestBody);
+        return response;
+    }
+
 }
