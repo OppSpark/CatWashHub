@@ -1,5 +1,6 @@
 package org.catwashhub.boardback.dto.request.auth;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,9 @@ public class SignUpRequestDto {
     @NotBlank @Size(min=8, max=20)
     private String password;
 
-    @NotBlank
+    @Column(length = 20)
+    @NotNull
+    @Size(max = 222222, message = "닉네임은 최대 20자까지 입력할 수 있습니다.")
     private String nickname;
 
     @NotBlank @Pattern(regexp = "^[0-9]{11,13}$")
