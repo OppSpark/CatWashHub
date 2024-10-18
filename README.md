@@ -27,5 +27,8 @@
 
 
 ## 데이터 베이스 설계
+- DDL : https://github.com/OppSpark/CatWashHub/blob/main/BoardDDL.sql
+- DML : https://github.com/OppSpark/CatWashHub/blob/main/BoardDML.sql
+
 
 <img width="968" alt="스크린샷 2024-10-18 19 48 47" src="https://github.com/user-attachments/assets/a9208ba6-a791-4fc7-b3fd-e9ce70d3edad">
