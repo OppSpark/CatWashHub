@@ -1,11 +1,24 @@
-import React, { useState, useRef, KeyboardEvent } from "react";
+import React, { useState, useRef, KeyboardEvent, ChangeEvent } from "react";
 import "./style.css";
 import InputBox from "components/InputBox";
+import { SignInRequestDto } from "apis/request/auth";
+import { signInRequest } from "apis";
+import { SignInResponseDto } from "apis/response/auth";
+import { ResponseDto } from "apis/response";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { MAIN_PATH } from "constants/";
 
 //컴포넌트 : 인증 화면 컴포넌트
 export default function Authentication() {
   //상태 : 화면 상태
   const [view, setView] = useState<"sign-in" | "sign-up">("sign-in");
+
+  //상태 : 쿠키 상태
+  const [cookies, setCookie] = useCookies();
+
+  //함수 : 네비게이터
+  const navigator = useNavigate();
 
   //컴포넌트 : sign in card 컴포넌트
   const SignInCard = () => {
@@ -34,8 +47,48 @@ export default function Authentication() {
     //상태 : 에러상태
     const [error, setError] = useState<boolean>(false);
 
+    //함수 : sign in response 처리
+    const signInResponse = (
+      responseBody: SignInResponseDto | ResponseDto | null
+    ) => {
+      if (!responseBody) {
+        alert("네트워크 이상입니다.");
+        return;
+      }
+      const { code } = responseBody;
+      if (code === "DBE") alert("데이터베이스 오류입니다.");
+      if (code === "SF" || code === "VF") setError(true);
+      if (code === "SU") {
+        const { token, expirationTime } = responseBody as SignInResponseDto;
+
+        const now = new Date().getTime();
+        const expires = new Date(now + expirationTime * 1000);
+
+        setCookie("accessToken", token, { expires, path: MAIN_PATH() });
+
+        navigator(MAIN_PATH());
+      }
+    };
+
+    //이벤트 핸들러 : 이메일 변경 이벤트 처리
+    const onEmailChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+      setError(false);
+      const { value } = event.target;
+      setEmail(value);
+    };
+
+    //이벤트 핸들러 : 비밀번호 변경 이벤트 처리
+    const onPasswordChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+      setError(false);
+      const { value } = event.target;
+      setPassword(value);
+    };
+
     //이벤트 헨들러 : 로그인 버튼 클릭 이벤트 처리 함수
-    const onSignInButtonClickHandler = () => {};
+    const onSignInButtonClickHandler = () => {
+      const requestBody: SignInRequestDto = { email, password };
+      signInRequest(requestBody).then(signInResponse);
+    };
 
     //이벤트 헨들러 : 회원가입 링크 클릭 이벤트 처리
     const onSignUpLinkClickHandler = () => {
@@ -52,7 +105,7 @@ export default function Authentication() {
       }
     };
 
-    //이벤트 헨드러 : 이메일 input keyDown 이벤트 처리
+    //이벤트 핸들러 : 이메일 input keyDown 이벤트 처리
     const onEmailKeyDownHandler = (event: KeyboardEvent<HTMLInputElement>) => {
       if (event.key !== "Enter") return;
       if (!passwordRef.current) return;
@@ -60,7 +113,7 @@ export default function Authentication() {
       onSignInButtonClickHandler();
     };
 
-    //이벤트 헨드러 : 패스워드 input keyDown 이벤트 처리
+    //이벤트 핸들러 : 패스워드 input keyDown 이벤트 처리
     const onPasswordKeyDownHandler = (
       event: KeyboardEvent<HTMLInputElement>
     ) => {
@@ -86,7 +139,7 @@ export default function Authentication() {
               placeholder="이메일 주소를 입력해주세요."
               error={error}
               value={email}
-              setValue={setEmail}
+              onChange={onEmailChangeHandler}
               onKeyDown={onEmailKeyDownHandler}
             />
             <InputBox
@@ -96,7 +149,7 @@ export default function Authentication() {
               placeholder="비밀번호를 입력해주세요."
               error={error}
               value={password}
-              setValue={setPassword}
+              onChange={onPasswordChangeHandler}
               icon={passwordButtonIcon}
               onButtonClick={onPasswordButtonClickHandler}
               onKeyDown={onPasswordKeyDownHandler}
@@ -112,7 +165,12 @@ export default function Authentication() {
                 </div>
               </div>
             )}
-            <div className="black-large-full-button">{"로그인"}</div>
+            <div
+              className="black-large-full-button"
+              onClick={onSignInButtonClickHandler}
+            >
+              {"로그인"}
+            </div>
             <div className="auth-description-box">
               <div className="auth-description">
                 {"신규 사용자이신가요?"}{" "}

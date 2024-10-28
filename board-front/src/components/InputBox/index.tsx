@@ -1,10 +1,4 @@
-import {
-  ChangeEvent,
-  Dispatch,
-  forwardRef,
-  SetStateAction,
-  KeyboardEvent,
-} from "react";
+import { ChangeEvent, forwardRef, KeyboardEvent } from "react";
 import "./style.css";
 
 //  인터페이스
@@ -13,10 +7,10 @@ interface Props {
   type: "text" | "password";
   placeholder: string;
   value: string;
-  setValue: Dispatch<SetStateAction<string>>;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   error: boolean;
 
-  icon?: 'eye-light-off-icon' | 'eye-light-on-icon' | 'eye-light-light-icon';
+  icon?: "eye-light-off-icon" | "eye-light-on-icon" | "eye-light-light-icon";
   onButtonClick?: () => void;
 
   message?: string;
@@ -28,13 +22,14 @@ interface Props {
 const inputBox = forwardRef<HTMLInputElement, Props>((props: Props, ref) => {
   //프로퍼티스
   const { label, type, placeholder, value, error, icon, message } = props;
-  const { setValue, onButtonClick, onKeyDown } = props;
+  const { onChange, onButtonClick, onKeyDown } = props;
 
   //이벤트 헨들러 input 값 변경 처리 함수
-  const onChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+
+  /*   const onChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setValue(value);
-  };
+  }; */
 
   // 이벤트 헨들러 keyEvent 헨들러 처리함수 (엔터)
   const onKeyDownHandler = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -55,7 +50,7 @@ const inputBox = forwardRef<HTMLInputElement, Props>((props: Props, ref) => {
           className="input"
           placeholder={placeholder}
           value={value}
-          onChange={onChangeHandler}
+          onChange={onChange}
           onKeyDown={onKeyDownHandler}
         />
         {onButtonClick !== undefined && (

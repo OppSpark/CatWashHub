@@ -1,3 +1,4 @@
 npm install react-router-dom
 npm install react-cookie
 npm i zustand
+npm install axios
