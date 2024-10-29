@@ -1,7 +1,7 @@
 # CatWashHub 세차 메니아들을 위한 커뮤니티!
 
-### 개발, 배퍼 URL
-- http://carwash.oppspark.net
+### 접속하기 (개발서버)
+- http://dev.catwashhub.oppspark.net
 
 ## 프로젝트 소개
 - CatWashHub는 세차를 사랑하는 사람들을 위한 모임으로 차량 관리와 세차에 대한 열정이 넘치는 사람들을 한자리에 모으기 위해 설립되었습니다.
@@ -16,7 +16,7 @@
 ## 개발 환경 및 도구
 - OS : MacOS, Ubuntu22.04
 - IDE : IntelliJ, VSCode, DataGrip
-- Framework : SpringBoot3.3.3
+- Framework : SpringBoot 3.3.3 (JAVA17)
 - Library : React(TS)
 - Server : OracleCloud
 - DBMS : MySQL
@@ -24,7 +24,7 @@
 ### Front-END
 - React(TS)
 ### Back-END
-- SpringBoot3.3.3
+- SpringBoot3.3.3 (JAVA17)
 - MySQL
 - Nginx
 
