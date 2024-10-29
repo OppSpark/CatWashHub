@@ -35,3 +35,9 @@
 
 
 <img width="968" alt="스크린샷 2024-10-18 19 48 47" src="https://github.com/user-attachments/assets/a9208ba6-a791-4fc7-b3fd-e9ce70d3edad">
+
+
+
+## 화면 예시 (개발중)
+
+<img width="1684" alt="스크린샷 2024-10-30 00 58 53" src="https://github.com/user-attachments/assets/6fde4360-a912-494c-a705-f28dc17e0ac1">
