@@ -285,7 +285,7 @@ export default function Authentication() {
 
     //이벤트 헨들러 : 비밀번호 확인 버튼 클릭 이벤트 처리
     const onPasswordCheckButtonClickHandler = () => {
-      if (passwordButtonIcon === "eye-light-off-icon") {
+      if (passwordCheckButtonIcon === "eye-light-off-icon") {
         setPasswordCheckButtonIcon("eye-light-on-icon");
         setPasswordCheckType("text");
       } else {
