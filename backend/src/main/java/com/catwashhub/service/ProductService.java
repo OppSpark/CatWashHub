@@ -123,7 +123,8 @@ public class ProductService {
                 productName,
                 _request.ratio(),
                 _request.waterMl(),
-                productMl
+                productMl,
+                _request.memo()
         );
     }
 
@@ -139,7 +140,8 @@ public class ProductService {
                         h.getProduct() != null ? h.getProduct().getName() : "직접입력",
                         h.getRatio(),
                         h.getWaterMl(),
-                        h.getProductMl()
+                        h.getProductMl(),
+                        h.getMemo()
                 ))
                 .toList();
     }

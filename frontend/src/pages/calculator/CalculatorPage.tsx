@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronDown, Search, Clock, X, ChevronRight, Bookmark } from 'lucide-react'
+import { ChevronDown, Search, Clock, X, ChevronRight, Bookmark, BadgeCheck, User } from 'lucide-react'
 import { getCategories, getProducts, calculate, getHistory } from '@/api/calculatorApi'
 import type { Category, Product, DilutionRatio, CalculationResult } from '@/types/calculator'
 
@@ -22,14 +22,16 @@ const CalculatorPage = () => {
   const [m_SelectedRatio, setM_SelectedRatio] = useState<DilutionRatio | null>(null)
   const [m_CustomRatio, setM_CustomRatio] = useState('')
 
-  // 물 양 (리터)
+  // 물 양 (리터) + 메모
   const [m_WaterL, setM_WaterL] = useState('')
+  const [m_Memo, setM_Memo] = useState('')
 
   // 실시간 계산 결과
   const [m_ProductMl, setM_ProductMl] = useState<number | null>(null)
 
   // 히스토리
   const [m_History, setM_History] = useState<CalculationResult[]>([])
+  const [m_SavedMsg, setM_SavedMsg] = useState(false)
 
   // ==================== 초기화 함수 ====================
   useEffect(() => {
@@ -91,8 +93,7 @@ const CalculatorPage = () => {
     return m_SelectedRatio?.ratio ?? null
   }
 
-  // 실시간 계산: 물(L) / 희석비 → 약품량(ml)
-  // 예) 19L, 1:100 → 19000ml / 100 = 190ml
+  // 실시간 계산: 물(L) × 1000 / 희석비 → 약품량(ml)
   const computeResult = () => {
     const ratio = getEffectiveRatio()
     const waterL = parseFloat(m_WaterL)
@@ -102,8 +103,7 @@ const CalculatorPage = () => {
       return
     }
 
-    const waterMl = waterL * 1000
-    const productMl = Math.round((waterMl / ratio) * 10) / 10
+    const productMl = Math.round((waterL * 1000 / ratio) * 10) / 10
     setM_ProductMl(productMl)
   }
 
@@ -118,12 +118,17 @@ const CalculatorPage = () => {
         productId: m_SelectedProduct?.id,
         ratio,
         waterMl: waterL * 1000,
+        memo: m_Memo || undefined,
       })
-      await loadHistory()
+      setM_SavedMsg(true)
+      setTimeout(() => setM_SavedMsg(false), 2000)
+      if (m_Tab === 'history') {
+        await loadHistory()
+      }
     } catch {
       // 저장 실패 무시
     }
-  }, [m_SelectedProduct, m_WaterL, m_ProductMl, m_RatioMode, m_SelectedRatio, m_CustomRatio])
+  }, [m_SelectedProduct, m_WaterL, m_ProductMl, m_RatioMode, m_SelectedRatio, m_CustomRatio, m_Memo, m_Tab])
 
   const handleSelectProduct = (product: Product) => {
     setM_SelectedProduct(product)
@@ -137,6 +142,7 @@ const CalculatorPage = () => {
     setM_SelectedRatio(null)
     setM_CustomRatio('')
     setM_WaterL('')
+    setM_Memo('')
     setM_ProductMl(null)
     setM_RatioMode('preset')
   }
@@ -144,6 +150,10 @@ const CalculatorPage = () => {
   const effectiveRatio = getEffectiveRatio()
   const waterL = parseFloat(m_WaterL)
   const isValid = effectiveRatio !== null && !isNaN(waterL) && waterL > 0
+
+  // 공식 제품 / 사용자 제품 분리
+  const officialProducts = m_Products.filter(p => p.isOfficial)
+  const userProducts = m_Products.filter(p => !p.isOfficial)
 
   return (
     <div className="min-h-dvh bg-[#F2F4F6] flex flex-col">
@@ -161,9 +171,7 @@ const CalculatorPage = () => {
             key={tab}
             onClick={() => setM_Tab(tab)}
             className={`py-3 text-[15px] font-semibold border-b-2 transition ${
-              m_Tab === tab
-                ? 'border-[#3182F6] text-[#3182F6]'
-                : 'border-transparent text-[#ADB5C0]'
+              m_Tab === tab ? 'border-[#3182F6] text-[#3182F6]' : 'border-transparent text-[#ADB5C0]'
             }`}
           >
             {tab === 'calculator' ? '계산기' : '히스토리'}
@@ -182,9 +190,16 @@ const CalculatorPage = () => {
               onClick={() => setM_ShowProductSheet(true)}
               className="w-full flex items-center justify-between px-4 py-3 bg-[#F2F4F6] rounded-xl"
             >
-              <span className={`text-[15px] ${m_SelectedProduct ? 'text-[#191F28] font-medium' : 'text-[#ADB5C0]'}`}>
-                {m_SelectedProduct ? m_SelectedProduct.name : '제품을 선택해주세요 (선택사항)'}
-              </span>
+              <div className="flex items-center gap-2">
+                {m_SelectedProduct && (
+                  m_SelectedProduct.isOfficial
+                    ? <BadgeCheck size={16} className="text-[#3182F6]" />
+                    : <User size={16} className="text-[#6B7684]" />
+                )}
+                <span className={`text-[15px] ${m_SelectedProduct ? 'text-[#191F28] font-medium' : 'text-[#ADB5C0]'}`}>
+                  {m_SelectedProduct ? m_SelectedProduct.name : '제품을 선택해주세요 (선택사항)'}
+                </span>
+              </div>
               <ChevronDown size={18} className="text-[#ADB5C0]" />
             </button>
             {m_SelectedProduct && (
@@ -228,9 +243,7 @@ const CalculatorPage = () => {
                       key={ratio.id}
                       onClick={() => setM_SelectedRatio(ratio)}
                       className={`flex items-center justify-between px-4 py-3 rounded-xl border transition ${
-                        m_SelectedRatio?.id === ratio.id
-                          ? 'border-[#3182F6] bg-blue-50'
-                          : 'border-[#E5E8EB] bg-white'
+                        m_SelectedRatio?.id === ratio.id ? 'border-[#3182F6] bg-blue-50' : 'border-[#E5E8EB] bg-white'
                       }`}
                     >
                       <div className="text-left">
@@ -295,6 +308,18 @@ const CalculatorPage = () => {
             )}
           </div>
 
+          {/* 메모 입력 */}
+          <div className="bg-white rounded-2xl p-4">
+            <p className="text-[15px] font-bold text-[#191F28] mb-3">메모 <span className="text-[13px] font-normal text-[#ADB5C0]">(선택사항)</span></p>
+            <input
+              type="text"
+              value={m_Memo}
+              onChange={e => setM_Memo(e.target.value)}
+              placeholder="예) 버킷 세차, 폼건 1차 도포"
+              className="w-full px-4 py-3 bg-[#F2F4F6] rounded-xl text-[15px] text-[#191F28] placeholder-[#ADB5C0] outline-none focus:ring-2 focus:ring-[#3182F6] transition"
+            />
+          </div>
+
           {/* 버튼 영역 */}
           <div className="flex gap-2">
             <button
@@ -309,7 +334,7 @@ const CalculatorPage = () => {
               className="flex-[2] py-4 bg-[#3182F6] text-white text-[16px] font-semibold rounded-xl disabled:opacity-40 active:bg-[#1B64DA] transition flex items-center justify-center gap-2"
             >
               <Bookmark size={18} />
-              기록 저장
+              {m_SavedMsg ? '저장됐어요!' : '기록 저장'}
             </button>
           </div>
         </div>
@@ -323,16 +348,21 @@ const CalculatorPage = () => {
             </div>
           ) : (
             m_History.map((item, index) => (
-              <div key={index} className="bg-white rounded-2xl px-4 py-4 flex items-center justify-between">
-                <div>
-                  <p className="text-[15px] font-semibold text-[#191F28]">{item.productName}</p>
-                  <p className="text-[13px] text-[#6B7684] mt-0.5">
-                    1:{item.ratio} · 물 {(item.waterMl / 1000).toFixed(1)}L
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[18px] font-bold text-[#3182F6]">{item.productMl}ml</p>
-                  <p className="text-[12px] text-[#ADB5C0]">약품량</p>
+              <div key={index} className="bg-white rounded-2xl px-4 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[15px] font-semibold text-[#191F28]">{item.productName}</p>
+                    <p className="text-[13px] text-[#6B7684] mt-0.5">
+                      1:{item.ratio} · 물 {(item.waterMl / 1000).toFixed(1)}L
+                    </p>
+                    {item.memo && (
+                      <p className="text-[12px] text-[#ADB5C0] mt-1">{item.memo}</p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[18px] font-bold text-[#3182F6]">{item.productMl}ml</p>
+                    <p className="text-[12px] text-[#ADB5C0]">약품량</p>
+                  </div>
                 </div>
               </div>
             ))
@@ -392,21 +422,33 @@ const CalculatorPage = () => {
               {m_Products.length === 0 ? (
                 <p className="py-12 text-center text-[14px] text-[#ADB5C0]">검색 결과가 없습니다</p>
               ) : (
-                m_Products.map(product => (
-                  <button
-                    key={product.id}
-                    onClick={() => handleSelectProduct(product)}
-                    className="w-full flex items-center justify-between px-6 py-4 border-b border-[#F2F4F6] active:bg-[#F2F4F6]"
-                  >
-                    <div className="text-left">
-                      <p className="text-[15px] font-semibold text-[#191F28]">{product.name}</p>
-                      <p className="text-[13px] text-[#6B7684] mt-0.5">
-                        {product.brand}{product.categoryName && ` · ${product.categoryName}`}
-                      </p>
-                    </div>
-                    <ChevronRight size={18} className="text-[#ADB5C0]" />
-                  </button>
-                ))
+                <>
+                  {/* 공식 제품 섹션 */}
+                  {officialProducts.length > 0 && (
+                    <>
+                      <div className="px-6 py-2 flex items-center gap-1.5 bg-[#F8FAFC]">
+                        <BadgeCheck size={14} className="text-[#3182F6]" />
+                        <span className="text-[12px] font-semibold text-[#3182F6]">공식 제품</span>
+                      </div>
+                      {officialProducts.map(product => (
+                        <ProductItem key={product.id} product={product} onSelect={handleSelectProduct} />
+                      ))}
+                    </>
+                  )}
+
+                  {/* 사용자 등록 제품 섹션 */}
+                  {userProducts.length > 0 && (
+                    <>
+                      <div className="px-6 py-2 flex items-center gap-1.5 bg-[#F8FAFC]">
+                        <User size={14} className="text-[#6B7684]" />
+                        <span className="text-[12px] font-semibold text-[#6B7684]">사용자 등록 제품</span>
+                      </div>
+                      {userProducts.map(product => (
+                        <ProductItem key={product.id} product={product} onSelect={handleSelectProduct} />
+                      ))}
+                    </>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -415,5 +457,25 @@ const CalculatorPage = () => {
     </div>
   )
 }
+
+interface ProductItemProps {
+  product: Product
+  onSelect: (product: Product) => void
+}
+
+const ProductItem = ({ product, onSelect }: ProductItemProps) => (
+  <button
+    onClick={() => onSelect(product)}
+    className="w-full flex items-center justify-between px-6 py-4 border-b border-[#F2F4F6] active:bg-[#F2F4F6]"
+  >
+    <div className="text-left">
+      <p className="text-[15px] font-semibold text-[#191F28]">{product.name}</p>
+      <p className="text-[13px] text-[#6B7684] mt-0.5">
+        {product.brand}{product.categoryName && ` · ${product.categoryName}`}
+      </p>
+    </div>
+    <ChevronRight size={18} className="text-[#ADB5C0]" />
+  </button>
+)
 
 export default CalculatorPage

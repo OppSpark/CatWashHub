@@ -7,5 +7,6 @@ public record CalculationResponse(
         String productName,
         Integer ratio,
         BigDecimal waterMl,
-        BigDecimal productMl
+        BigDecimal productMl,
+        String memo
 ) {}

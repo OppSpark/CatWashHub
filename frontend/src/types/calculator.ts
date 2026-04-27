@@ -22,6 +22,7 @@ export interface Product {
   imageUrl: string | null
   visibility: 'PUBLIC' | 'PRIVATE'
   dilutionRatios: DilutionRatio[]
+  isOfficial: boolean  // user_id가 null이면 관리자 등록 (공식 제품)
 }
 
 export interface CalculationResult {
@@ -30,4 +31,5 @@ export interface CalculationResult {
   ratio: number
   waterMl: number
   productMl: number
+  memo: string | null
 }
