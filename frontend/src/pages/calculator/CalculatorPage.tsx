@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { ChevronDown, Search, Clock, X, ChevronRight } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { ChevronDown, Search, Clock, X, ChevronRight, Bookmark } from 'lucide-react'
 import { getCategories, getProducts, calculate, getHistory } from '@/api/calculatorApi'
 import type { Category, Product, DilutionRatio, CalculationResult } from '@/types/calculator'
 
@@ -22,10 +22,11 @@ const CalculatorPage = () => {
   const [m_SelectedRatio, setM_SelectedRatio] = useState<DilutionRatio | null>(null)
   const [m_CustomRatio, setM_CustomRatio] = useState('')
 
-  // 계산
-  const [m_WaterMl, setM_WaterMl] = useState('')
-  const [m_Result, setM_Result] = useState<CalculationResult | null>(null)
-  const [m_Loading, setM_Loading] = useState(false)
+  // 물 양 (리터)
+  const [m_WaterL, setM_WaterL] = useState('')
+
+  // 실시간 계산 결과
+  const [m_ProductMl, setM_ProductMl] = useState<number | null>(null)
 
   // 히스토리
   const [m_History, setM_History] = useState<CalculationResult[]>([])
@@ -45,6 +46,11 @@ const CalculatorPage = () => {
   useEffect(() => {
     loadProducts()
   }, [m_SelectedCategoryId, m_Keyword])
+
+  // 값이 바뀔 때마다 실시간 계산
+  useEffect(() => {
+    computeResult()
+  }, [m_SelectedRatio, m_CustomRatio, m_WaterL, m_RatioMode])
 
   // ==================== 기능별 함수 ====================
   const loadCategories = async () => {
@@ -77,14 +83,6 @@ const CalculatorPage = () => {
     }
   }
 
-  const handleSelectProduct = (product: Product) => {
-    setM_SelectedProduct(product)
-    setM_SelectedRatio(null)
-    setM_RatioMode('preset')
-    setM_Result(null)
-    setM_ShowProductSheet(false)
-  }
-
   const getEffectiveRatio = (): number | null => {
     if (m_RatioMode === 'custom') {
       const parsed = parseInt(m_CustomRatio)
@@ -93,39 +91,59 @@ const CalculatorPage = () => {
     return m_SelectedRatio?.ratio ?? null
   }
 
-  const handleCalculate = async () => {
+  // 실시간 계산: 물(L) / 희석비 → 약품량(ml)
+  // 예) 19L, 1:100 → 19000ml / 100 = 190ml
+  const computeResult = () => {
     const ratio = getEffectiveRatio()
-    const waterMl = parseFloat(m_WaterMl)
+    const waterL = parseFloat(m_WaterL)
 
-    if (!ratio) { return }
-    if (isNaN(waterMl) || waterMl <= 0) { return }
+    if (!ratio || isNaN(waterL) || waterL <= 0) {
+      setM_ProductMl(null)
+      return
+    }
+
+    const waterMl = waterL * 1000
+    const productMl = Math.round((waterMl / ratio) * 10) / 10
+    setM_ProductMl(productMl)
+  }
+
+  // 히스토리 저장 (백엔드)
+  const handleSaveHistory = useCallback(async () => {
+    const ratio = getEffectiveRatio()
+    const waterL = parseFloat(m_WaterL)
+    if (!ratio || isNaN(waterL) || waterL <= 0 || m_ProductMl === null) { return }
 
     try {
-      setM_Loading(true)
-      const result = await calculate({
+      await calculate({
         productId: m_SelectedProduct?.id,
         ratio,
-        waterMl,
+        waterMl: waterL * 1000,
       })
-      setM_Result(result)
+      await loadHistory()
     } catch {
-      // 계산 오류 무시
-    } finally {
-      setM_Loading(false)
+      // 저장 실패 무시
     }
+  }, [m_SelectedProduct, m_WaterL, m_ProductMl, m_RatioMode, m_SelectedRatio, m_CustomRatio])
+
+  const handleSelectProduct = (product: Product) => {
+    setM_SelectedProduct(product)
+    setM_SelectedRatio(null)
+    setM_RatioMode('preset')
+    setM_ShowProductSheet(false)
   }
 
   const handleReset = () => {
     setM_SelectedProduct(null)
     setM_SelectedRatio(null)
     setM_CustomRatio('')
-    setM_WaterMl('')
-    setM_Result(null)
+    setM_WaterL('')
+    setM_ProductMl(null)
     setM_RatioMode('preset')
   }
 
-  const isCalculatable = getEffectiveRatio() !== null &&
-    parseFloat(m_WaterMl) > 0
+  const effectiveRatio = getEffectiveRatio()
+  const waterL = parseFloat(m_WaterL)
+  const isValid = effectiveRatio !== null && !isNaN(waterL) && waterL > 0
 
   return (
     <div className="min-h-dvh bg-[#F2F4F6] flex flex-col">
@@ -170,12 +188,11 @@ const CalculatorPage = () => {
               <ChevronDown size={18} className="text-[#ADB5C0]" />
             </button>
             {m_SelectedProduct && (
-              <div className="mt-2 px-1">
-                <p className="text-[12px] text-[#6B7684]">
-                  {m_SelectedProduct.brand} · {m_SelectedProduct.categoryName}
-                  {m_SelectedProduct.capacityMl && ` · ${m_SelectedProduct.capacityMl}ml`}
-                </p>
-              </div>
+              <p className="text-[12px] text-[#6B7684] mt-2 px-1">
+                {m_SelectedProduct.brand}
+                {m_SelectedProduct.categoryName && ` · ${m_SelectedProduct.categoryName}`}
+                {m_SelectedProduct.capacityMl && ` · ${m_SelectedProduct.capacityMl}ml`}
+              </p>
             )}
           </div>
 
@@ -184,14 +201,11 @@ const CalculatorPage = () => {
             <p className="text-[12px] font-semibold text-[#3182F6] mb-2">STEP 2</p>
             <p className="text-[15px] font-bold text-[#191F28] mb-3">희석비 선택</p>
 
-            {/* 모드 토글 */}
             <div className="flex gap-2 mb-3">
               <button
                 onClick={() => setM_RatioMode('preset')}
                 className={`flex-1 py-2 rounded-xl text-[14px] font-semibold transition ${
-                  m_RatioMode === 'preset'
-                    ? 'bg-[#3182F6] text-white'
-                    : 'bg-[#F2F4F6] text-[#6B7684]'
+                  m_RatioMode === 'preset' ? 'bg-[#3182F6] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'
                 }`}
               >
                 추천 희석비
@@ -199,9 +213,7 @@ const CalculatorPage = () => {
               <button
                 onClick={() => setM_RatioMode('custom')}
                 className={`flex-1 py-2 rounded-xl text-[14px] font-semibold transition ${
-                  m_RatioMode === 'custom'
-                    ? 'bg-[#3182F6] text-white'
-                    : 'bg-[#F2F4F6] text-[#6B7684]'
+                  m_RatioMode === 'custom' ? 'bg-[#3182F6] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'
                 }`}
               >
                 직접 입력
@@ -236,9 +248,9 @@ const CalculatorPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="py-4 text-center text-[14px] text-[#ADB5C0]">
+                <p className="py-4 text-center text-[14px] text-[#ADB5C0]">
                   {m_SelectedProduct ? '등록된 희석비가 없습니다' : '제품을 선택하면 추천 희석비가 표시됩니다'}
-                </div>
+                </p>
               )
             ) : (
               <div className="flex items-center gap-2">
@@ -254,38 +266,37 @@ const CalculatorPage = () => {
             )}
           </div>
 
-          {/* STEP 3: 물 양 입력 */}
+          {/* STEP 3: 물 양 입력 + 실시간 결과 */}
           <div className="bg-white rounded-2xl p-4">
             <p className="text-[12px] font-semibold text-[#3182F6] mb-2">STEP 3</p>
             <p className="text-[15px] font-bold text-[#191F28] mb-3">물 양 입력</p>
             <div className="flex items-center gap-2">
               <input
                 type="number"
-                value={m_WaterMl}
-                onChange={e => setM_WaterMl(e.target.value)}
+                value={m_WaterL}
+                onChange={e => setM_WaterL(e.target.value)}
                 placeholder="물 양 입력"
                 className="flex-1 px-4 py-3 bg-[#F2F4F6] rounded-xl text-[16px] text-[#191F28] placeholder-[#ADB5C0] outline-none focus:ring-2 focus:ring-[#3182F6] transition"
               />
-              <span className="text-[16px] font-semibold text-[#191F28] w-10">ml</span>
+              <span className="text-[16px] font-semibold text-[#191F28] w-6">L</span>
             </div>
+
+            {/* 실시간 결과 */}
+            {isValid && m_ProductMl !== null && (
+              <div className="mt-4 bg-[#3182F6] rounded-xl p-4">
+                <p className="text-[12px] text-blue-200 mb-2">
+                  {m_SelectedProduct?.name ?? '직접입력'} · 1:{effectiveRatio} · 물 {m_WaterL}L
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-white text-[15px]">넣을 약품 양</span>
+                  <span className="text-white text-[28px] font-bold">{m_ProductMl} <span className="text-[18px]">ml</span></span>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* 결과 */}
-          {m_Result && (
-            <div className="bg-[#3182F6] rounded-2xl p-5">
-              <p className="text-[13px] text-blue-200 mb-1">{m_Result.productName} · 1:{m_Result.ratio}</p>
-              <p className="text-white text-[14px] mb-3">
-                물 <span className="font-bold text-[18px]">{m_Result.waterMl}</span>ml 기준
-              </p>
-              <div className="bg-white/20 rounded-xl px-4 py-3 flex items-center justify-between">
-                <span className="text-white text-[14px]">넣을 약품 양</span>
-                <span className="text-white text-[24px] font-bold">{m_Result.productMl} ml</span>
-              </div>
-            </div>
-          )}
-
-          {/* 버튼 */}
-          <div className="flex gap-2 mt-1">
+          {/* 버튼 영역 */}
+          <div className="flex gap-2">
             <button
               onClick={handleReset}
               className="flex-1 py-4 bg-white border border-[#E5E8EB] text-[#6B7684] text-[16px] font-semibold rounded-xl active:bg-[#F2F4F6] transition"
@@ -293,11 +304,12 @@ const CalculatorPage = () => {
               초기화
             </button>
             <button
-              onClick={handleCalculate}
-              disabled={!isCalculatable || m_Loading}
-              className="flex-2 w-full flex-[2] py-4 bg-[#3182F6] text-white text-[16px] font-semibold rounded-xl disabled:opacity-40 active:bg-[#1B64DA] transition"
+              onClick={handleSaveHistory}
+              disabled={!isValid || m_ProductMl === null}
+              className="flex-[2] py-4 bg-[#3182F6] text-white text-[16px] font-semibold rounded-xl disabled:opacity-40 active:bg-[#1B64DA] transition flex items-center justify-center gap-2"
             >
-              {m_Loading ? '계산 중...' : '계산하기'}
+              <Bookmark size={18} />
+              기록 저장
             </button>
           </div>
         </div>
@@ -307,7 +319,7 @@ const CalculatorPage = () => {
           {m_History.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 py-20">
               <Clock size={40} className="text-[#ADB5C0]" />
-              <p className="text-[15px] text-[#ADB5C0]">계산 히스토리가 없습니다</p>
+              <p className="text-[15px] text-[#ADB5C0]">저장된 기록이 없습니다</p>
             </div>
           ) : (
             m_History.map((item, index) => (
@@ -315,7 +327,7 @@ const CalculatorPage = () => {
                 <div>
                   <p className="text-[15px] font-semibold text-[#191F28]">{item.productName}</p>
                   <p className="text-[13px] text-[#6B7684] mt-0.5">
-                    1:{item.ratio} · 물 {item.waterMl}ml
+                    1:{item.ratio} · 물 {(item.waterMl / 1000).toFixed(1)}L
                   </p>
                 </div>
                 <div className="text-right">
@@ -331,13 +343,9 @@ const CalculatorPage = () => {
       {/* 제품 선택 바텀시트 */}
       {m_ShowProductSheet && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setM_ShowProductSheet(false)}
-          />
+          <div className="absolute inset-0 bg-black/40" onClick={() => setM_ShowProductSheet(false)} />
           <div className="relative bg-white rounded-t-3xl max-h-[80dvh] flex flex-col">
 
-            {/* 시트 헤더 */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E8EB]">
               <h2 className="text-[17px] font-bold text-[#191F28]">제품 선택</h2>
               <button onClick={() => setM_ShowProductSheet(false)}>
@@ -345,7 +353,6 @@ const CalculatorPage = () => {
               </button>
             </div>
 
-            {/* 검색창 */}
             <div className="px-4 py-3 border-b border-[#E5E8EB]">
               <div className="flex items-center gap-2 bg-[#F2F4F6] rounded-xl px-3 py-2">
                 <Search size={16} className="text-[#ADB5C0]" />
@@ -359,14 +366,11 @@ const CalculatorPage = () => {
               </div>
             </div>
 
-            {/* 카테고리 필터 */}
             <div className="px-4 py-2 flex gap-2 overflow-x-auto border-b border-[#E5E8EB]">
               <button
                 onClick={() => setM_SelectedCategoryId(null)}
                 className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[13px] font-semibold transition ${
-                  m_SelectedCategoryId === null
-                    ? 'bg-[#3182F6] text-white'
-                    : 'bg-[#F2F4F6] text-[#6B7684]'
+                  m_SelectedCategoryId === null ? 'bg-[#3182F6] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'
                 }`}
               >
                 전체
@@ -376,9 +380,7 @@ const CalculatorPage = () => {
                   key={cat.id}
                   onClick={() => setM_SelectedCategoryId(cat.id)}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[13px] font-semibold transition ${
-                    m_SelectedCategoryId === cat.id
-                      ? 'bg-[#3182F6] text-white'
-                      : 'bg-[#F2F4F6] text-[#6B7684]'
+                    m_SelectedCategoryId === cat.id ? 'bg-[#3182F6] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'
                   }`}
                 >
                   {cat.name}
@@ -386,12 +388,9 @@ const CalculatorPage = () => {
               ))}
             </div>
 
-            {/* 제품 목록 */}
             <div className="overflow-y-auto flex-1">
               {m_Products.length === 0 ? (
-                <div className="py-12 text-center text-[14px] text-[#ADB5C0]">
-                  검색 결과가 없습니다
-                </div>
+                <p className="py-12 text-center text-[14px] text-[#ADB5C0]">검색 결과가 없습니다</p>
               ) : (
                 m_Products.map(product => (
                   <button
@@ -402,8 +401,7 @@ const CalculatorPage = () => {
                     <div className="text-left">
                       <p className="text-[15px] font-semibold text-[#191F28]">{product.name}</p>
                       <p className="text-[13px] text-[#6B7684] mt-0.5">
-                        {product.brand}
-                        {product.categoryName && ` · ${product.categoryName}`}
+                        {product.brand}{product.categoryName && ` · ${product.categoryName}`}
                       </p>
                     </div>
                     <ChevronRight size={18} className="text-[#ADB5C0]" />
