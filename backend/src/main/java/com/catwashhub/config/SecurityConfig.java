@@ -1,8 +1,6 @@
 package com.catwashhub.config;
 
 import com.catwashhub.security.JwtAuthenticationFilter;
-import com.catwashhub.security.OAuth2SuccessHandler;
-import com.catwashhub.security.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +19,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter m_JwtAuthenticationFilter;
-    private final CustomOAuth2UserService m_OAuth2UserService;
-    private final OAuth2SuccessHandler m_OAuth2SuccessHandler;
+
+    // OAuth2 관련 (나중에 활성화)
+    // private final CustomOAuth2UserService m_OAuth2UserService;
+    // private final OAuth2SuccessHandler m_OAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity _http) throws Exception {
@@ -32,13 +32,15 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        // .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(m_OAuth2UserService))
-                        .successHandler(m_OAuth2SuccessHandler)
-                )
+                // OAuth2 로그인 (나중에 활성화)
+                // .oauth2Login(oauth2 -> oauth2
+                //         .userInfoEndpoint(userInfo -> userInfo.userService(m_OAuth2UserService))
+                //         .successHandler(m_OAuth2SuccessHandler)
+                // )
                 .addFilterBefore(m_JwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return _http.build();
