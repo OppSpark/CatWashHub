@@ -17,10 +17,16 @@ spring:
       enabled: true      # http://localhost:8080/h2-console 접속 가능
       path: /h2-console
 
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:db/data.sql
+
   jpa:
     hibernate:
       ddl-auto: create-drop  # 앱 시작 시 테이블 자동 생성, 종료 시 삭제
     show-sql: true
+    defer-datasource-initialization: true  # JPA 테이블 생성 후 data.sql 실행
     properties:
       hibernate:
         format_sql: true
