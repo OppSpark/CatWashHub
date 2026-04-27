@@ -1,0 +1,51 @@
+spring:
+  datasource:
+    # H2 (로컬 테스트용)
+    url: jdbc:h2:mem:catwashhub;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+    # MySQL (운영 환경)
+#    url: jdbc:mysql://localhost:3306/catwashhub?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#    username: ${DB_USERNAME:root}
+#    password: ${DB_PASSWORD:}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  h2:
+    console:
+      enabled: true      # http://localhost:8080/h2-console 접속 가능
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # 앱 시작 시 테이블 자동 생성, 종료 시 삭제
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+    # MySQL Dialect (운영 환경)
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQLDialect
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-expiration: 1800000    # 30분
+  refresh-expiration: 604800000 # 7일
+
+server:
+  port: 8080
