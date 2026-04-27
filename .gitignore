@@ -32,6 +32,10 @@ frontend/dist/
 frontend/.DS_Store
 frontend/.env
 frontend/.env.*
+frontend/tsconfig.tsbuildinfo
+
+# ===== Claude =====
+.claude/
 
 # ===== OS =====
 .DS_Store

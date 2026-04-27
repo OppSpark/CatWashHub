@@ -1,94 +1,99 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, ChevronLeft } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { signup } from '@/api/authApi'
 import { AUTH_MSGS } from '@/constants/messages'
-
-interface SignupForm {
-  email: string
-  password: string
-  nickname: string
-  agreedTerms: boolean
-  agreedPrivacy: boolean
-  agreedMarketing: boolean
-}
+import { useValidation } from '@/hooks/useValidation'
+import { useToast } from '@/hooks/useToast'
+import FieldInput from '@/components/FieldInput'
 
 const SignupPage = () => {
   const navigate = useNavigate()
+  const toast = useToast()
+  const { validateEmail, validatePassword, validatePasswordConfirm, validateNickname } = useValidation()
 
-  const [m_Form, setM_Form] = useState<SignupForm>({
-    email: '',
-    password: '',
-    nickname: '',
-    agreedTerms: false,
-    agreedPrivacy: false,
-    agreedMarketing: false,
-  })
-  const [m_ShowPassword, setM_ShowPassword] = useState(false)
-  const [m_Error, setM_Error] = useState('')
+  const [m_Email, setM_Email] = useState('')
+  const [m_Password, setM_Password] = useState('')
+  const [m_PasswordConfirm, setM_PasswordConfirm] = useState('')
+  const [m_Nickname, setM_Nickname] = useState('')
+  const [m_AgreedTerms, setM_AgreedTerms] = useState(false)
+  const [m_AgreedPrivacy, setM_AgreedPrivacy] = useState(false)
+  const [m_AgreedMarketing, setM_AgreedMarketing] = useState(false)
   const [m_Loading, setM_Loading] = useState(false)
+  const [m_Shake, setM_Shake] = useState(false)
 
-  // ==================== 유효성 검사 ====================
-  const validateForm = (): string => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(m_Form.email)) {
-      return AUTH_MSGS.ERROR_EMAIL
-    }
-    if (m_Form.password.length < 8) {
-      return AUTH_MSGS.ERROR_PASSWORD_LENGTH
-    }
-    if (m_Form.nickname.length < 2 || m_Form.nickname.length > 50) {
-      return AUTH_MSGS.ERROR_NICKNAME_LENGTH
-    }
-    if (!m_Form.agreedTerms || !m_Form.agreedPrivacy) {
-      return AUTH_MSGS.ERROR_AGREEMENT
-    }
-    return ''
+  // 실시간 유효성
+  const emailError = validateEmail(m_Email)
+  const passwordError = validatePassword(m_Password)
+  const passwordConfirmError = validatePasswordConfirm(m_Password, m_PasswordConfirm)
+  const nicknameError = validateNickname(m_Nickname)
+
+  const isAllAgreed = m_AgreedTerms && m_AgreedPrivacy && m_AgreedMarketing
+
+  const handleAllAgree = (checked: boolean) => {
+    setM_AgreedTerms(checked)
+    setM_AgreedPrivacy(checked)
+    setM_AgreedMarketing(checked)
   }
 
-  // ==================== 이벤트 핸들러 ====================
-  const handleAllAgree = (checked: boolean) => {
-    setM_Form(prev => ({
-      ...prev,
-      agreedTerms: checked,
-      agreedPrivacy: checked,
-      agreedMarketing: checked,
-    }))
+  const triggerShake = () => {
+    setM_Shake(true)
+    setTimeout(() => setM_Shake(false), 400)
   }
 
   const handleSubmit = async () => {
-    const error = validateForm()
-    if (error !== '') {
-      setM_Error(error)
+    if (emailError.valid !== true) {
+      toast.error(emailError.message || AUTH_MSGS.ERROR_EMAIL)
+      triggerShake()
+      return
+    }
+    if (passwordError.valid !== true) {
+      toast.error(passwordError.message || AUTH_MSGS.ERROR_PASSWORD_LENGTH)
+      triggerShake()
+      return
+    }
+    if (passwordConfirmError.valid !== true) {
+      toast.error('비밀번호가 일치하지 않습니다.')
+      triggerShake()
+      return
+    }
+    if (nicknameError.valid !== true) {
+      toast.error(nicknameError.message || AUTH_MSGS.ERROR_NICKNAME_LENGTH)
+      triggerShake()
+      return
+    }
+    if (!m_AgreedTerms || !m_AgreedPrivacy) {
+      toast.error(AUTH_MSGS.ERROR_AGREEMENT)
+      triggerShake()
       return
     }
 
     try {
       setM_Loading(true)
-      setM_Error('')
-      await signup(m_Form)
-      alert(AUTH_MSGS.SIGNUP_SUCCESS)
+      await signup({
+        email: m_Email,
+        password: m_Password,
+        nickname: m_Nickname,
+        agreedTerms: m_AgreedTerms,
+        agreedPrivacy: m_AgreedPrivacy,
+        agreedMarketing: m_AgreedMarketing,
+      })
+      toast.success(AUTH_MSGS.SIGNUP_SUCCESS)
       navigate('/login')
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : '회원가입 중 오류가 발생했습니다.'
-      setM_Error(message)
+    } catch {
+      toast.error('이미 사용 중인 이메일 또는 닉네임입니다.')
+      triggerShake()
     } finally {
       setM_Loading(false)
     }
   }
 
-  const isAllAgreed = m_Form.agreedTerms && m_Form.agreedPrivacy && m_Form.agreedMarketing
-
   return (
     <div className="min-h-dvh bg-white flex flex-col">
 
-      {/* 상단 헤더 */}
+      {/* 헤더 */}
       <div className="flex items-center px-4 pt-4 pb-2">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 -ml-2 text-[#191F28]"
-        >
+        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-[#191F28]">
           <ChevronLeft size={24} />
         </button>
       </div>
@@ -96,124 +101,78 @@ const SignupPage = () => {
       {/* 타이틀 */}
       <div className="px-6 pt-4 pb-8">
         <h1 className="text-[26px] font-bold text-[#191F28] leading-tight">
-          안녕하세요!<br />
-          회원가입을 해주세요
+          안녕하세요!<br />회원가입을 해주세요
         </h1>
       </div>
 
       {/* 입력 폼 */}
-      <div className="flex-1 px-6 flex flex-col gap-4">
-
-        {/* 이메일 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-[14px] font-medium text-[#6B7684]">이메일</label>
-          <input
-            type="email"
-            value={m_Form.email}
-            onChange={e => setM_Form(prev => ({ ...prev, email: e.target.value }))}
-            placeholder={AUTH_MSGS.PLACEHOLDER_EMAIL}
-            className="w-full px-4 py-4 bg-[#F2F4F6] rounded-xl text-[16px] text-[#191F28] placeholder-[#ADB5C0] outline-none focus:ring-2 focus:ring-[#3182F6] transition"
-          />
-        </div>
-
-        {/* 비밀번호 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-[14px] font-medium text-[#6B7684]">비밀번호</label>
-          <div className="relative">
-            <input
-              type={m_ShowPassword ? 'text' : 'password'}
-              value={m_Form.password}
-              onChange={e => setM_Form(prev => ({ ...prev, password: e.target.value }))}
-              placeholder={AUTH_MSGS.PLACEHOLDER_PASSWORD}
-              className="w-full px-4 py-4 bg-[#F2F4F6] rounded-xl text-[16px] text-[#191F28] placeholder-[#ADB5C0] outline-none focus:ring-2 focus:ring-[#3182F6] transition pr-12"
-            />
-            <button
-              type="button"
-              onClick={() => setM_ShowPassword(prev => !prev)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#ADB5C0]"
-            >
-              {m_ShowPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-          </div>
-        </div>
-
-        {/* 닉네임 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-[14px] font-medium text-[#6B7684]">닉네임</label>
-          <input
-            type="text"
-            value={m_Form.nickname}
-            onChange={e => setM_Form(prev => ({ ...prev, nickname: e.target.value }))}
-            placeholder={AUTH_MSGS.PLACEHOLDER_NICKNAME}
-            className="w-full px-4 py-4 bg-[#F2F4F6] rounded-xl text-[16px] text-[#191F28] placeholder-[#ADB5C0] outline-none focus:ring-2 focus:ring-[#3182F6] transition"
-          />
-        </div>
+      <div className={`flex-1 px-6 flex flex-col gap-4 ${m_Shake ? 'animate-shake' : ''}`}>
+        <FieldInput
+          label="이메일"
+          type="email"
+          value={m_Email}
+          onChange={setM_Email}
+          placeholder={AUTH_MSGS.PLACEHOLDER_EMAIL}
+          fieldError={emailError}
+        />
+        <FieldInput
+          label="비밀번호"
+          value={m_Password}
+          onChange={setM_Password}
+          placeholder="8자 이상, 특수문자 포함"
+          fieldError={passwordError}
+          showToggle
+        />
+        <FieldInput
+          label="비밀번호 확인"
+          value={m_PasswordConfirm}
+          onChange={setM_PasswordConfirm}
+          placeholder="비밀번호를 한 번 더 입력해주세요"
+          fieldError={passwordConfirmError}
+          showToggle
+        />
+        <FieldInput
+          label="닉네임"
+          value={m_Nickname}
+          onChange={setM_Nickname}
+          placeholder="2~20자, 한글/영문/숫자/_"
+          fieldError={nicknameError}
+        />
 
         {/* 약관 동의 */}
         <div className="flex flex-col gap-3 mt-2">
-
-          {/* 전체 동의 */}
           <button
             onClick={() => handleAllAgree(!isAllAgreed)}
             className="flex items-center gap-3 py-4 px-4 bg-[#F2F4F6] rounded-xl"
           >
-            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${isAllAgreed ? 'bg-[#3182F6] border-[#3182F6]' : 'border-[#ADB5C0]'}`}>
-              {isAllAgreed && <div className="w-2 h-2 bg-white rounded-full" />}
-            </div>
+            <AgreeDot checked={isAllAgreed} />
             <span className="text-[15px] font-semibold text-[#191F28]">전체 동의</span>
           </button>
-
-          <div className="flex flex-col gap-2 px-1">
-            {/* 이용약관 (필수) */}
-            <button
-              onClick={() => setM_Form(prev => ({ ...prev, agreedTerms: !prev.agreedTerms }))}
-              className="flex items-center gap-3"
-            >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${m_Form.agreedTerms ? 'bg-[#3182F6] border-[#3182F6]' : 'border-[#ADB5C0]'}`}>
-                {m_Form.agreedTerms && <div className="w-2 h-2 bg-white rounded-full" />}
-              </div>
-              <span className="text-[14px] text-[#6B7684]">
-                이용약관 동의 <span className="text-[#3182F6]">(필수)</span>
-              </span>
-            </button>
-
-            {/* 개인정보처리방침 (필수) */}
-            <button
-              onClick={() => setM_Form(prev => ({ ...prev, agreedPrivacy: !prev.agreedPrivacy }))}
-              className="flex items-center gap-3"
-            >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${m_Form.agreedPrivacy ? 'bg-[#3182F6] border-[#3182F6]' : 'border-[#ADB5C0]'}`}>
-                {m_Form.agreedPrivacy && <div className="w-2 h-2 bg-white rounded-full" />}
-              </div>
-              <span className="text-[14px] text-[#6B7684]">
-                개인정보처리방침 동의 <span className="text-[#3182F6]">(필수)</span>
-              </span>
-            </button>
-
-            {/* 마케팅 수신 (선택) */}
-            <button
-              onClick={() => setM_Form(prev => ({ ...prev, agreedMarketing: !prev.agreedMarketing }))}
-              className="flex items-center gap-3"
-            >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${m_Form.agreedMarketing ? 'bg-[#3182F6] border-[#3182F6]' : 'border-[#ADB5C0]'}`}>
-                {m_Form.agreedMarketing && <div className="w-2 h-2 bg-white rounded-full" />}
-              </div>
-              <span className="text-[14px] text-[#6B7684]">
-                마케팅 수신 동의 <span className="text-[#ADB5C0]">(선택)</span>
-              </span>
-            </button>
+          <div className="flex flex-col gap-3 px-1">
+            <AgreeRow
+              checked={m_AgreedTerms}
+              label="이용약관 동의"
+              required
+              onChange={() => setM_AgreedTerms(p => !p)}
+            />
+            <AgreeRow
+              checked={m_AgreedPrivacy}
+              label="개인정보처리방침 동의"
+              required
+              onChange={() => setM_AgreedPrivacy(p => !p)}
+            />
+            <AgreeRow
+              checked={m_AgreedMarketing}
+              label="마케팅 수신 동의"
+              required={false}
+              onChange={() => setM_AgreedMarketing(p => !p)}
+            />
           </div>
         </div>
-
-        {/* 에러 메시지 */}
-        {m_Error !== '' && (
-          <p className="text-[13px] text-[#F04452] text-center">{m_Error}</p>
-        )}
       </div>
 
-      {/* 하단 버튼 영역 */}
+      {/* 하단 버튼 */}
       <div className="px-6 py-6 flex flex-col gap-3">
-        {/* 회원가입 버튼 */}
         <button
           onClick={handleSubmit}
           disabled={m_Loading}
@@ -222,14 +181,12 @@ const SignupPage = () => {
           {m_Loading ? '처리 중...' : '회원가입'}
         </button>
 
-        {/* 구분선 */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-[#E5E8EB]" />
           <span className="text-[13px] text-[#ADB5C0]">또는</span>
           <div className="flex-1 h-px bg-[#E5E8EB]" />
         </div>
 
-        {/* 구글 로그인 버튼 */}
         <a
           href="/oauth2/authorization/google"
           className="w-full py-4 bg-white border border-[#E5E8EB] text-[#191F28] text-[17px] font-semibold rounded-xl flex items-center justify-center gap-2 active:bg-[#F2F4F6] transition"
@@ -238,13 +195,9 @@ const SignupPage = () => {
           Google로 시작하기
         </a>
 
-        {/* 로그인 링크 */}
         <p className="text-center text-[14px] text-[#6B7684]">
           이미 계정이 있으신가요?{' '}
-          <button
-            onClick={() => navigate('/login')}
-            className="text-[#3182F6] font-semibold"
-          >
+          <button onClick={() => navigate('/login')} className="text-[#3182F6] font-semibold">
             로그인
           </button>
         </p>
@@ -252,6 +205,32 @@ const SignupPage = () => {
     </div>
   )
 }
+
+// ==================== 내부 컴포넌트 ====================
+const AgreeDot = ({ checked }: { checked: boolean }) => (
+  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${checked ? 'bg-[#3182F6] border-[#3182F6]' : 'border-[#ADB5C0]'}`}>
+    {checked && <div className="w-2 h-2 bg-white rounded-full" />}
+  </div>
+)
+
+interface AgreeRowProps {
+  checked: boolean
+  label: string
+  required: boolean
+  onChange: () => void
+}
+
+const AgreeRow = ({ checked, label, required, onChange }: AgreeRowProps) => (
+  <button onClick={onChange} className="flex items-center gap-3">
+    <AgreeDot checked={checked} />
+    <span className="text-[14px] text-[#6B7684]">
+      {label}{' '}
+      <span className={required ? 'text-[#3182F6]' : 'text-[#ADB5C0]'}>
+        ({required ? '필수' : '선택'})
+      </span>
+    </span>
+  </button>
+)
 
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24">
