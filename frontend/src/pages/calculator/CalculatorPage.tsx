@@ -156,7 +156,7 @@ const CalculatorPage = () => {
   const userProducts = m_Products.filter(p => !p.isOfficial)
 
   return (
-    <div className="min-h-dvh bg-[#F2F4F6] flex flex-col">
+    <div className="min-h-dvh bg-[#F2F4F6] flex flex-col pb-20">
 
       {/* 헤더 */}
       <div className="bg-white px-6 pt-12 pb-4">
