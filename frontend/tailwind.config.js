@@ -4,8 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 토스 디자인 시스템 색상
-        toss: {
+        brand: {
           blue: '#3182F6',
           'blue-hover': '#1B64DA',
           bg: '#F2F4F6',
@@ -22,8 +21,13 @@ export default {
                'Pretendard', 'sans-serif'],
       },
       borderRadius: {
-        'toss': '12px',
-        'toss-lg': '16px',
+        'card': '12px',
+        'card-lg': '16px',
+      },
+      padding: {
+        // iOS 홈 인디케이터 safe area 대응
+        'safe': 'env(safe-area-inset-bottom)',
+        'safe-top': 'env(safe-area-inset-top)',
       },
     },
   },

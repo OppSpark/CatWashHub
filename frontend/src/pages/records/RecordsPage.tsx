@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getSessions } from '@/api/washApi'
 import type { WashSession } from '@/types/wash'
 import { WASH_MSGS } from '@/constants/messages'
+import PageLayout from '@/layouts/PageLayout'
 
 const WEATHER_EMOJI: Record<string, string> = {
   SUNNY: '☀️',
@@ -37,20 +38,15 @@ const RecordsPage = () => {
   }, [])
 
   return (
-    <div className="min-h-dvh bg-[#F2F4F6] pb-24">
-
-      {/* 헤더 */}
-      <div className="bg-white px-6 pt-12 pb-4 flex items-center justify-between">
-        <h1 className="text-[22px] font-bold text-[#191F28]">세차 기록</h1>
-        <button
-          onClick={() => navigate('/wash/new')}
-          className="text-[14px] text-[#3182F6] font-medium"
-        >
+    <PageLayout
+      title="세차 기록"
+      headerRight={
+        <button onClick={() => navigate('/wash/new')} className="text-[14px] text-[#3182F6] font-medium">
           + 새 기록
         </button>
-      </div>
-
-      <div className="px-4 pt-4">
+      }
+    >
+      <div className="pb-24">
         {isLoading ? (
           <div className="flex flex-col gap-3">
             {[...Array(4)].map((_, i) => (
@@ -113,7 +109,7 @@ const RecordsPage = () => {
           </div>
         )}
       </div>
-    </div>
+    </PageLayout>
   )
 }
 

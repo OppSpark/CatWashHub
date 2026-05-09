@@ -10,37 +10,45 @@ import WashNewPage from '@/pages/wash/WashNewPage'
 import WashDetailPage from '@/pages/wash/WashDetailPage'
 import WashReviewPage from '@/pages/wash/WashReviewPage'
 import ProductSetsPage from '@/pages/wash/ProductSetsPage'
+import MobileShell from '@/layouts/MobileShell'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
 
-const AuthLayout = () => {
+// 인증 체크만 담당
+const AuthGuard = () => {
   const isLoggedIn = useAuthStore(s => s.isLoggedIn)
-
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />
   }
-
-  return (
-    <>
-      <Outlet />
-      <BottomNav />
-    </>
-  )
+  return <Outlet />
 }
+
+// BottomNav가 있는 메인 탭 페이지
+const WithBottomNav = () => (
+  <>
+    <Outlet />
+    <BottomNav />
+  </>
+)
 
 const App = () => {
   return (
-    <>
+    <MobileShell>
       <Toast />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
-        <Route element={<AuthLayout />}>
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/calculator" element={<CalculatorPage />} />
-          <Route path="/records" element={<RecordsPage />} />
-          <Route path="/mypage" element={<MyPage />} />
+        <Route element={<AuthGuard />}>
+          {/* BottomNav 있는 탭 페이지 */}
+          <Route element={<WithBottomNav />}>
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/calculator" element={<CalculatorPage />} />
+            <Route path="/records" element={<RecordsPage />} />
+            <Route path="/mypage" element={<MyPage />} />
+          </Route>
+
+          {/* BottomNav 없는 서브 페이지 */}
           <Route path="/wash/new" element={<WashNewPage />} />
           <Route path="/wash/sets" element={<ProductSetsPage />} />
           <Route path="/wash/sets/new" element={<ProductSetsPage />} />
@@ -50,7 +58,7 @@ const App = () => {
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-    </>
+    </MobileShell>
   )
 }
 

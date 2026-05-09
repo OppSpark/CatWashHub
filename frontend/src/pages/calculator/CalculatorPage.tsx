@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { ChevronDown, Search, Clock, X, ChevronRight, Bookmark, BadgeCheck, User } from 'lucide-react'
 import { getCategories, getProducts, calculate, getHistory } from '@/api/calculatorApi'
 import type { Category, Product, DilutionRatio, CalculationResult } from '@/types/calculator'
+import PageLayout from '@/layouts/PageLayout'
 
 type TabType = 'calculator' | 'history'
 type RatioMode = 'preset' | 'custom'
@@ -156,7 +157,8 @@ const CalculatorPage = () => {
   const userProducts = m_Products.filter(p => !p.isOfficial)
 
   return (
-    <div className="min-h-dvh bg-[#F2F4F6] flex flex-col pb-20">
+    <PageLayout noPadding>
+      <div className="flex flex-col pb-24">
 
       {/* 헤더 */}
       <div className="bg-white px-6 pt-12 pb-4">
@@ -454,7 +456,8 @@ const CalculatorPage = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PageLayout>
   )
 }
 

@@ -1,0 +1,159 @@
+import { useCallback, useRef, useState, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
+
+interface PageLayoutProps {
+  children?: ReactNode
+
+  // 헤더
+  title?: string
+  onBack?: (() => void) | boolean   // 함수: 커스텀 동작, true: navigate(-1), 생략: 버튼 없음
+  headerRight?: ReactNode            // 우상단 액션 버튼 영역
+
+  // 하단 여백
+  hasFixedButton?: boolean           // fixed 저장버튼 있는 페이지 → pb 더 크게
+  noPadding?: boolean                // 콘텐츠 영역 px 없음 (지도, 탭 UI 등)
+
+  // 배경
+  bgColor?: string                   // 기본: #F2F4F6
+
+  // 전체 로딩 스피너
+  isLoading?: boolean
+
+  // 전체 화면 (헤더/패딩 없음 — 지도, 이미지뷰어 등)
+  fullscreen?: boolean
+
+  // 당겨서 새로고침
+  onRefresh?: () => Promise<void>
+}
+
+const PULL_THRESHOLD = 64
+
+const PageLayout = ({
+  children,
+  title,
+  onBack,
+  headerRight,
+  hasFixedButton = false,
+  noPadding = false,
+  bgColor = '#F2F4F6',
+  isLoading = false,
+  fullscreen = false,
+  onRefresh,
+}: PageLayoutProps) => {
+  const navigate = useNavigate()
+
+  const handleBack = () => {
+    if (typeof onBack === 'function') {
+      onBack()
+    } else {
+      navigate(-1)
+    }
+  }
+
+  // ── 당겨서 새로고침 ──────────────────────────────────────
+  const [pullY, setPullY] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const touchStartY = useRef(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!onRefresh) { return }
+    touchStartY.current = e.touches[0].clientY
+  }, [onRefresh])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!onRefresh || isRefreshing) { return }
+    const scrollTop = scrollRef.current?.scrollTop ?? 0
+    if (scrollTop > 0) { return }
+    const delta = e.touches[0].clientY - touchStartY.current
+    if (delta > 0) { setPullY(Math.min(delta * 0.4, PULL_THRESHOLD)) }
+  }, [onRefresh, isRefreshing])
+
+  const handleTouchEnd = useCallback(async () => {
+    if (!onRefresh || pullY < PULL_THRESHOLD) {
+      setPullY(0)
+      return
+    }
+    setIsRefreshing(true)
+    setPullY(0)
+    try {
+      await onRefresh()
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [onRefresh, pullY])
+
+  // ── 전체 화면 모드 ────────────────────────────────────────
+  if (fullscreen) {
+    return (
+      <div className="min-h-dvh" style={{ backgroundColor: bgColor }}>
+        {children}
+      </div>
+    )
+  }
+
+  // ── 전체 로딩 ────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center" style={{ backgroundColor: bgColor }}>
+        <div className="w-8 h-8 border-2 border-[#3182F6] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  const hasHeader = title !== undefined || onBack !== undefined || headerRight !== undefined
+  const bottomPadding = hasFixedButton ? 'pb-32' : 'pb-24'
+
+  return (
+    <div
+      className={`min-h-dvh flex flex-col ${bottomPadding}`}
+      style={{ backgroundColor: bgColor }}
+    >
+      {/* 당겨서 새로고침 인디케이터 */}
+      {onRefresh && (pullY > 0 || isRefreshing) && (
+        <div
+          className="flex items-center justify-center transition-all"
+          style={{ height: isRefreshing ? 48 : pullY }}
+        >
+          <div className={`w-5 h-5 border-2 border-[#3182F6] border-t-transparent rounded-full ${isRefreshing ? 'animate-spin' : ''}`} />
+        </div>
+      )}
+
+      {/* 헤더 */}
+      {hasHeader && (
+        <div className="bg-white px-4 pt-12 pb-4 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {(onBack !== undefined) && (
+              <button
+                onClick={handleBack}
+                className="p-1 -ml-1 text-[#191F28] shrink-0"
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+            {title && (
+              <h1 className="text-[18px] font-bold text-[#191F28] truncate">{title}</h1>
+            )}
+          </div>
+          {headerRight && (
+            <div className="shrink-0">{headerRight}</div>
+          )}
+        </div>
+      )}
+
+      {/* 콘텐츠 */}
+      <div
+        ref={scrollRef}
+        className={`flex-1 ${noPadding ? '' : 'px-4 pt-4'}`}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
+export default PageLayout

@@ -6,6 +6,7 @@ import type { ProductSet } from '@/types/wash'
 import type { Product } from '@/types/calculator'
 import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
+import PageLayout from '@/layouts/PageLayout'
 
 interface SelectedProduct {
   productId: number | null
@@ -100,7 +101,6 @@ const WashNewPage = () => {
   const isAlreadyAdded = (productId: number) =>
     selectedProducts.some(p => p.productId === productId)
 
-  // 세차 준비 저장 → PREPARING 상태로 DB 저장 후 상세 페이지로
   const handleSave = async () => {
     if (isSaving) { return }
     setIsSaving(true)
@@ -119,18 +119,12 @@ const WashNewPage = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F2F4F6] pb-28">
-
-      {/* 헤더 */}
-      <div className="bg-white px-6 pt-12 pb-4 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="text-[#191F28]">←</button>
-        <div>
-          <h1 className="text-[18px] font-bold text-[#191F28]">세차 준비</h1>
-          <p className="text-[12px] text-[#ADB5C0]">사용할 용품을 미리 선택해두세요</p>
-        </div>
-      </div>
-
-      <div className="px-4 pt-4 flex flex-col gap-3">
+    <PageLayout
+      title="세차 준비"
+      onBack={true}
+      hasFixedButton
+    >
+      <div className="flex flex-col gap-3">
 
         {/* 즐겨찾기 세트 선택 */}
         {sets.length > 0 && (
@@ -172,10 +166,7 @@ const WashNewPage = () => {
                     <p className="text-[13px] font-medium text-[#191F28]">{p.displayName}</p>
                     {p.category && <p className="text-[11px] text-[#ADB5C0]">{p.category}</p>}
                   </div>
-                  <button
-                    onClick={() => removeProduct(i)}
-                    className="text-[#ADB5C0] text-[18px] leading-none px-1"
-                  >
+                  <button onClick={() => removeProduct(i)} className="text-[#ADB5C0] text-[18px] leading-none px-1">
                     ×
                   </button>
                 </div>
@@ -218,7 +209,6 @@ const WashNewPage = () => {
             </div>
           )}
 
-          {/* 직접 입력 */}
           {isAddingCustom ? (
             <div className="mt-3 flex flex-col gap-2">
               <input
@@ -234,18 +224,8 @@ const WashNewPage = () => {
                 className="w-full border border-[#E5E8EB] rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#3182F6]"
               />
               <div className="flex gap-2">
-                <button
-                  onClick={() => setIsAddingCustom(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-[#E5E8EB] text-[14px] text-[#6B7684]"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={addCustomProduct}
-                  className="flex-1 py-2.5 rounded-xl bg-[#3182F6] text-white text-[14px] font-medium"
-                >
-                  추가
-                </button>
+                <button onClick={() => setIsAddingCustom(false)} className="flex-1 py-2.5 rounded-xl border border-[#E5E8EB] text-[14px] text-[#6B7684]">취소</button>
+                <button onClick={addCustomProduct} className="flex-1 py-2.5 rounded-xl bg-[#3182F6] text-white text-[14px] font-medium">추가</button>
               </div>
             </div>
           ) : (
@@ -261,7 +241,7 @@ const WashNewPage = () => {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#F2F4F6] px-4 py-4 pb-safe">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#F2F4F6] px-4 py-4 pb-safe">
         <button
           onClick={handleSave}
           disabled={isSaving || selectedProducts.length === 0}
@@ -270,7 +250,7 @@ const WashNewPage = () => {
           {isSaving ? '저장 중...' : '세차 준비 저장'}
         </button>
       </div>
-    </div>
+    </PageLayout>
   )
 }
 

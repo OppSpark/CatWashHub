@@ -7,12 +7,9 @@
 }
 
 body {
-  background-color: #F2F4F6;
+  background-color: #D1D5DB;
   color: #191F28;
   font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', sans-serif;
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100dvh;
 }
 
 @keyframes slide-up {

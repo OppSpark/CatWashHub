@@ -6,6 +6,7 @@ import type { Weather, WashProductRequest, WashProductItem } from '@/types/wash'
 import type { Product } from '@/types/calculator'
 import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
+import PageLayout from '@/layouts/PageLayout'
 
 const WEATHER_OPTIONS: { value: Weather; label: string; emoji: string }[] = [
   { value: 'SUNNY', label: '맑음', emoji: '☀️' },
@@ -26,7 +27,6 @@ const WashReviewPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 기존 세션 정보에서 초기값 채우기
   const [location, setLocation] = useState('')
   const [weather, setWeather] = useState<Weather | null>(null)
   const [durationMinutes, setDurationMinutes] = useState('')
@@ -35,7 +35,6 @@ const WashReviewPage = () => {
   const [memo, setMemo] = useState('')
   const [products, setProducts] = useState<EditingProduct[]>([])
 
-  // 용품 추가 패널
   const [dbProducts, setDbProducts] = useState<Product[]>([])
   const [showProductPanel, setShowProductPanel] = useState(false)
   const [isLoadingProducts, setIsLoadingProducts] = useState(false)
@@ -120,26 +119,16 @@ const WashReviewPage = () => {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-dvh bg-[#F2F4F6] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#3182F6] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <PageLayout isLoading />
   }
 
   return (
-    <div className="min-h-dvh bg-[#F2F4F6] pb-32">
-
-      {/* 헤더 */}
-      <div className="bg-white px-6 pt-12 pb-4 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="text-[#191F28]">←</button>
-        <div>
-          <h1 className="text-[18px] font-bold text-[#191F28]">후기 작성</h1>
-          <p className="text-[12px] text-[#ADB5C0]">세차 어떠셨나요?</p>
-        </div>
-      </div>
-
-      <div className="px-4 pt-4 flex flex-col gap-3">
+    <PageLayout
+      title="후기 작성"
+      onBack={true}
+      hasFixedButton
+    >
+      <div className="flex flex-col gap-3">
 
         {/* 세차장 */}
         <div className="bg-white rounded-2xl px-5 py-4">
@@ -217,7 +206,7 @@ const WashReviewPage = () => {
           </div>
         </div>
 
-        {/* 사용 용품 수정 */}
+        {/* 사용 용품 */}
         <div className="bg-white rounded-2xl px-5 py-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[14px] font-semibold text-[#191F28]">
@@ -241,9 +230,7 @@ const WashReviewPage = () => {
                     <p className="text-[13px] font-medium text-[#191F28]">{p.displayName}</p>
                     {p.category && <p className="text-[11px] text-[#ADB5C0]">{p.category}</p>}
                   </div>
-                  <button onClick={() => removeProduct(i)} className="text-[#ADB5C0] text-[18px] leading-none px-1">
-                    ×
-                  </button>
+                  <button onClick={() => removeProduct(i)} className="text-[#ADB5C0] text-[18px] leading-none px-1">×</button>
                 </div>
               ))}
             </div>
@@ -317,7 +304,7 @@ const WashReviewPage = () => {
       )}
 
       {/* 하단 저장 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#F2F4F6] px-4 py-4 pb-safe">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#F2F4F6] px-4 py-4 pb-safe">
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
@@ -326,7 +313,7 @@ const WashReviewPage = () => {
           {isSubmitting ? '저장 중...' : '후기 저장 완료'}
         </button>
       </div>
-    </div>
+    </PageLayout>
   )
 }
 

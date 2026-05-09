@@ -4,6 +4,7 @@ import { getSession, deleteSession } from '@/api/washApi'
 import type { WashSession, WashProductItem, DilutionRatio } from '@/types/wash'
 import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
+import PageLayout from '@/layouts/PageLayout'
 
 const WEATHER_LABEL: Record<string, string> = {
   SUNNY: '☀️ 맑음',
@@ -28,7 +29,6 @@ const StarRating = ({ rating }: { rating: number | null }) => {
   )
 }
 
-// 용품 행 — 탭하면 희석비 드롭다운 펼침
 const ProductRow = ({ product }: { product: WashProductItem }) => {
   const [open, setOpen] = useState(false)
   const hasRatios = product.dilutionRatios.length > 0
@@ -37,8 +37,7 @@ const ProductRow = ({ product }: { product: WashProductItem }) => {
     <div className="rounded-xl overflow-hidden">
       <button
         onClick={() => hasRatios && setOpen(prev => !prev)}
-        className={`w-full flex items-center justify-between px-3 py-2.5 text-left
-          ${hasRatios ? 'bg-[#F2F4F6] active:brightness-95' : 'bg-[#F2F4F6]'}`}
+        className="w-full flex items-center justify-between px-3 py-2.5 text-left bg-[#F2F4F6] active:brightness-95"
       >
         <div>
           <p className="text-[13px] font-medium text-[#191F28]">{product.productName}</p>
@@ -61,9 +60,7 @@ const ProductRow = ({ product }: { product: WashProductItem }) => {
                   <p className="text-[11px] text-[#6B7684] mt-0.5">{dr.description}</p>
                 )}
               </div>
-              <span className="text-[13px] font-bold text-[#191F28] shrink-0">
-                1 : {dr.ratio}
-              </span>
+              <span className="text-[13px] font-bold text-[#191F28] shrink-0">1 : {dr.ratio}</span>
             </div>
           ))}
         </div>
@@ -101,43 +98,33 @@ const WashDetailPage = () => {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-dvh bg-[#F2F4F6] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#3182F6] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <PageLayout isLoading />
   }
 
   if (!session) {
     return (
-      <div className="min-h-dvh bg-[#F2F4F6] flex flex-col items-center justify-center gap-3">
-        <p className="text-[15px] text-[#6B7684]">기록을 찾을 수 없어요</p>
-        <button onClick={() => navigate(-1)} className="text-[#3182F6] text-[14px]">돌아가기</button>
-      </div>
+      <PageLayout onBack={true}>
+        <div className="flex flex-col items-center justify-center py-32 gap-3">
+          <p className="text-[15px] text-[#6B7684]">기록을 찾을 수 없어요</p>
+        </div>
+      </PageLayout>
     )
   }
 
   const isPreparing = session.status === 'PREPARING'
 
   return (
-    <div className="min-h-dvh bg-[#F2F4F6] pb-32">
-
-      {/* 헤더 */}
-      <div className="bg-white px-6 pt-12 pb-4 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="text-[#191F28]">←</button>
-        <h1 className="text-[18px] font-bold text-[#191F28]">
-          {isPreparing ? '세차 준비 중' : '세차 기록'}
-        </h1>
-        <button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="text-[14px] text-[#FF4D4F] disabled:opacity-50"
-        >
+    <PageLayout
+      title={isPreparing ? '세차 준비 중' : '세차 기록'}
+      onBack={true}
+      headerRight={
+        <button onClick={handleDelete} disabled={isDeleting} className="text-[14px] text-[#FF4D4F] disabled:opacity-50">
           삭제
         </button>
-      </div>
-
-      <div className="px-4 pt-4 flex flex-col gap-3">
+      }
+      hasFixedButton={isPreparing}
+    >
+      <div className="flex flex-col gap-3">
 
         {/* PREPARING 상태 배너 */}
         {isPreparing && (
@@ -154,9 +141,7 @@ const WashDetailPage = () => {
 
         {/* 날짜/장소 */}
         <div className="bg-white rounded-2xl px-5 py-4">
-          <p className="text-[22px] font-bold text-[#191F28]">
-            {session.location ?? '장소 미입력'}
-          </p>
+          <p className="text-[22px] font-bold text-[#191F28]">{session.location ?? '장소 미입력'}</p>
           <p className="text-[14px] text-[#6B7684] mt-1">{formatDate(session.washedAt)}</p>
           {!isPreparing && (
             <div className="mt-3">
@@ -224,12 +209,7 @@ const WashDetailPage = () => {
             </p>
             <div className="grid grid-cols-3 gap-2">
               {session.photos.map(photo => (
-                <img
-                  key={photo.id}
-                  src={photo.photoUrl}
-                  alt={photo.photoType}
-                  className="w-full aspect-square object-cover rounded-xl"
-                />
+                <img key={photo.id} src={photo.photoUrl} alt={photo.photoType} className="w-full aspect-square object-cover rounded-xl" />
               ))}
             </div>
           </div>
@@ -237,9 +217,9 @@ const WashDetailPage = () => {
 
       </div>
 
-      {/* 하단 버튼 */}
+      {/* 하단 버튼 (PREPARING만) */}
       {isPreparing && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#F2F4F6] px-4 py-4 pb-safe">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#F2F4F6] px-4 py-4 pb-safe">
           <button
             onClick={() => navigate(`/wash/${session.id}/review`)}
             className="w-full bg-[#3182F6] text-white rounded-2xl py-4 text-[16px] font-semibold"
@@ -248,7 +228,7 @@ const WashDetailPage = () => {
           </button>
         </div>
       )}
-    </div>
+    </PageLayout>
   )
 }
 
