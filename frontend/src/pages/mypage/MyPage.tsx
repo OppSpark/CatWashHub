@@ -6,6 +6,7 @@ import {
   User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet,
 } from 'lucide-react'
 import PageLayout from '@/layouts/PageLayout'
+import BottomSheet from '@/components/BottomSheet'
 import { MY_MSGS } from '@/constants/messages'
 import { updateNickname, updatePassword, deleteAccount } from '@/api/authApi'
 import { getDashboard } from '@/api/washApi'
@@ -190,7 +191,7 @@ const MyPage = () => {
           <div className="pb-2" />
         </div>
 
-        {/* 위험 구역 */}
+        {/* 기타 */}
         <div className="bg-white rounded-2xl overflow-hidden">
           <p className="text-[12px] font-semibold text-[#6B7684] px-5 pt-4 pb-2">기타</p>
           <MenuItem
@@ -205,15 +206,22 @@ const MyPage = () => {
 
       </div>
 
-      {/* 닉네임 변경 모달 */}
-      {activeModal === 'nickname' && (
-        <BottomModal
-          title="닉네임 변경"
-          onClose={resetModal}
-          onConfirm={handleNicknameSubmit}
-          confirmLabel="변경하기"
-          loading={nicknameLoading}
-        >
+      {/* 닉네임 변경 시트 */}
+      <BottomSheet
+        open={activeModal === 'nickname'}
+        onClose={resetModal}
+        title="닉네임 변경"
+        footer={
+          <button
+            onClick={handleNicknameSubmit}
+            disabled={nicknameLoading}
+            className="w-full bg-[#3182F6] text-white rounded-xl py-3.5 text-[15px] font-semibold disabled:opacity-50"
+          >
+            {nicknameLoading ? '처리 중...' : '변경하기'}
+          </button>
+        }
+      >
+        <div className="py-2">
           <input
             type="text"
             value={newNickname}
@@ -222,36 +230,41 @@ const MyPage = () => {
             maxLength={50}
             className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] text-[#191F28] outline-none focus:ring-2 focus:ring-[#3182F6]"
           />
-        </BottomModal>
-      )}
+        </div>
+      </BottomSheet>
 
-      {/* 비밀번호 변경 모달 */}
-      {activeModal === 'password' && (
-        <BottomModal
-          title="비밀번호 변경"
-          onClose={resetModal}
-          onConfirm={handlePasswordSubmit}
-          confirmLabel="변경하기"
-          loading={pwLoading}
-        >
-          <div className="flex flex-col gap-3">
-            <input
-              type="password"
-              value={currentPw}
-              onChange={e => setCurrentPw(e.target.value)}
-              placeholder="현재 비밀번호"
-              className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] text-[#191F28] outline-none focus:ring-2 focus:ring-[#3182F6]"
-            />
-            <input
-              type="password"
-              value={newPw}
-              onChange={e => setNewPw(e.target.value)}
-              placeholder="새 비밀번호 (8자 이상)"
-              className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] text-[#191F28] outline-none focus:ring-2 focus:ring-[#3182F6]"
-            />
-          </div>
-        </BottomModal>
-      )}
+      {/* 비밀번호 변경 시트 */}
+      <BottomSheet
+        open={activeModal === 'password'}
+        onClose={resetModal}
+        title="비밀번호 변경"
+        footer={
+          <button
+            onClick={handlePasswordSubmit}
+            disabled={pwLoading}
+            className="w-full bg-[#3182F6] text-white rounded-xl py-3.5 text-[15px] font-semibold disabled:opacity-50"
+          >
+            {pwLoading ? '처리 중...' : '변경하기'}
+          </button>
+        }
+      >
+        <div className="flex flex-col gap-3 py-2">
+          <input
+            type="password"
+            value={currentPw}
+            onChange={e => setCurrentPw(e.target.value)}
+            placeholder="현재 비밀번호"
+            className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] text-[#191F28] outline-none focus:ring-2 focus:ring-[#3182F6]"
+          />
+          <input
+            type="password"
+            value={newPw}
+            onChange={e => setNewPw(e.target.value)}
+            placeholder="새 비밀번호 (8자 이상)"
+            className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] text-[#191F28] outline-none focus:ring-2 focus:ring-[#3182F6]"
+          />
+        </div>
+      </BottomSheet>
     </PageLayout>
   )
 }
@@ -276,35 +289,6 @@ const MenuItem = ({ icon, label, labelClass, onClick, hideChevron }: MenuItemPro
     </span>
     {!hideChevron && <ChevronRight size={16} className="text-[#B0B8C1]" />}
   </button>
-)
-
-interface BottomModalProps {
-  title: string
-  onClose: () => void
-  onConfirm: () => void
-  confirmLabel: string
-  loading?: boolean
-  children: React.ReactNode
-}
-
-const BottomModal = ({ title, onClose, onConfirm, confirmLabel, loading, children }: BottomModalProps) => (
-  <div className="fixed inset-0 z-50 flex flex-col justify-end">
-    <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-    <div className="relative bg-white rounded-t-2xl p-5 flex flex-col gap-4 max-w-[480px] w-full mx-auto">
-      <div className="flex items-center justify-between">
-        <p className="text-[17px] font-bold text-[#191F28]">{title}</p>
-        <button onClick={onClose} className="text-[#6B7684] text-[13px]">취소</button>
-      </div>
-      {children}
-      <button
-        onClick={onConfirm}
-        disabled={loading}
-        className="w-full bg-[#3182F6] text-white rounded-xl py-3.5 text-[15px] font-semibold disabled:opacity-50"
-      >
-        {loading ? '처리 중...' : confirmLabel}
-      </button>
-    </div>
-  </div>
 )
 
 export default MyPage

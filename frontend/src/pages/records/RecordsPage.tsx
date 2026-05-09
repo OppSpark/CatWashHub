@@ -4,6 +4,7 @@ import { getSessions } from '@/api/washApi'
 import type { WashSession } from '@/types/wash'
 import { WASH_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
+import BottomSheet from '@/components/BottomSheet'
 import { SlidersHorizontal, Search, X } from 'lucide-react'
 
 const WEATHER_EMOJI: Record<string, string> = {
@@ -250,106 +251,105 @@ const RecordsPage = () => {
         </div>
       </div>
 
-      {/* 필터 바텀시트 */}
-      {showFilter && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowFilter(false)} />
-          <div className="relative bg-white rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-5">
+      <BottomSheet
+        open={showFilter}
+        onClose={() => setShowFilter(false)}
+        title="필터"
+        footer={
+          <button
+            onClick={applyFilter}
+            className="w-full bg-[#3182F6] text-white rounded-2xl py-4 text-[16px] font-semibold"
+          >
+            필터 적용
+          </button>
+        }
+      >
+        <div className="flex flex-col gap-5 pb-2">
 
-            {/* 헤더 */}
-            <div className="flex items-center justify-between">
-              <p className="text-[17px] font-bold text-[#191F28]">필터</p>
-              <button onClick={resetFilter} className="text-[13px] text-[#ADB5C0]">초기화</button>
-            </div>
-
-            {/* 날씨 */}
-            <div>
-              <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">날씨</p>
-              <div className="flex gap-2">
-                {Object.entries(WEATHER_EMOJI).map(([key, emoji]) => (
-                  <button
-                    key={key}
-                    onClick={() => toggleWeather(key)}
-                    className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl border transition-colors
-                      ${pendingFilter.weather.includes(key) ? 'border-[#3182F6] bg-[#EBF3FF]' : 'border-[#E5E8EB]'}`}
-                  >
-                    <span className="text-[20px]">{emoji}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 별점 */}
-            <div>
-              <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">최소 별점</p>
-              <div className="flex gap-2">
-                {[null, 1, 2, 3, 4, 5].map(star => (
-                  <button
-                    key={star ?? 'all'}
-                    onClick={() => setPendingFilter(prev => ({ ...prev, rating: star }))}
-                    className={`flex-1 py-2 rounded-xl border text-[13px] font-medium transition-colors
-                      ${pendingFilter.rating === star ? 'border-[#3182F6] bg-[#EBF3FF] text-[#3182F6]' : 'border-[#E5E8EB] text-[#6B7684]'}`}
-                  >
-                    {star === null ? '전체' : `${star}★`}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 비용 */}
-            <div>
-              <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">비용</p>
-              <div className="grid grid-cols-4 gap-2">
-                {([
-                  { value: 'all', label: '전체' },
-                  { value: 'under1', label: '1만원↓' },
-                  { value: 'under3', label: '3만원↓' },
-                  { value: 'over3', label: '3만원↑' },
-                ] as { value: CostRange; label: string }[]).map(({ value, label }) => (
-                  <button
-                    key={value}
-                    onClick={() => setPendingFilter(prev => ({ ...prev, costRange: value }))}
-                    className={`py-2 rounded-xl border text-[13px] font-medium transition-colors
-                      ${pendingFilter.costRange === value ? 'border-[#3182F6] bg-[#EBF3FF] text-[#3182F6]' : 'border-[#E5E8EB] text-[#6B7684]'}`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 정렬 */}
-            <div>
-              <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">정렬</p>
-              <div className="flex gap-2">
-                {([
-                  { value: 'latest', label: '최신순' },
-                  { value: 'rating', label: '별점순' },
-                  { value: 'cost', label: '비용순' },
-                ] as { value: SortType; label: string }[]).map(({ value, label }) => (
-                  <button
-                    key={value}
-                    onClick={() => setPendingFilter(prev => ({ ...prev, sort: value }))}
-                    className={`flex-1 py-2.5 rounded-xl border text-[13px] font-medium transition-colors
-                      ${pendingFilter.sort === value ? 'border-[#3182F6] bg-[#EBF3FF] text-[#3182F6]' : 'border-[#E5E8EB] text-[#6B7684]'}`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 적용 버튼 */}
-            <button
-              onClick={applyFilter}
-              className="w-full bg-[#3182F6] text-white rounded-2xl py-4 text-[16px] font-semibold"
-            >
-              필터 적용
-            </button>
-
+          {/* 초기화 버튼 */}
+          <div className="flex justify-end -mt-1">
+            <button onClick={resetFilter} className="text-[13px] text-[#ADB5C0]">초기화</button>
           </div>
+
+          {/* 날씨 */}
+          <div>
+            <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">날씨</p>
+            <div className="flex gap-2">
+              {Object.entries(WEATHER_EMOJI).map(([key, emoji]) => (
+                <button
+                  key={key}
+                  onClick={() => toggleWeather(key)}
+                  className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl border transition-colors
+                    ${pendingFilter.weather.includes(key) ? 'border-[#3182F6] bg-[#EBF3FF]' : 'border-[#E5E8EB]'}`}
+                >
+                  <span className="text-[20px]">{emoji}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 별점 */}
+          <div>
+            <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">최소 별점</p>
+            <div className="flex gap-2">
+              {[null, 1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star ?? 'all'}
+                  onClick={() => setPendingFilter(prev => ({ ...prev, rating: star }))}
+                  className={`flex-1 py-2 rounded-xl border text-[13px] font-medium transition-colors
+                    ${pendingFilter.rating === star ? 'border-[#3182F6] bg-[#EBF3FF] text-[#3182F6]' : 'border-[#E5E8EB] text-[#6B7684]'}`}
+                >
+                  {star === null ? '전체' : `${star}★`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 비용 */}
+          <div>
+            <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">비용</p>
+            <div className="grid grid-cols-4 gap-2">
+              {([
+                { value: 'all', label: '전체' },
+                { value: 'under1', label: '1만원↓' },
+                { value: 'under3', label: '3만원↓' },
+                { value: 'over3', label: '3만원↑' },
+              ] as { value: CostRange; label: string }[]).map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setPendingFilter(prev => ({ ...prev, costRange: value }))}
+                  className={`py-2 rounded-xl border text-[13px] font-medium transition-colors
+                    ${pendingFilter.costRange === value ? 'border-[#3182F6] bg-[#EBF3FF] text-[#3182F6]' : 'border-[#E5E8EB] text-[#6B7684]'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 정렬 */}
+          <div>
+            <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">정렬</p>
+            <div className="flex gap-2">
+              {([
+                { value: 'latest', label: '최신순' },
+                { value: 'rating', label: '별점순' },
+                { value: 'cost', label: '비용순' },
+              ] as { value: SortType; label: string }[]).map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setPendingFilter(prev => ({ ...prev, sort: value }))}
+                  className={`flex-1 py-2.5 rounded-xl border text-[13px] font-medium transition-colors
+                    ${pendingFilter.sort === value ? 'border-[#3182F6] bg-[#EBF3FF] text-[#3182F6]' : 'border-[#E5E8EB] text-[#6B7684]'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
         </div>
-      )}
+      </BottomSheet>
     </PageLayout>
   )
 }
