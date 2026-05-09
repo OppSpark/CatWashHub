@@ -82,6 +82,7 @@ const LoginPage = () => {
           onChange={setM_Email}
           placeholder={AUTH_MSGS.PLACEHOLDER_EMAIL}
           fieldError={emailError}
+          showSuccessMessage={false}
         />
         <div onKeyDown={handleKeyDown}>
           <FieldInput

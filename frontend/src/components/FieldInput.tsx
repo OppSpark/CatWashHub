@@ -9,19 +9,22 @@ interface FieldInputProps {
   onChange: (value: string) => void
   placeholder?: string
   fieldError?: FieldError
-  showToggle?: boolean  // 비밀번호 보이기/숨기기
+  showToggle?: boolean
+  showSuccessMessage?: boolean  // false면 valid=true 시 메시지/아이콘 숨김 (로그인 등)
 }
 
 const FieldInput = ({
   label, type = 'text', value, onChange,
-  placeholder, fieldError, showToggle = false,
+  placeholder, fieldError, showToggle = false, showSuccessMessage = true,
 }: FieldInputProps) => {
   const [m_ShowPassword, setM_ShowPassword] = useState(false)
 
   const inputType = showToggle ? (m_ShowPassword ? 'text' : 'password') : type
 
+  const isSuccess = fieldError?.valid === true && showSuccessMessage
+
   const borderClass =
-    fieldError?.valid === true  ? 'ring-2 ring-[#1EC76B]' :
+    isSuccess                   ? 'ring-2 ring-[#1EC76B]' :
     fieldError?.valid === false ? 'ring-2 ring-[#F04452]' :
                                   'focus:ring-2 focus:ring-[#3182F6]'
 
@@ -47,9 +50,9 @@ const FieldInput = ({
           </button>
         )}
         {/* 유효성 아이콘 (비밀번호 토글 없을 때만) */}
-        {!showToggle && fieldError?.valid !== null && fieldError?.valid !== undefined && (
+        {!showToggle && fieldError?.valid !== null && fieldError?.valid !== undefined && (isSuccess || fieldError.valid === false) && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            {fieldError.valid
+            {isSuccess
               ? <CheckCircle size={18} className="text-[#1EC76B]" />
               : <XCircle size={18} className="text-[#F04452]" />
             }
@@ -57,8 +60,8 @@ const FieldInput = ({
         )}
       </div>
       {/* 유효성 메시지 */}
-      {fieldError?.valid !== null && fieldError?.message && (
-        <p className={`text-[12px] px-1 ${fieldError.valid ? 'text-[#1EC76B]' : 'text-[#F04452]'}`}>
+      {fieldError?.valid !== null && fieldError?.message && (isSuccess || fieldError.valid === false) && (
+        <p className={`text-[12px] px-1 ${isSuccess ? 'text-[#1EC76B]' : 'text-[#F04452]'}`}>
           {fieldError.message}
         </p>
       )}
