@@ -3,6 +3,7 @@ import type {
   WashDashboard,
   WashSession,
   WashSessionRequest,
+  WashCompleteRequest,
   ProductSet,
   ProductSetRequest,
 } from '@/types/wash'
@@ -26,13 +27,21 @@ export const getSession = async (id: number): Promise<WashSession> => {
   return res.data.data
 }
 
+// 세차 준비 저장 (PREPARING)
 export const createSession = async (data: WashSessionRequest): Promise<WashSession> => {
   const res = await apiClient.post('/wash', data)
   return res.data.data
 }
 
-export const updateSession = async (id: number, data: WashSessionRequest): Promise<WashSession> => {
-  const res = await apiClient.put(`/wash/${id}`, data)
+// 세차 준비 수정 (용품/장소 수정)
+export const updatePreparation = async (id: number, data: WashSessionRequest): Promise<WashSession> => {
+  const res = await apiClient.put(`/wash/${id}/preparation`, data)
+  return res.data.data
+}
+
+// 후기 작성 완료 (DONE)
+export const completeSession = async (id: number, data: WashCompleteRequest): Promise<WashSession> => {
+  const res = await apiClient.patch(`/wash/${id}/complete`, data)
   return res.data.data
 }
 

@@ -5,13 +5,6 @@ import { getDashboard } from '@/api/washApi'
 import type { WashDashboard } from '@/types/wash'
 import { HOME_MSGS } from '@/constants/messages'
 
-const WEATHER_LABELS: Record<string, string> = {
-  SUNNY: '맑음',
-  CLOUDY: '흐림',
-  RAINY: '비',
-  SNOWY: '눈',
-}
-
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr)
   return `${date.getMonth() + 1}/${date.getDate()}`
@@ -71,9 +64,7 @@ const HomePage = () => {
             <p className="text-[13px] text-[#6B7684]">마지막 세차</p>
             <p className="text-[16px] font-semibold text-[#191F28] mt-0.5">
               {isLoading ? '-' : (
-                dashboard?.lastWashedAt
-                  ? getDaysAgo(dashboard.lastWashedAt)
-                  : '기록 없음'
+                dashboard?.lastWashedAt ? getDaysAgo(dashboard.lastWashedAt) : '기록 없음'
               )}
             </p>
           </div>
@@ -84,17 +75,43 @@ const HomePage = () => {
           onClick={() => navigate('/wash/new')}
           className="w-full bg-[#3182F6] text-white rounded-2xl py-4 text-[16px] font-semibold active:brightness-90 transition-all"
         >
-          + 세차 시작하기
+          + 세차 준비하기
         </button>
+
+        {/* 진행 중인 세차 */}
+        {!isLoading && (dashboard?.preparingSessions.length ?? 0) > 0 && (
+          <div className="bg-white rounded-2xl px-5 py-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-2 rounded-full bg-[#FF6B35] animate-pulse" />
+              <p className="text-[15px] font-semibold text-[#191F28]">진행 중인 세차</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              {dashboard!.preparingSessions.map(session => (
+                <button
+                  key={session.id}
+                  onClick={() => navigate(`/wash/${session.id}`)}
+                  className="flex items-center justify-between bg-[#FFF4EF] rounded-xl px-4 py-3 text-left active:brightness-95"
+                >
+                  <div>
+                    <p className="text-[14px] font-semibold text-[#191F28]">
+                      {session.location ?? '장소 미정'}
+                    </p>
+                    <p className="text-[12px] text-[#ADB5C0] mt-0.5">
+                      용품 {session.productCount}개 · {formatDate(session.washedAt)} 준비
+                    </p>
+                  </div>
+                  <span className="text-[13px] text-[#FF6B35] font-medium">후기 작성 →</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 즐겨찾기 용품 세트 */}
         <div className="bg-white rounded-2xl px-5 py-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[15px] font-semibold text-[#191F28]">즐겨찾기 세트</p>
-            <button
-              onClick={() => navigate('/wash/sets')}
-              className="text-[13px] text-[#3182F6]"
-            >
+            <button onClick={() => navigate('/wash/sets')} className="text-[13px] text-[#3182F6]">
               전체보기
             </button>
           </div>
@@ -109,9 +126,7 @@ const HomePage = () => {
                   onClick={() => navigate('/wash/new', { state: { setId: set.id } })}
                   className="flex items-center gap-1.5 bg-[#F2F4F6] rounded-full px-3 py-1.5"
                 >
-                  {set.isDefault && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#3182F6]" />
-                  )}
+                  {set.isDefault && <span className="w-1.5 h-1.5 rounded-full bg-[#3182F6]" />}
                   <span className="text-[13px] font-medium text-[#191F28]">{set.name}</span>
                   <span className="text-[11px] text-[#ADB5C0]">{set.itemCount}개</span>
                 </button>
@@ -130,14 +145,11 @@ const HomePage = () => {
           )}
         </div>
 
-        {/* 최근 세차 기록 */}
+        {/* 최근 세차 기록 (DONE만) */}
         <div className="bg-white rounded-2xl px-5 py-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[15px] font-semibold text-[#191F28]">최근 세차 기록</p>
-            <button
-              onClick={() => navigate('/records')}
-              className="text-[13px] text-[#3182F6]"
-            >
+            <button onClick={() => navigate('/records')} className="text-[13px] text-[#3182F6]">
               전체보기
             </button>
           </div>
@@ -165,9 +177,7 @@ const HomePage = () => {
                   <div className="flex flex-col items-end gap-0.5">
                     <p className="text-[13px] text-[#6B7684]">{formatDate(session.washedAt)}</p>
                     {session.cost != null && (
-                      <p className="text-[12px] text-[#ADB5C0]">
-                        {session.cost.toLocaleString()}원
-                      </p>
+                      <p className="text-[12px] text-[#ADB5C0]">{session.cost.toLocaleString()}원</p>
                     )}
                   </div>
                 </button>

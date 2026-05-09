@@ -7,8 +7,9 @@ import HomePage from '@/pages/home/HomePage'
 import RecordsPage from '@/pages/records/RecordsPage'
 import MyPage from '@/pages/mypage/MyPage'
 import WashNewPage from '@/pages/wash/WashNewPage'
-import WashEditPage from '@/pages/wash/WashEditPage'
 import WashDetailPage from '@/pages/wash/WashDetailPage'
+import WashReviewPage from '@/pages/wash/WashReviewPage'
+import ProductSetsPage from '@/pages/wash/ProductSetsPage'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
 
@@ -41,8 +42,10 @@ const App = () => {
           <Route path="/records" element={<RecordsPage />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/wash/new" element={<WashNewPage />} />
-          <Route path="/wash/edit" element={<WashEditPage />} />
+          <Route path="/wash/sets" element={<ProductSetsPage />} />
+          <Route path="/wash/sets/new" element={<ProductSetsPage />} />
           <Route path="/wash/:id" element={<WashDetailPage />} />
+          <Route path="/wash/:id/review" element={<WashReviewPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

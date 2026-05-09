@@ -25,6 +25,10 @@ public class WashSession {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+
     @Column(nullable = false)
     private LocalDate washedAt;
 
@@ -56,30 +60,36 @@ public class WashSession {
     private List<WashProduct> washProducts = new ArrayList<>();
 
     @Builder
-    public WashSession(User user, LocalDate washedAt, String location, Weather weather,
-                       Integer durationMinutes, Integer cost, Integer rating, String memo) {
+    public WashSession(User user, LocalDate washedAt, String location) {
         this.user = user;
+        this.status = Status.PREPARING;
         this.washedAt = washedAt;
         this.location = location;
-        this.weather = weather;
-        this.durationMinutes = durationMinutes;
-        this.cost = cost;
-        this.rating = rating;
-        this.memo = memo;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void update(LocalDate _washedAt, String _location, Weather _weather,
-                       Integer _durationMinutes, Integer _cost, Integer _rating, String _memo) {
-        this.washedAt = _washedAt;
+    // 세차장 도착 후 장소/금액 수정
+    public void updatePreparation(String _location, Integer _cost) {
         this.location = _location;
+        this.cost = _cost;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 후기 작성 완료 → DONE
+    public void complete(Weather _weather, Integer _durationMinutes, Integer _cost,
+                         Integer _rating, String _memo) {
+        this.status = Status.DONE;
         this.weather = _weather;
         this.durationMinutes = _durationMinutes;
         this.cost = _cost;
         this.rating = _rating;
         this.memo = _memo;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public enum Status {
+        PREPARING, DONE
     }
 
     public enum Weather {

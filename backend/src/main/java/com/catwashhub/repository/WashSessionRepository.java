@@ -12,11 +12,16 @@ public interface WashSessionRepository extends JpaRepository<WashSession, Long> 
 
     List<WashSession> findByUserIdOrderByWashedAtDesc(Long userId);
 
+    // 상태별 조회
+    List<WashSession> findByUserIdAndStatusOrderByCreatedAtDesc(
+            Long userId, WashSession.Status status);
+
     Optional<WashSession> findByIdAndUserId(Long id, Long userId);
 
-    // 홈 대시보드용: 최근 N건
-    @Query("SELECT w FROM WashSession w WHERE w.user.id = :userId ORDER BY w.washedAt DESC LIMIT :limit")
-    List<WashSession> findRecentByUserId(@Param("userId") Long userId, @Param("limit") int limit);
+    // 홈 대시보드용: DONE 최근 N건
+    @Query("SELECT w FROM WashSession w WHERE w.user.id = :userId AND w.status = 'DONE' ORDER BY w.washedAt DESC LIMIT :limit")
+    List<WashSession> findRecentDoneByUserId(@Param("userId") Long userId, @Param("limit") int limit);
 
-    long countByUserId(Long userId);
+    // DONE 상태만 카운트
+    long countByUserIdAndStatus(Long userId, WashSession.Status status);
 }

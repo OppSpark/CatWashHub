@@ -1,6 +1,7 @@
 package com.catwashhub.service;
 
 import com.catwashhub.domain.*;
+import com.catwashhub.dto.request.WashCompleteRequest;
 import com.catwashhub.dto.request.WashSessionRequest;
 import com.catwashhub.dto.response.WashDashboardResponse;
 import com.catwashhub.dto.response.WashSessionResponse;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -30,17 +32,23 @@ public class WashService {
     public WashDashboardResponse getDashboard(String _email) {
         User user = getUser(_email);
 
-        long totalCount = m_WashSessionRepository.countByUserId(user.getId());
+        long totalCount = m_WashSessionRepository.countByUserIdAndStatus(
+                user.getId(), WashSession.Status.DONE);
 
-        List<WashSession> recentSessions = m_WashSessionRepository
-                .findRecentByUserId(user.getId(), c_DashboardRecentCount);
+        List<WashSession> recentDone = m_WashSessionRepository
+                .findRecentDoneByUserId(user.getId(), c_DashboardRecentCount);
 
-        WashSession lastSession = recentSessions.isEmpty() ? null : recentSessions.get(0);
+        LocalDate lastWashedAt = recentDone.isEmpty() ? null : recentDone.get(0).getWashedAt();
 
-        List<WashDashboardResponse.WashSessionSummary> sessionSummaries = recentSessions.stream()
-                .map(s -> new WashDashboardResponse.WashSessionSummary(
-                        s.getId(), s.getWashedAt(), s.getLocation(), s.getRating(), s.getCost()
-                ))
+        List<WashDashboardResponse.WashSessionSummary> preparingSummaries =
+                m_WashSessionRepository.findByUserIdAndStatusOrderByCreatedAtDesc(
+                                user.getId(), WashSession.Status.PREPARING)
+                        .stream()
+                        .map(this::toSummary)
+                        .toList();
+
+        List<WashDashboardResponse.WashSessionSummary> doneSummaries = recentDone.stream()
+                .map(this::toSummary)
                 .toList();
 
         List<WashDashboardResponse.ProductSetSummary> setSummaries = m_ProductSetRepository
@@ -52,14 +60,10 @@ public class WashService {
                 .toList();
 
         return new WashDashboardResponse(
-                totalCount,
-                lastSession != null ? lastSession.getWashedAt() : null,
-                sessionSummaries,
-                setSummaries
-        );
+                totalCount, lastWashedAt, preparingSummaries, doneSummaries, setSummaries);
     }
 
-    // ==================== 세차 일지 CRUD ====================
+    // ==================== 세차 준비 저장 (PREPARING) ====================
 
     @Transactional
     public WashSessionResponse createSession(String _email, WashSessionRequest _request) {
@@ -67,13 +71,8 @@ public class WashService {
 
         WashSession session = WashSession.builder()
                 .user(user)
-                .washedAt(_request.washedAt())
+                .washedAt(_request.washedAt() != null ? _request.washedAt() : LocalDate.now())
                 .location(_request.location())
-                .weather(_request.weather())
-                .durationMinutes(_request.durationMinutes())
-                .cost(_request.cost())
-                .rating(_request.rating())
-                .memo(_request.memo())
                 .build();
 
         addProducts(session, _request.products());
@@ -81,6 +80,48 @@ public class WashService {
 
         return WashSessionResponse.from(session);
     }
+
+    // ==================== 세차 준비 수정 (장소/금액/용품) ====================
+
+    @Transactional
+    public WashSessionResponse updatePreparation(String _email, Long _sessionId,
+                                                  WashSessionRequest _request) {
+        User user = getUser(_email);
+        WashSession session = getSessionOfUser(_sessionId, user.getId());
+
+        session.updatePreparation(_request.location(), null);
+        session.getWashProducts().clear();
+        addProducts(session, _request.products());
+
+        return WashSessionResponse.from(session);
+    }
+
+    // ==================== 후기 작성 완료 (DONE) ====================
+
+    @Transactional
+    public WashSessionResponse completeSession(String _email, Long _sessionId,
+                                               WashCompleteRequest _request) {
+        User user = getUser(_email);
+        WashSession session = getSessionOfUser(_sessionId, user.getId());
+
+        // 용품 수정분 반영
+        if (_request.products() != null) {
+            session.getWashProducts().clear();
+            addProducts(session, _request.products());
+        }
+
+        session.complete(
+                _request.weather(),
+                _request.durationMinutes(),
+                _request.cost(),
+                _request.rating(),
+                _request.memo()
+        );
+
+        return WashSessionResponse.from(session);
+    }
+
+    // ==================== 조회 ====================
 
     @Transactional(readOnly = true)
     public List<WashSessionResponse> getSessions(String _email) {
@@ -94,39 +135,23 @@ public class WashService {
     @Transactional(readOnly = true)
     public WashSessionResponse getSession(String _email, Long _sessionId) {
         User user = getUser(_email);
-        WashSession session = m_WashSessionRepository.findByIdAndUserId(_sessionId, user.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.WASH_SESSION_NOT_FOUND));
+        WashSession session = getSessionOfUser(_sessionId, user.getId());
         return WashSessionResponse.from(session);
     }
 
-    @Transactional
-    public WashSessionResponse updateSession(String _email, Long _sessionId, WashSessionRequest _request) {
-        User user = getUser(_email);
-        WashSession session = m_WashSessionRepository.findByIdAndUserId(_sessionId, user.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.WASH_SESSION_NOT_FOUND));
-
-        session.update(
-                _request.washedAt(), _request.location(), _request.weather(),
-                _request.durationMinutes(), _request.cost(), _request.rating(), _request.memo()
-        );
-
-        session.getWashProducts().clear();
-        addProducts(session, _request.products());
-
-        return WashSessionResponse.from(session);
-    }
+    // ==================== 삭제 ====================
 
     @Transactional
     public void deleteSession(String _email, Long _sessionId) {
         User user = getUser(_email);
-        WashSession session = m_WashSessionRepository.findByIdAndUserId(_sessionId, user.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.WASH_SESSION_NOT_FOUND));
+        WashSession session = getSessionOfUser(_sessionId, user.getId());
         m_WashSessionRepository.delete(session);
     }
 
     // ==================== 초기화 함수 ====================
 
-    private void addProducts(WashSession _session, List<WashSessionRequest.WashProductRequest> _products) {
+    private void addProducts(WashSession _session,
+                             List<WashSessionRequest.WashProductRequest> _products) {
         if (_products == null) {
             return;
         }
@@ -149,6 +174,23 @@ public class WashService {
 
             _session.getWashProducts().add(washProduct);
         }
+    }
+
+    private WashDashboardResponse.WashSessionSummary toSummary(WashSession _session) {
+        return new WashDashboardResponse.WashSessionSummary(
+                _session.getId(),
+                _session.getStatus().name(),
+                _session.getWashedAt(),
+                _session.getLocation(),
+                _session.getRating(),
+                _session.getCost(),
+                _session.getWashProducts().size()
+        );
+    }
+
+    private WashSession getSessionOfUser(Long _sessionId, Long _userId) {
+        return m_WashSessionRepository.findByIdAndUserId(_sessionId, _userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WASH_SESSION_NOT_FOUND));
     }
 
     private User getUser(String _email) {

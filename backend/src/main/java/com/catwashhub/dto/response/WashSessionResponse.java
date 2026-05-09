@@ -10,6 +10,7 @@ import java.util.List;
 
 public record WashSessionResponse(
         Long id,
+        String status,
         LocalDate washedAt,
         String location,
         String weather,
@@ -33,7 +34,15 @@ public record WashSessionResponse(
             String productName,
             String category,
             String memo,
-            Integer sortOrder
+            Integer sortOrder,
+            List<DilutionRatioResponse> dilutionRatios  // 희석비 목록 (제품DB 연결된 경우)
+    ) { }
+
+    public record DilutionRatioResponse(
+            Long id,
+            String label,
+            Integer ratio,
+            String description
     ) { }
 
     public static WashSessionResponse from(WashSession session) {
@@ -42,18 +51,30 @@ public record WashSessionResponse(
                 .toList();
 
         List<WashProductResponse> products = session.getWashProducts().stream()
-                .map(wp -> new WashProductResponse(
-                        wp.getId(),
-                        wp.getProduct() != null ? wp.getProduct().getId() : null,
-                        wp.getDisplayName(),
-                        wp.getCategory(),
-                        wp.getMemo(),
-                        wp.getSortOrder()
-                ))
+                .map(wp -> {
+                    List<DilutionRatioResponse> ratios = List.of();
+                    if (wp.getProduct() != null) {
+                        ratios = wp.getProduct().getDilutionRatios().stream()
+                                .map(dr -> new DilutionRatioResponse(
+                                        dr.getId(), dr.getLabel(), dr.getRatio(), dr.getDescription()
+                                ))
+                                .toList();
+                    }
+                    return new WashProductResponse(
+                            wp.getId(),
+                            wp.getProduct() != null ? wp.getProduct().getId() : null,
+                            wp.getDisplayName(),
+                            wp.getCategory(),
+                            wp.getMemo(),
+                            wp.getSortOrder(),
+                            ratios
+                    );
+                })
                 .toList();
 
         return new WashSessionResponse(
                 session.getId(),
+                session.getStatus().name(),
                 session.getWashedAt(),
                 session.getLocation(),
                 session.getWeather() != null ? session.getWeather().name() : null,

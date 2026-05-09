@@ -1,18 +1,12 @@
 package com.catwashhub.dto.request;
 
-import com.catwashhub.domain.WashSession;
-
 import java.time.LocalDate;
 import java.util.List;
 
+// 세차 준비 저장 (1차 저장 - PREPARING)
 public record WashSessionRequest(
         LocalDate washedAt,
         String location,
-        WashSession.Weather weather,
-        Integer durationMinutes,
-        Integer cost,
-        Integer rating,
-        String memo,
         List<WashProductRequest> products
 ) {
     public record WashProductRequest(

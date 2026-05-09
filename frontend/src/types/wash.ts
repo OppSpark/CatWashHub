@@ -1,3 +1,4 @@
+export type WashStatus = 'PREPARING' | 'DONE'
 export type Weather = 'SUNNY' | 'CLOUDY' | 'RAINY' | 'SNOWY'
 export type PhotoType = 'BEFORE' | 'AFTER' | 'ETC'
 
@@ -7,6 +8,13 @@ export interface WashPhoto {
   photoType: PhotoType
 }
 
+export interface DilutionRatio {
+  id: number
+  label: string
+  ratio: number
+  description: string | null
+}
+
 export interface WashProductItem {
   id: number
   productId: number | null
@@ -14,10 +22,12 @@ export interface WashProductItem {
   category: string | null
   memo: string | null
   sortOrder: number
+  dilutionRatios: DilutionRatio[]
 }
 
 export interface WashSession {
   id: number
+  status: WashStatus
   washedAt: string
   location: string | null
   weather: Weather | null
@@ -32,10 +42,12 @@ export interface WashSession {
 
 export interface WashSessionSummary {
   id: number
+  status: WashStatus
   washedAt: string
   location: string | null
   rating: number | null
   cost: number | null
+  productCount: number
 }
 
 export interface ProductSetItem {
@@ -63,14 +75,20 @@ export interface ProductSetSummary {
 export interface WashDashboard {
   totalCount: number
   lastWashedAt: string | null
-  recentSessions: WashSessionSummary[]
+  preparingSessions: WashSessionSummary[]   // 진행 중 (PREPARING)
+  recentSessions: WashSessionSummary[]      // 최근 완료 (DONE)
   favoriteSets: ProductSetSummary[]
 }
 
-// 세차 일지 작성 요청 타입
+// 세차 준비 저장 요청 (1차 - PREPARING)
 export interface WashSessionRequest {
-  washedAt: string
+  washedAt: string | null
   location: string | null
+  products: WashProductRequest[]
+}
+
+// 후기 작성 완료 요청 (DONE)
+export interface WashCompleteRequest {
   weather: Weather | null
   durationMinutes: number | null
   cost: number | null
