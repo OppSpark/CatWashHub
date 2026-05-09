@@ -1,24 +1,185 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
+import { getDashboard } from '@/api/washApi'
+import type { WashDashboard } from '@/types/wash'
+import { HOME_MSGS } from '@/constants/messages'
+
+const WEATHER_LABELS: Record<string, string> = {
+  SUNNY: '맑음',
+  CLOUDY: '흐림',
+  RAINY: '비',
+  SNOWY: '눈',
+}
+
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr)
+  return `${date.getMonth() + 1}/${date.getDate()}`
+}
+
+const getDaysAgo = (dateStr: string) => {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+  if (diff === 0) { return '오늘' }
+  if (diff === 1) { return '어제' }
+  return `${diff}일 전`
+}
+
+const StarRating = ({ rating }: { rating: number | null }) => {
+  if (!rating) { return null }
+  return (
+    <span className="text-[12px] text-[#FFB800]">
+      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+    </span>
+  )
+}
 
 const HomePage = () => {
+  const navigate = useNavigate()
   const nickname = useAuthStore(s => s.nickname)
+  const [dashboard, setDashboard] = useState<WashDashboard | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    getDashboard()
+      .then(setDashboard)
+      .finally(() => setIsLoading(false))
+  }, [])
 
   return (
-    <div className="min-h-dvh bg-[#F2F4F6] pb-20">
+    <div className="min-h-dvh bg-[#F2F4F6] pb-24">
 
       {/* 헤더 */}
-      <div className="bg-white px-6 pt-12 pb-4">
+      <div className="bg-white px-6 pt-12 pb-5">
         <p className="text-[14px] text-[#6B7684]">안녕하세요 👋</p>
         <h1 className="text-[22px] font-bold text-[#191F28] mt-0.5">
-          {nickname ?? '세차인'}님의 피드
+          {nickname ?? '세차인'}님의 세차 허브
         </h1>
       </div>
 
-      {/* 준비 중 */}
-      <div className="flex flex-col items-center justify-center py-32 gap-3">
-        <span className="text-[48px]">🚗</span>
-        <p className="text-[16px] font-semibold text-[#191F28]">커뮤니티 피드</p>
-        <p className="text-[14px] text-[#ADB5C0]">곧 오픈 예정입니다</p>
+      <div className="px-4 pt-4 flex flex-col gap-3">
+
+        {/* 요약 카드 */}
+        <div className="bg-white rounded-2xl px-5 py-4 flex justify-between items-center">
+          <div>
+            <p className="text-[13px] text-[#6B7684]">총 세차 횟수</p>
+            <p className="text-[28px] font-bold text-[#191F28] mt-0.5">
+              {isLoading ? '-' : (dashboard?.totalCount ?? 0)}
+              <span className="text-[16px] font-medium ml-1">회</span>
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-[13px] text-[#6B7684]">마지막 세차</p>
+            <p className="text-[16px] font-semibold text-[#191F28] mt-0.5">
+              {isLoading ? '-' : (
+                dashboard?.lastWashedAt
+                  ? getDaysAgo(dashboard.lastWashedAt)
+                  : '기록 없음'
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* 세차 시작 버튼 */}
+        <button
+          onClick={() => navigate('/wash/new')}
+          className="w-full bg-[#3182F6] text-white rounded-2xl py-4 text-[16px] font-semibold active:brightness-90 transition-all"
+        >
+          + 세차 시작하기
+        </button>
+
+        {/* 즐겨찾기 용품 세트 */}
+        <div className="bg-white rounded-2xl px-5 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[15px] font-semibold text-[#191F28]">즐겨찾기 세트</p>
+            <button
+              onClick={() => navigate('/wash/sets')}
+              className="text-[13px] text-[#3182F6]"
+            >
+              전체보기
+            </button>
+          </div>
+
+          {isLoading ? (
+            <div className="h-8 bg-[#F2F4F6] rounded-lg animate-pulse" />
+          ) : dashboard?.favoriteSets.length ? (
+            <div className="flex gap-2 flex-wrap">
+              {dashboard.favoriteSets.map(set => (
+                <button
+                  key={set.id}
+                  onClick={() => navigate('/wash/new', { state: { setId: set.id } })}
+                  className="flex items-center gap-1.5 bg-[#F2F4F6] rounded-full px-3 py-1.5"
+                >
+                  {set.isDefault && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#3182F6]" />
+                  )}
+                  <span className="text-[13px] font-medium text-[#191F28]">{set.name}</span>
+                  <span className="text-[11px] text-[#ADB5C0]">{set.itemCount}개</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-[13px] text-[#ADB5C0]">{HOME_MSGS.EMPTY_SETS}</p>
+              <button
+                onClick={() => navigate('/wash/sets/new')}
+                className="mt-2 text-[13px] text-[#3182F6] font-medium"
+              >
+                세트 만들기
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 최근 세차 기록 */}
+        <div className="bg-white rounded-2xl px-5 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[15px] font-semibold text-[#191F28]">최근 세차 기록</p>
+            <button
+              onClick={() => navigate('/records')}
+              className="text-[13px] text-[#3182F6]"
+            >
+              전체보기
+            </button>
+          </div>
+
+          {isLoading ? (
+            <div className="flex flex-col gap-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-12 bg-[#F2F4F6] rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : dashboard?.recentSessions.length ? (
+            <div className="flex flex-col divide-y divide-[#F2F4F6]">
+              {dashboard.recentSessions.map(session => (
+                <button
+                  key={session.id}
+                  onClick={() => navigate(`/wash/${session.id}`)}
+                  className="flex items-center justify-between py-3 text-left"
+                >
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[14px] font-medium text-[#191F28]">
+                      {session.location ?? '장소 미입력'}
+                    </p>
+                    <StarRating rating={session.rating} />
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <p className="text-[13px] text-[#6B7684]">{formatDate(session.washedAt)}</p>
+                    {session.cost != null && (
+                      <p className="text-[12px] text-[#ADB5C0]">
+                        {session.cost.toLocaleString()}원
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-[13px] text-[#ADB5C0]">{HOME_MSGS.EMPTY_RECORDS}</p>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   )

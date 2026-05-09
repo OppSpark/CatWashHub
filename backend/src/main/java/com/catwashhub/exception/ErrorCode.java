@@ -21,7 +21,15 @@ public enum ErrorCode {
     // 제품/카테고리
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 제품입니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
-    CATEGORY_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 카테고리입니다.");
+    CATEGORY_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 카테고리입니다."),
+
+    // 세차 일지
+    WASH_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 세차 기록입니다."),
+    WASH_SESSION_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 세차 기록에 접근 권한이 없습니다."),
+
+    // 용품 세트
+    PRODUCT_SET_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 용품 세트입니다."),
+    PRODUCT_SET_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 용품 세트에 접근 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

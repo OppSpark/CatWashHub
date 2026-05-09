@@ -6,6 +6,9 @@ import CalculatorPage from '@/pages/calculator/CalculatorPage'
 import HomePage from '@/pages/home/HomePage'
 import RecordsPage from '@/pages/records/RecordsPage'
 import MyPage from '@/pages/mypage/MyPage'
+import WashNewPage from '@/pages/wash/WashNewPage'
+import WashEditPage from '@/pages/wash/WashEditPage'
+import WashDetailPage from '@/pages/wash/WashDetailPage'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
 
@@ -37,6 +40,9 @@ const App = () => {
           <Route path="/calculator" element={<CalculatorPage />} />
           <Route path="/records" element={<RecordsPage />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/wash/new" element={<WashNewPage />} />
+          <Route path="/wash/edit" element={<WashEditPage />} />
+          <Route path="/wash/:id" element={<WashDetailPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />
