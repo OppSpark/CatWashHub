@@ -83,6 +83,11 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void updatePassword(String _encodedPassword) {
+        this.password = _encodedPassword;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public void softDelete() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();

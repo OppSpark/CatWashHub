@@ -15,6 +15,20 @@ export const HOME_MSGS = {
   EMPTY_RECORDS: '아직 세차 기록이 없어요. 첫 세차를 시작해보세요!',
 }
 
+export const MY_MSGS = {
+  NICKNAME_UPDATED: '닉네임이 변경됐어요.',
+  NICKNAME_UPDATE_ERROR: '닉네임 변경 중 오류가 발생했어요.',
+  PASSWORD_UPDATED: '비밀번호가 변경됐어요.',
+  PASSWORD_UPDATE_ERROR: '비밀번호 변경 중 오류가 발생했어요.',
+  ACCOUNT_DELETED: '계정이 탈퇴됐어요.',
+  ACCOUNT_DELETE_ERROR: '탈퇴 중 오류가 발생했어요.',
+  CONFIRM_DELETE_ACCOUNT: '정말 탈퇴하시겠어요? 모든 데이터가 삭제됩니다.',
+  PLACEHOLDER_NICKNAME: '새 닉네임을 입력해주세요',
+  PLACEHOLDER_CURRENT_PW: '현재 비밀번호',
+  PLACEHOLDER_NEW_PW: '새 비밀번호 (8자 이상)',
+  LOGOUT_SUCCESS: '로그아웃 됐어요.',
+}
+
 export const WASH_MSGS = {
   EMPTY_PRODUCTS: '용품을 추가해주세요',
   EMPTY_RECORDS: '아직 세차 기록이 없어요. 첫 세차를 시작해보세요!',

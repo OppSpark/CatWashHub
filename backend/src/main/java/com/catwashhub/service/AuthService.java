@@ -2,6 +2,8 @@ package com.catwashhub.service;
 
 import com.catwashhub.domain.User;
 import com.catwashhub.dto.request.SignupRequest;
+import com.catwashhub.dto.request.UpdateNicknameRequest;
+import com.catwashhub.dto.request.UpdatePasswordRequest;
 import com.catwashhub.dto.response.AuthResponse;
 import com.catwashhub.exception.CustomException;
 import com.catwashhub.exception.ErrorCode;
@@ -46,6 +48,36 @@ public class AuthService {
         m_UserRepository.save(user);
     }
 
+    @Transactional
+    public AuthResponse updateNickname(String _email, UpdateNicknameRequest _request) {
+        User user = getUser(_email);
+        if (m_UserRepository.existsByNicknameAndEmailNot(_request.nickname(), _email)) {
+            throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+        }
+        user.updateNickname(_request.nickname());
+        return new AuthResponse(
+                m_JwtUtil.generateAccessToken(user.getEmail()),
+                m_JwtUtil.generateRefreshToken(user.getEmail()),
+                user.getNickname(),
+                user.getEmail()
+        );
+    }
+
+    @Transactional
+    public void updatePassword(String _email, UpdatePasswordRequest _request) {
+        User user = getUser(_email);
+        if (!m_PasswordEncoder.matches(_request.currentPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+        user.updatePassword(m_PasswordEncoder.encode(_request.newPassword()));
+    }
+
+    @Transactional
+    public void deleteAccount(String _email) {
+        User user = getUser(_email);
+        user.softDelete();
+    }
+
     @Transactional(readOnly = true)
     public AuthResponse login(String _email, String _password) {
         User user = m_UserRepository.findByEmail(_email)
@@ -64,5 +96,11 @@ public class AuthService {
                 user.getNickname(),
                 user.getEmail()
         );
+    }
+
+    // ==================== 초기화 함수 ====================
+    private User getUser(String _email) {
+        return m_UserRepository.findByEmail(_email)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }

@@ -24,4 +24,11 @@ public interface WashSessionRepository extends JpaRepository<WashSession, Long> 
 
     // DONE 상태만 카운트
     long countByUserIdAndStatus(Long userId, WashSession.Status status);
+
+    // 평균 비용 / 평균 별점 (DONE, null 제외)
+    @Query("SELECT AVG(w.cost) FROM WashSession w WHERE w.user.id = :userId AND w.status = 'DONE' AND w.cost IS NOT NULL")
+    Double avgCostByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT AVG(w.rating) FROM WashSession w WHERE w.user.id = :userId AND w.status = 'DONE' AND w.rating IS NOT NULL")
+    Double avgRatingByUserId(@Param("userId") Long userId);
 }

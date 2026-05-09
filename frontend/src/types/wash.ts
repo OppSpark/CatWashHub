@@ -75,6 +75,8 @@ export interface ProductSetSummary {
 export interface WashDashboard {
   totalCount: number
   lastWashedAt: string | null
+  avgCost: number | null
+  avgRating: number | null
   preparingSessions: WashSessionSummary[]   // 진행 중 (PREPARING)
   recentSessions: WashSessionSummary[]      // 최근 완료 (DONE)
   favoriteSets: ProductSetSummary[]

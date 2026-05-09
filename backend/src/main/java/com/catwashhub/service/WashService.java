@@ -35,6 +35,9 @@ public class WashService {
         long totalCount = m_WashSessionRepository.countByUserIdAndStatus(
                 user.getId(), WashSession.Status.DONE);
 
+        Double avgCost = m_WashSessionRepository.avgCostByUserId(user.getId());
+        Double avgRating = m_WashSessionRepository.avgRatingByUserId(user.getId());
+
         List<WashSession> recentDone = m_WashSessionRepository
                 .findRecentDoneByUserId(user.getId(), c_DashboardRecentCount);
 
@@ -60,7 +63,8 @@ public class WashService {
                 .toList();
 
         return new WashDashboardResponse(
-                totalCount, lastWashedAt, preparingSummaries, doneSummaries, setSummaries);
+                totalCount, lastWashedAt, avgCost, avgRating,
+                preparingSummaries, doneSummaries, setSummaries);
     }
 
     // ==================== 세차 준비 저장 (PREPARING) ====================
