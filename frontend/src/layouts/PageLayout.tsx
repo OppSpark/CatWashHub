@@ -7,15 +7,17 @@ interface PageLayoutProps {
 
   // 헤더
   title?: string
-  onBack?: (() => void) | boolean   // 함수: 커스텀 동작, true: navigate(-1), 생략: 버튼 없음
-  headerRight?: ReactNode            // 우상단 액션 버튼 영역
+  headerVariant?: 'default' | 'large'  // default: 18px 타이틀바, large: 22px 대형 타이틀 (홈·계산기 스타일)
+  headerSubtitle?: string               // large 전용 서브텍스트
+  onBack?: (() => void) | boolean       // 함수: 커스텀 동작, true: navigate(-1), 생략: 버튼 없음
+  headerRight?: ReactNode               // 우상단 액션 버튼 영역
 
   // 하단 여백
-  hasFixedButton?: boolean           // fixed 저장버튼 있는 페이지 → pb 더 크게
-  noPadding?: boolean                // 콘텐츠 영역 px 없음 (지도, 탭 UI 등)
+  hasFixedButton?: boolean              // fixed 저장버튼 있는 페이지 → pb 더 크게
+  noPadding?: boolean                   // 콘텐츠 영역 px 없음 (검색바 full-width 등)
 
   // 배경
-  bgColor?: string                   // 기본: #F2F4F6
+  bgColor?: string                      // 기본: #F2F4F6
 
   // 전체 로딩 스피너
   isLoading?: boolean
@@ -32,6 +34,8 @@ const PULL_THRESHOLD = 64
 const PageLayout = ({
   children,
   title,
+  headerVariant = 'default',
+  headerSubtitle,
   onBack,
   headerRight,
   hasFixedButton = false,
@@ -120,26 +124,35 @@ const PageLayout = ({
         </div>
       )}
 
-      {/* 헤더 */}
+      {/* 헤더 — default: 타이틀바 / large: 대형 타이틀 */}
       {hasHeader && (
-        <div className="bg-white px-4 pt-12 pb-4 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            {(onBack !== undefined) && (
-              <button
-                onClick={handleBack}
-                className="p-1 -ml-1 text-[#191F28] shrink-0"
-              >
-                <ChevronLeft size={24} />
-              </button>
-            )}
-            {title && (
-              <h1 className="text-[18px] font-bold text-[#191F28] truncate">{title}</h1>
-            )}
+        headerVariant === 'large' ? (
+          <div className="bg-white px-5 pt-12 pb-5 shrink-0">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                {headerSubtitle && (
+                  <p className="text-[14px] text-[#6B7684] mb-0.5">{headerSubtitle}</p>
+                )}
+                <h1 className="text-[22px] font-bold text-[#191F28]">{title}</h1>
+              </div>
+              {headerRight && <div className="shrink-0 pt-1">{headerRight}</div>}
+            </div>
           </div>
-          {headerRight && (
-            <div className="shrink-0">{headerRight}</div>
-          )}
-        </div>
+        ) : (
+          <div className="bg-white px-5 pt-12 pb-4 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              {onBack !== undefined && (
+                <button onClick={handleBack} className="p-1 -ml-1 text-[#191F28] shrink-0">
+                  <ChevronLeft size={24} />
+                </button>
+              )}
+              {title && (
+                <h1 className="text-[18px] font-bold text-[#191F28] truncate">{title}</h1>
+              )}
+            </div>
+            {headerRight && <div className="shrink-0">{headerRight}</div>}
+          </div>
+        )
       )}
 
       {/* 콘텐츠 */}

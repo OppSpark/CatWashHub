@@ -122,17 +122,16 @@ const CalculatorPage = () => {
   const isValid = effectiveRatio !== null && !isNaN(waterL) && waterL > 0
 
   return (
-    <PageLayout noPadding>
+    <PageLayout
+      title="희석 계산기"
+      headerVariant="large"
+      headerSubtitle="약품 희석 비율을 계산해보세요"
+      noPadding
+    >
       <div className="flex flex-col pb-24">
 
-      {/* 헤더 */}
-      <div className="bg-white px-6 pt-12 pb-4">
-        <h1 className="text-[22px] font-bold text-[#191F28]">희석 계산기</h1>
-        <p className="text-[14px] text-[#6B7684] mt-1">약품 희석 비율을 계산해보세요</p>
-      </div>
-
       {/* 탭 */}
-      <div className="bg-white border-b border-[#E5E8EB] px-6 flex gap-6">
+      <div className="bg-white border-b border-[#E5E8EB] px-5 flex gap-6">
         {(['calculator', 'history'] as TabType[]).map(tab => (
           <button
             key={tab}

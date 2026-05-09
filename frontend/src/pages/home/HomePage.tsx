@@ -39,21 +39,13 @@ const HomePage = () => {
       .finally(() => setIsLoading(false))
   }, [])
 
-  const headerContent = (
-    <div className="bg-white px-6 pt-12 pb-5">
-      <p className="text-[14px] text-[#6B7684]">안녕하세요 👋</p>
-      <h1 className="text-[22px] font-bold text-[#191F28] mt-0.5">
-        {nickname ?? '세차인'}님의 세차 허브
-      </h1>
-    </div>
-  )
-
   return (
-    <PageLayout noPadding>
-
-      {headerContent}
-
-      <div className="px-4 pt-4 pb-24 flex flex-col gap-3">
+    <PageLayout
+      title={`${nickname ?? '세차인'}님의 세차 허브`}
+      headerVariant="large"
+      headerSubtitle="안녕하세요 👋"
+    >
+      <div className="flex flex-col gap-3">
 
         {/* 요약 카드 */}
         <div className="bg-white rounded-2xl px-5 py-4 flex justify-between items-center">
@@ -200,3 +192,4 @@ const HomePage = () => {
 }
 
 export default HomePage
+
