@@ -11,6 +11,7 @@ import { MY_MSGS } from '@/constants/messages'
 import { updateNickname, updatePassword, deleteAccount } from '@/api/authApi'
 import { getDashboard } from '@/api/washApi'
 import type { WashDashboard } from '@/types/wash'
+import { formatCost, formatRating } from '@/utils/format'
 
 // ==================== 모달 타입 ====================
 type ModalType = 'nickname' | 'password' | null
@@ -100,20 +101,6 @@ const MyPage = () => {
     } catch {
       toast.error(MY_MSGS.ACCOUNT_DELETE_ERROR)
     }
-  }
-
-  const formatCost = (val: number | null | undefined) => {
-    if (val == null) {
-      return '-'
-    }
-    return `${Math.round(val / 1000)}천원`
-  }
-
-  const formatRating = (val: number | null | undefined) => {
-    if (val == null) {
-      return '-'
-    }
-    return val.toFixed(1)
   }
 
   return (
