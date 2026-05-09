@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronDown, Search, Clock, X, ChevronRight, Bookmark, BadgeCheck, User } from 'lucide-react'
-import { getCategories, getProducts, calculate, getHistory } from '@/api/calculatorApi'
-import type { Category, Product, DilutionRatio, CalculationResult } from '@/types/calculator'
+import { ChevronDown, Clock, Bookmark, BadgeCheck, User } from 'lucide-react'
+import { calculate, getHistory } from '@/api/calculatorApi'
+import type { Product, DilutionRatio, CalculationResult } from '@/types/calculator'
 import PageLayout from '@/layouts/PageLayout'
+import ProductPickerSheet from '@/components/ProductPickerSheet'
 
 type TabType = 'calculator' | 'history'
 type RatioMode = 'preset' | 'custom'
@@ -11,12 +12,8 @@ const CalculatorPage = () => {
   const [m_Tab, setM_Tab] = useState<TabType>('calculator')
 
   // 제품 선택
-  const [m_Categories, setM_Categories] = useState<Category[]>([])
-  const [m_Products, setM_Products] = useState<Product[]>([])
   const [m_SelectedProduct, setM_SelectedProduct] = useState<Product | null>(null)
   const [m_ShowProductSheet, setM_ShowProductSheet] = useState(false)
-  const [m_Keyword, setM_Keyword] = useState('')
-  const [m_SelectedCategoryId, setM_SelectedCategoryId] = useState<number | null>(null)
 
   // 희석비 선택
   const [m_RatioMode, setM_RatioMode] = useState<RatioMode>('preset')
@@ -36,19 +33,10 @@ const CalculatorPage = () => {
 
   // ==================== 초기화 함수 ====================
   useEffect(() => {
-    loadCategories()
-    loadProducts()
-  }, [])
-
-  useEffect(() => {
     if (m_Tab === 'history') {
       loadHistory()
     }
   }, [m_Tab])
-
-  useEffect(() => {
-    loadProducts()
-  }, [m_SelectedCategoryId, m_Keyword])
 
   // 값이 바뀔 때마다 실시간 계산
   useEffect(() => {
@@ -56,27 +44,6 @@ const CalculatorPage = () => {
   }, [m_SelectedRatio, m_CustomRatio, m_WaterL, m_RatioMode])
 
   // ==================== 기능별 함수 ====================
-  const loadCategories = async () => {
-    try {
-      const data = await getCategories()
-      setM_Categories(data)
-    } catch {
-      // 카테고리 로드 실패 시 빈 목록 유지
-    }
-  }
-
-  const loadProducts = async () => {
-    try {
-      const data = await getProducts({
-        categoryId: m_SelectedCategoryId ?? undefined,
-        keyword: m_Keyword || undefined,
-      })
-      setM_Products(data)
-    } catch {
-      // 제품 로드 실패 시 빈 목록 유지
-    }
-  }
-
   const loadHistory = async () => {
     try {
       const data = await getHistory()
@@ -138,6 +105,8 @@ const CalculatorPage = () => {
     setM_ShowProductSheet(false)
   }
 
+
+
   const handleReset = () => {
     setM_SelectedProduct(null)
     setM_SelectedRatio(null)
@@ -151,10 +120,6 @@ const CalculatorPage = () => {
   const effectiveRatio = getEffectiveRatio()
   const waterL = parseFloat(m_WaterL)
   const isValid = effectiveRatio !== null && !isNaN(waterL) && waterL > 0
-
-  // 공식 제품 / 사용자 제품 분리
-  const officialProducts = m_Products.filter(p => p.isOfficial)
-  const userProducts = m_Products.filter(p => !p.isOfficial)
 
   return (
     <PageLayout noPadding>
@@ -372,113 +337,14 @@ const CalculatorPage = () => {
         </div>
       )}
 
-      {/* 제품 선택 바텀시트 */}
-      {m_ShowProductSheet && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setM_ShowProductSheet(false)} />
-          <div className="relative bg-white rounded-t-3xl max-h-[80dvh] flex flex-col">
-
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E8EB]">
-              <h2 className="text-[17px] font-bold text-[#191F28]">제품 선택</h2>
-              <button onClick={() => setM_ShowProductSheet(false)}>
-                <X size={22} className="text-[#6B7684]" />
-              </button>
-            </div>
-
-            <div className="px-4 py-3 border-b border-[#E5E8EB]">
-              <div className="flex items-center gap-2 bg-[#F2F4F6] rounded-xl px-3 py-2">
-                <Search size={16} className="text-[#ADB5C0]" />
-                <input
-                  type="text"
-                  value={m_Keyword}
-                  onChange={e => setM_Keyword(e.target.value)}
-                  placeholder="제품명 검색"
-                  className="flex-1 bg-transparent text-[14px] text-[#191F28] placeholder-[#ADB5C0] outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="px-4 py-2 flex gap-2 overflow-x-auto border-b border-[#E5E8EB]">
-              <button
-                onClick={() => setM_SelectedCategoryId(null)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[13px] font-semibold transition ${
-                  m_SelectedCategoryId === null ? 'bg-[#3182F6] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'
-                }`}
-              >
-                전체
-              </button>
-              {m_Categories.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setM_SelectedCategoryId(cat.id)}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[13px] font-semibold transition ${
-                    m_SelectedCategoryId === cat.id ? 'bg-[#3182F6] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-
-            <div className="overflow-y-auto flex-1">
-              {m_Products.length === 0 ? (
-                <p className="py-12 text-center text-[14px] text-[#ADB5C0]">검색 결과가 없습니다</p>
-              ) : (
-                <>
-                  {/* 공식 제품 섹션 */}
-                  {officialProducts.length > 0 && (
-                    <>
-                      <div className="px-6 py-2 flex items-center gap-1.5 bg-[#F8FAFC]">
-                        <BadgeCheck size={14} className="text-[#3182F6]" />
-                        <span className="text-[12px] font-semibold text-[#3182F6]">공식 제품</span>
-                      </div>
-                      {officialProducts.map(product => (
-                        <ProductItem key={product.id} product={product} onSelect={handleSelectProduct} />
-                      ))}
-                    </>
-                  )}
-
-                  {/* 사용자 등록 제품 섹션 */}
-                  {userProducts.length > 0 && (
-                    <>
-                      <div className="px-6 py-2 flex items-center gap-1.5 bg-[#F8FAFC]">
-                        <User size={14} className="text-[#6B7684]" />
-                        <span className="text-[12px] font-semibold text-[#6B7684]">사용자 등록 제품</span>
-                      </div>
-                      {userProducts.map(product => (
-                        <ProductItem key={product.id} product={product} onSelect={handleSelectProduct} />
-                      ))}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <ProductPickerSheet
+        open={m_ShowProductSheet}
+        onClose={() => setM_ShowProductSheet(false)}
+        onSelect={handleSelectProduct}
+      />
       </div>
     </PageLayout>
   )
 }
-
-interface ProductItemProps {
-  product: Product
-  onSelect: (product: Product) => void
-}
-
-const ProductItem = ({ product, onSelect }: ProductItemProps) => (
-  <button
-    onClick={() => onSelect(product)}
-    className="w-full flex items-center justify-between px-6 py-4 border-b border-[#F2F4F6] active:bg-[#F2F4F6]"
-  >
-    <div className="text-left">
-      <p className="text-[15px] font-semibold text-[#191F28]">{product.name}</p>
-      <p className="text-[13px] text-[#6B7684] mt-0.5">
-        {product.brand}{product.categoryName && ` · ${product.categoryName}`}
-      </p>
-    </div>
-    <ChevronRight size={18} className="text-[#ADB5C0]" />
-  </button>
-)
 
 export default CalculatorPage
