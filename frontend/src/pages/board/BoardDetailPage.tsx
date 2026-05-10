@@ -8,7 +8,7 @@ import { BOARD_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
 import LoginPromptSheet from '@/components/LoginPromptSheet'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { Heart, MessageSquare, Eye, Send, ChevronRight, CornerDownRight, ClipboardList, MapPin, Clock, Star, Droplets } from 'lucide-react'
+import { Heart, MessageSquare, Eye, Send, ChevronRight, CornerDownRight, ClipboardList, MapPin, Clock, Star, Droplets, BookOpen } from 'lucide-react'
 
 const WEATHER_LABEL: Record<string, string> = {
   SUNNY: '☀️ 맑음',
@@ -67,6 +67,13 @@ const WashLogCard = ({ session }: { session: WashSessionEmbed }) => {
               {name}
             </span>
           ))}
+        </div>
+      )}
+
+      {session.recipeTitle && (
+        <div className="flex items-center gap-1.5 mt-2.5 border-t border-[#BFDBFE] pt-2.5">
+          <BookOpen size={12} className="text-[#3182F6] shrink-0" />
+          <span className="text-[12px] text-[#3182F6] font-medium truncate">{session.recipeTitle}</span>
         </div>
       )}
 
