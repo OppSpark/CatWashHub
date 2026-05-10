@@ -36,8 +36,11 @@ const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProp
         className="absolute inset-0 bg-black/40"
         onClick={onClose}
       />
-      {/* 시트 본체 */}
-      <div className="relative bg-white rounded-t-3xl flex flex-col max-h-[90%]">
+      {/* 시트 본체 — 키보드 올라와도 시트가 따라 올라오도록 */}
+      <div
+        className="relative bg-white rounded-t-3xl flex flex-col max-h-[90%]"
+        style={{ marginBottom: 'env(keyboard-inset-height, 0px)' }}
+      >
         {/* 핸들 바 */}
         <div className="flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 bg-[#E5E8EB] rounded-full" />
@@ -58,7 +61,7 @@ const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProp
 
         {/* 하단 액션 버튼 */}
         {footer !== undefined && (
-          <div className="px-5 pt-3 pb-8 shrink-0 border-t border-[#F2F4F6]">
+          <div className="px-5 pt-3 pb-safe shrink-0 border-t border-[#F2F4F6]" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 20px)' }}>
             {footer}
           </div>
         )}

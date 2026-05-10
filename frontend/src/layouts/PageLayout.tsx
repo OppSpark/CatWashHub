@@ -129,7 +129,7 @@ const PageLayout = ({
       {/* 헤더 — default: 타이틀바 / large: 대형 타이틀 */}
       {hasHeader && (
         headerVariant === 'large' ? (
-          <div className="bg-white px-5 pt-12 pb-5 shrink-0">
+          <div className="bg-white px-5 pb-5 shrink-0" style={{ paddingTop: 'max(48px, calc(env(safe-area-inset-top) + 12px))' }}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 {headerSubtitle && (
@@ -141,7 +141,7 @@ const PageLayout = ({
             </div>
           </div>
         ) : (
-          <div className="bg-white px-5 pt-12 pb-4 flex items-center justify-between gap-3 shrink-0">
+          <div className="bg-white px-5 pb-4 flex items-center justify-between gap-3 shrink-0" style={{ paddingTop: 'max(48px, calc(env(safe-area-inset-top) + 12px))' }}>
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {onBack !== undefined && (
                 <button onClick={handleBack} className="p-1 -ml-1 text-[#191F28] shrink-0">
