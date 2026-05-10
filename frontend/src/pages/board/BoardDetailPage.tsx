@@ -310,11 +310,13 @@ const BoardDetailPage = () => {
 
   useEffect(() => {
     if (!id) { return }
-    Promise.all([getPost(Number(id)), getComments(Number(id))])
-      .then(([p, c]) => {
+    getPost(Number(id))
+      .then(p => {
         setPost(p)
-        setComments(c)
+        return getComments(Number(id)).catch(() => [])
       })
+      .then(c => setComments(c as Comment[]))
+      .catch(() => {})
       .finally(() => setIsLoading(false))
   }, [id])
 
@@ -590,7 +592,7 @@ const BoardDetailPage = () => {
         )}
       </div>
 
-      <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} />
+      <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} bottomOffset={56} />
     </PageLayout>
   )
 }

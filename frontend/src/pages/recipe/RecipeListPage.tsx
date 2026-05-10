@@ -239,7 +239,7 @@ const RecipeListPage = () => {
         <Plus size={24} />
       </button>
 
-      <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} />
+      <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} bottomOffset={56} />
     </PageLayout>
   )
 }

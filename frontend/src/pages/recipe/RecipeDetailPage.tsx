@@ -10,60 +10,78 @@ import { Bookmark, Clock, Car, Download, Trash2, Pencil } from 'lucide-react'
 import html2canvas from 'html2canvas'
 
 // ==================== 공유용 카드 (이미지 변환 대상) ====================
+// html2canvas 호환을 위해 인라인 style만 사용, SVG 아이콘 제거
 const ShareCard = ({ recipe }: { recipe: Recipe }) => (
-  <div className="bg-white rounded-2xl p-5 w-[320px]">
+  <div style={{
+    background: '#ffffff',
+    borderRadius: '16px',
+    padding: '20px',
+    width: '320px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Pretendard", sans-serif',
+    boxSizing: 'border-box',
+  }}>
     {/* 워터마크 */}
-    <div className="flex items-center justify-between mb-3">
-      <span className="text-[11px] font-bold text-[#3182F6]">CatWashHub</span>
-      <span className="text-[11px] text-[#ADB5C0]">세차 레시피</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+      <span style={{ fontSize: '11px', fontWeight: 700, color: '#3182F6' }}>CatWashHub</span>
+      <span style={{ fontSize: '11px', color: '#ADB5C0' }}>세차 레시피</span>
     </div>
 
     {/* 제목 */}
-    <p className="text-[18px] font-bold text-[#191F28] mb-1">{recipe.title}</p>
+    <p style={{ fontSize: '18px', fontWeight: 700, color: '#191F28', margin: '0 0 4px 0' }}>{recipe.title}</p>
 
     {/* 차종 + 시간 */}
-    <div className="flex items-center gap-3 mb-3">
-      {recipe.carModel && (
-        <span className="text-[12px] text-[#6B7684] flex items-center gap-1 leading-none">
-          <Car size={11} className="shrink-0" />{recipe.carModel}
-        </span>
-      )}
-      {recipe.estimatedMinutes && (
-        <span className="text-[12px] text-[#6B7684] flex items-center gap-1 leading-none">
-          <Clock size={11} className="shrink-0" />{recipe.estimatedMinutes}분
-        </span>
-      )}
-    </div>
+    {(recipe.carModel || recipe.estimatedMinutes) && (
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '12px', marginTop: '4px' }}>
+        {recipe.carModel && (
+          <span style={{ fontSize: '12px', color: '#6B7684' }}>🚗 {recipe.carModel}</span>
+        )}
+        {recipe.estimatedMinutes && (
+          <span style={{ fontSize: '12px', color: '#6B7684' }}>⏱ {recipe.estimatedMinutes}분</span>
+        )}
+      </div>
+    )}
 
     {/* 구분선 */}
-    <div className="h-px bg-[#F2F4F6] mb-3" />
+    <div style={{ height: '1px', background: '#F2F4F6', margin: '8px 0 12px' }} />
 
     {/* 단계 목록 */}
-    <div className="flex flex-col gap-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       {recipe.steps.map((step, i) => (
-        <div key={i} className="flex items-start gap-2.5">
-          <span
-            className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white mt-0.5"
-            style={{ backgroundColor: STEP_TYPE_COLORS[step.stepType] }}
-          >
+        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+          <span style={{
+            flexShrink: 0,
+            width: '22px',
+            height: '22px',
+            borderRadius: '50%',
+            background: STEP_TYPE_COLORS[step.stepType],
+            color: '#ffffff',
+            fontSize: '10px',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: '2px',
+          }}>
             {i + 1}
           </span>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-[#191F28]">{step.displayLabel}</p>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: '#191F28', margin: 0 }}>{step.displayLabel}</p>
             {step.productName && (
-              <p className="text-[11px] text-[#6B7684]">
+              <p style={{ fontSize: '11px', color: '#6B7684', margin: '2px 0 0' }}>
                 {step.productName}{step.ratio ? `  1:${step.ratio}` : ''}
               </p>
             )}
-            {step.memo && <p className="text-[11px] text-[#ADB5C0]">{step.memo}</p>}
+            {step.memo && (
+              <p style={{ fontSize: '11px', color: '#ADB5C0', margin: '1px 0 0' }}>{step.memo}</p>
+            )}
           </div>
         </div>
       ))}
     </div>
 
     {/* 하단 */}
-    <div className="h-px bg-[#F2F4F6] mt-3 mb-2" />
-    <p className="text-[11px] text-[#ADB5C0]">by {recipe.authorNickname} · catwashhub.com</p>
+    <div style={{ height: '1px', background: '#F2F4F6', margin: '12px 0 8px' }} />
+    <p style={{ fontSize: '11px', color: '#ADB5C0', margin: 0 }}>by {recipe.authorNickname} · catwashhub.com</p>
   </div>
 )
 
@@ -107,7 +125,13 @@ const RecipeDetailPage = () => {
     if (!cardRef.current || isDownloading) { return }
     setIsDownloading(true)
     try {
-      const canvas = await html2canvas(cardRef.current, { scale: 2, backgroundColor: null })
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
+      })
       const link = document.createElement('a')
       link.download = `${recipe?.title ?? '레시피'}.png`
       link.href = canvas.toDataURL('image/png')
@@ -240,8 +264,8 @@ const RecipeDetailPage = () => {
             {isDownloading ? '저장 중...' : '이미지로 저장하기'}
           </button>
 
-          {/* 이미지 변환용 숨김 카드 */}
-          <div className="fixed -left-[9999px] -top-[9999px]">
+          {/* 이미지 변환용 숨김 카드 — visibility:hidden으로 레이아웃 계산 보장 */}
+          <div style={{ position: 'fixed', top: 0, left: 0, visibility: 'hidden', pointerEvents: 'none', zIndex: -1 }}>
             <div ref={cardRef}>
               <ShareCard recipe={recipe} />
             </div>

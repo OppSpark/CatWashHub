@@ -7,6 +7,7 @@ interface BottomSheetProps {
   title?: string
   children: ReactNode
   footer?: ReactNode
+  bottomOffset?: number  // BottomNav 등 하단 고정 요소 높이 (px)
 }
 
 // snap 단계: 'half' = 50dvh, 'full' = 92dvh
@@ -22,7 +23,7 @@ const DRAG_EXPAND_THRESHOLD = 80   // px — half에서 이 이상 올리면 ful
 const DRAG_SHRINK_THRESHOLD = 80   // px — full에서 이 이상 내리면 half로
 const VELOCITY_THRESHOLD = 0.4     // px/ms
 
-const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProps) => {
+const BottomSheet = ({ open, onClose, title, children, footer, bottomOffset = 0 }: BottomSheetProps) => {
   const sheetRef = useRef<HTMLDivElement>(null)
   const dragStartY = useRef(0)
   const dragStartTime = useRef(0)
@@ -167,7 +168,7 @@ const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProp
           height: SNAP_HEIGHTS[snap],
           transform: `translateY(${translateY}px)`,
           transition: isDragging ? 'none' : 'transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), height 0.32s cubic-bezier(0.32, 0.72, 0, 1)',
-          marginBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : undefined,
+          marginBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : bottomOffset > 0 ? `${bottomOffset}px` : undefined,
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

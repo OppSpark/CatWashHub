@@ -69,7 +69,6 @@ public class PostService {
 
     @Transactional
     public PostResponse getPost(String _email, Long _postId, jakarta.servlet.http.HttpSession _session) {
-        User user = getUser(_email);
         Post post = getPostById(_postId);
 
         String sessionKey = "viewed_post_" + _postId;
@@ -78,7 +77,12 @@ public class PostService {
             _session.setAttribute(sessionKey, true);
         }
 
-        boolean likedByMe = m_PostLikeRepository.existsByPostIdAndUserId(_postId, user.getId());
+        // 비로그인 시 likedByMe = false
+        boolean likedByMe = false;
+        if (_email != null) {
+            User user = getUser(_email);
+            likedByMe = m_PostLikeRepository.existsByPostIdAndUserId(_postId, user.getId());
+        }
         return PostResponse.from(post, likedByMe);
     }
 
