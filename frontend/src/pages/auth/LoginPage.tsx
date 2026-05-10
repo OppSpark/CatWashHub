@@ -41,7 +41,7 @@ const LoginPage = () => {
     try {
       setM_Loading(true)
       const res = await login(m_Email, m_Password)
-      setAuth(res.accessToken, res.nickname, res.email)
+      setAuth(res.userId, res.accessToken, res.nickname, res.email)
       toast.success(`${res.nickname}님, 환영합니다!`)
       navigate('/home')
     } catch {

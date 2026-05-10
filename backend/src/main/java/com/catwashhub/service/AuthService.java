@@ -56,6 +56,7 @@ public class AuthService {
         }
         user.updateNickname(_request.nickname());
         return new AuthResponse(
+                user.getId(),
                 m_JwtUtil.generateAccessToken(user.getEmail()),
                 m_JwtUtil.generateRefreshToken(user.getEmail()),
                 user.getNickname(),
@@ -91,6 +92,7 @@ public class AuthService {
         }
 
         return new AuthResponse(
+                user.getId(),
                 m_JwtUtil.generateAccessToken(user.getEmail()),
                 m_JwtUtil.generateRefreshToken(user.getEmail()),
                 user.getNickname(),

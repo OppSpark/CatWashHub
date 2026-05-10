@@ -29,6 +29,23 @@ export const MY_MSGS = {
   LOGOUT_SUCCESS: '로그아웃 됐어요.',
 }
 
+export const BOARD_MSGS = {
+  EMPTY_POSTS: '아직 게시글이 없어요. 첫 글을 작성해보세요!',
+  POST_CREATED: '게시글이 작성됐어요.',
+  POST_UPDATED: '게시글이 수정됐어요.',
+  POST_DELETED: '게시글이 삭제됐어요.',
+  POST_SAVE_ERROR: '저장 중 오류가 발생했어요.',
+  POST_DELETE_ERROR: '삭제 중 오류가 발생했어요.',
+  CONFIRM_DELETE_POST: '게시글을 삭제할까요?',
+  COMMENT_CREATED: '댓글이 작성됐어요.',
+  COMMENT_DELETED: '댓글이 삭제됐어요.',
+  COMMENT_SAVE_ERROR: '댓글 저장 중 오류가 발생했어요.',
+  CONFIRM_DELETE_COMMENT: '댓글을 삭제할까요?',
+  PLACEHOLDER_TITLE: '제목을 입력해주세요',
+  PLACEHOLDER_CONTENT: '내용을 입력해주세요',
+  PLACEHOLDER_COMMENT: '댓글을 입력해주세요',
+}
+
 export const WASH_MSGS = {
   EMPTY_PRODUCTS: '용품을 추가해주세요',
   EMPTY_RECORDS: '아직 세차 기록이 없어요. 첫 세차를 시작해보세요!',

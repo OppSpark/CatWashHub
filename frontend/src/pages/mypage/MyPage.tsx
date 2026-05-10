@@ -62,7 +62,7 @@ const MyPage = () => {
     setNicknameLoading(true)
     try {
       const res = await updateNickname(newNickname.trim())
-      setAuth(res.accessToken, res.nickname, res.email)
+      setAuth(res.userId, res.accessToken, res.nickname, res.email)
       toast.success(MY_MSGS.NICKNAME_UPDATED)
       resetModal()
     } catch {

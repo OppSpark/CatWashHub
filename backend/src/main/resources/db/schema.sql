@@ -156,3 +156,49 @@ CREATE TABLE IF NOT EXISTS wash_photos
     created_at  DATETIME                     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES wash_sessions (id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS posts
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT       NOT NULL,
+    title      VARCHAR(200) NOT NULL,
+    content    TEXT         NOT NULL,
+    view_count INT          NOT NULL DEFAULT 0,
+    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS post_images
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id    BIGINT       NOT NULL,
+    image_url  VARCHAR(500) NOT NULL,
+    sort_order INT          NOT NULL DEFAULT 0,
+    FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS post_likes
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id    BIGINT   NOT NULL,
+    user_id    BIGINT   NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_post_likes (post_id, user_id),
+    FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS comments
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id    BIGINT NOT NULL,
+    user_id    BIGINT NOT NULL,
+    parent_id  BIGINT,
+    content    TEXT   NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES comments (id) ON DELETE CASCADE
+);

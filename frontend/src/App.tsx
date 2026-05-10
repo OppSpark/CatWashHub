@@ -11,6 +11,9 @@ import WashNewPage from '@/pages/wash/WashNewPage'
 import WashDetailPage from '@/pages/wash/WashDetailPage'
 import WashReviewPage from '@/pages/wash/WashReviewPage'
 import ProductSetsPage from '@/pages/wash/ProductSetsPage'
+import BoardListPage from '@/pages/board/BoardListPage'
+import BoardNewPage from '@/pages/board/BoardNewPage'
+import BoardDetailPage from '@/pages/board/BoardDetailPage'
 import MobileShell from '@/layouts/MobileShell'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
@@ -46,6 +49,7 @@ const App = () => {
             <Route path="/home" element={<HomePage />} />
             <Route path="/calculator" element={<CalculatorPage />} />
             <Route path="/records" element={<RecordsPage />} />
+            <Route path="/board" element={<BoardListPage />} />
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/mypage" element={<MyPage />} />
           </Route>
@@ -56,6 +60,8 @@ const App = () => {
           <Route path="/wash/sets/new" element={<ProductSetsPage />} />
           <Route path="/wash/:id" element={<WashDetailPage />} />
           <Route path="/wash/:id/review" element={<WashReviewPage />} />
+          <Route path="/board/new" element={<BoardNewPage />} />
+          <Route path="/board/:id" element={<BoardDetailPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />
