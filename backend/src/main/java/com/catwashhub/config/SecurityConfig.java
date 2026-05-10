@@ -40,11 +40,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
-                        // 비로그인 공개 허용 — 게시글 조회, 계산기, 제품/카테고리 조회
+                        // 비로그인 공개 허용 — 게시글 조회, 계산기, 제품/카테고리 조회, 레시피 조회
                         .requestMatchers("GET", "/api/posts", "/api/posts/{id}").permitAll()
                         .requestMatchers("GET", "/api/posts/{id}/comments").permitAll()
                         .requestMatchers("GET", "/api/products", "/api/products/{id}").permitAll()
                         .requestMatchers("GET", "/api/categories").permitAll()
+                        .requestMatchers("GET", "/api/recipes", "/api/recipes/{id}", "/api/recipes/top").permitAll()
                         // .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )

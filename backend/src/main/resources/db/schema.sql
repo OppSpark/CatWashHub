@@ -202,3 +202,56 @@ CREATE TABLE IF NOT EXISTS comments
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (parent_id) REFERENCES comments (id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS recipes
+(
+    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id           BIGINT        NOT NULL,
+    title             VARCHAR(100)  NOT NULL,
+    description       TEXT,
+    car_model         VARCHAR(100),
+    estimated_minutes INT,
+    visibility        ENUM('PUBLIC', 'PRIVATE') NOT NULL DEFAULT 'PUBLIC',
+    save_count        INT           NOT NULL DEFAULT 0,
+    created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS recipe_steps
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    recipe_id   BIGINT      NOT NULL,
+    step_order  INT         NOT NULL,
+    step_type   ENUM(
+        'PRE_RINSE',
+        'PRE_WASH',
+        'WHEEL',
+        'MAIN_WASH',
+        'IRON_REMOVE',
+        'CLAY',
+        'DRY',
+        'GLASS',
+        'COATING',
+        'TIRE_DRESSING',
+        'INTERIOR',
+        'OTHER'
+    )           NOT NULL DEFAULT 'OTHER',
+    custom_label VARCHAR(50),
+    product_id  BIGINT,
+    ratio       INT,
+    memo        VARCHAR(255),
+    FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS recipe_saves
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT   NOT NULL,
+    recipe_id  BIGINT   NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_recipe_saves (user_id, recipe_id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE
+);
