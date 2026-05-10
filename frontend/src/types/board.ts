@@ -8,6 +8,8 @@ export interface WashSessionEmbed {
   rating: number | null
   memo: string | null
   productNames: string[]
+  recipeId: number | null
+  recipeTitle: string | null
 }
 
 export interface PostSummary {

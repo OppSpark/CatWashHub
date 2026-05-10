@@ -5,7 +5,7 @@ import type { WashSessionEmbed } from '@/types/board'
 import { useToast } from '@/hooks/useToast'
 import { BOARD_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
-import { MessageSquare, ClipboardList, Star, MapPin, Clock, ChevronDown, ChevronUp, Check } from 'lucide-react'
+import { MessageSquare, ClipboardList, Star, MapPin, Clock, ChevronDown, ChevronUp, Check, BookOpen } from 'lucide-react'
 
 type PostType = 'FREE' | 'WASH_LOG'
 
@@ -76,6 +76,12 @@ const WashSessionCard = ({
         {session.productNames.length > 4 && (
           <span className="text-[11px] text-[#ADB5C0]">+{session.productNames.length - 4}</span>
         )}
+      </div>
+    )}
+    {session.recipeTitle && (
+      <div className="flex items-center gap-1.5 mt-2">
+        <BookOpen size={11} className="text-[#3182F6]" />
+        <span className="text-[11px] text-[#3182F6] font-medium truncate">{session.recipeTitle}</span>
       </div>
     )}
   </button>

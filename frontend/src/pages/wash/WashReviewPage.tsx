@@ -7,6 +7,7 @@ import type { Product } from '@/types/calculator'
 import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
+import { BookOpen } from 'lucide-react'
 
 const WEATHER_OPTIONS: { value: Weather; label: string; emoji: string }[] = [
   { value: 'SUNNY', label: '맑음', emoji: '☀️' },
@@ -35,6 +36,9 @@ const WashReviewPage = () => {
   const [memo, setMemo] = useState('')
   const [products, setProducts] = useState<EditingProduct[]>([])
 
+  const [recipeId, setRecipeId] = useState<number | null>(null)
+  const [recipeTitle, setRecipeTitle] = useState<string | null>(null)
+
   const [dbProducts, setDbProducts] = useState<Product[]>([])
   const [showProductPanel, setShowProductPanel] = useState(false)
   const [isLoadingProducts, setIsLoadingProducts] = useState(false)
@@ -46,6 +50,8 @@ const WashReviewPage = () => {
     if (!id) { return }
     getSession(Number(id)).then(session => {
       setLocation(session.location ?? '')
+      setRecipeId(session.recipeId)
+      setRecipeTitle(session.recipeTitle)
       setProducts(
         session.products.map((p: WashProductItem) => ({
           productId: p.productId,
@@ -141,6 +147,22 @@ const WashReviewPage = () => {
             className="w-full text-[15px] text-[#191F28] outline-none placeholder:text-[#C8D0DA]"
           />
         </div>
+
+        {/* 사용한 레시피 */}
+        {recipeId && recipeTitle && (
+          <button
+            onClick={() => navigate(`/recipe/${recipeId}`)}
+            className="w-full bg-white rounded-2xl px-5 py-4 flex items-center gap-3 active:brightness-95 text-left"
+          >
+            <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center shrink-0">
+              <BookOpen size={18} className="text-[#3182F6]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] text-[#ADB5C0] mb-0.5">사용한 레시피</p>
+              <p className="text-[14px] font-semibold text-[#3182F6] truncate">{recipeTitle}</p>
+            </div>
+          </button>
+        )}
 
         {/* 날씨 */}
         <div className="bg-white rounded-2xl px-5 py-4">

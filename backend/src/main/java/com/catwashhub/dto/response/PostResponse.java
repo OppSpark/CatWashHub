@@ -33,7 +33,9 @@ public record PostResponse(
             Integer cost,
             Integer rating,
             String memo,
-            List<String> productNames
+            List<String> productNames,
+            Long recipeId,
+            String recipeTitle
     ) {
         public static WashSessionEmbed from(WashSession session) {
             List<String> productNames = session.getWashProducts().stream()
@@ -48,7 +50,9 @@ public record PostResponse(
                     session.getCost(),
                     session.getRating(),
                     session.getMemo(),
-                    productNames
+                    productNames,
+                    session.getRecipe() != null ? session.getRecipe().getId() : null,
+                    session.getRecipe() != null ? session.getRecipe().getTitle() : null
             );
         }
     }
