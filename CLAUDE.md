@@ -18,7 +18,6 @@
   - 배경: #F2F4F6
   - 텍스트: #191F28
   - 포인트: #3182F6
-- 페이지 구성: 로그인/회원가입 → 홈(피드) → 희석계산기 → 세차기록 → 마이페이지
 
 
 ---
@@ -66,7 +65,7 @@ private static final int c_Column = 0;
 ## 예외처리
 
 ```java
-// 올바른 예시 — try-catch-finally
+// 올바른 예시 — try-catch-throw 패턴
 public void setPatientList() {
     try (ResultSet rs = query.executeQuery(sql)) {
         if (rs.next()) { /* 처리 */ }

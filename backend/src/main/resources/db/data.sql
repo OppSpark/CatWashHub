@@ -1,58 +1,385 @@
--- 카테고리 더미 데이터
+-- 1. 카테고리 테이블 초기화 (순서 꼬임 방지)
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE dilution_ratios;
+TRUNCATE TABLE products;
+TRUNCATE TABLE categories;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ==========================================
+-- [1] 카테고리 더미 데이터
+-- ==========================================
 INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('세차 샴푸', 1, CURRENT_TIMESTAMP);
-INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('휠 클리너', 2, CURRENT_TIMESTAMP);
-INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('유리 세정제', 3, CURRENT_TIMESTAMP);
-INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('왁스/코팅제', 4, CURRENT_TIMESTAMP);
-INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('타이어 드레싱', 5, CURRENT_TIMESTAMP);
-INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('철분 제거제', 6, CURRENT_TIMESTAMP);
-INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('기타', 7, CURRENT_TIMESTAMP);
+INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('프리워시', 2, CURRENT_TIMESTAMP);
+INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('휠 클리너', 3, CURRENT_TIMESTAMP);
+INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('유리 세정제', 4, CURRENT_TIMESTAMP);
+INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('왁스/코팅제', 5, CURRENT_TIMESTAMP);
+INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('타이어 드레싱', 6, CURRENT_TIMESTAMP);
+INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('철분 제거제', 7, CURRENT_TIMESTAMP);
+INSERT IGNORE INTO categories (name, sort_order, created_at) VALUES ('기타', 8, CURRENT_TIMESTAMP);
 
--- 제품 더미 데이터 (user_id NULL = 관리자 등록)
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 1, '머구스 카 샴푸', '머구스', '고농축 중성 세차 샴푸. 차량 도장면에 안전하며 풍부한 거품으로 오염을 효과적으로 제거합니다.', 18000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- ==========================================
+-- [2] 제품 더미 데이터 (총 150개)
+-- ==========================================
+-- 카테고리 번호 매칭 가이드:
+-- 1: 세차 샴푸 / 2: 프리워시 / 3: 휠 클리너 / 4: 유리 세정제
+-- 5: 왁스/코팅제 / 6: 타이어 드레싱 / 7: 철분 제거제 / 8: 기타
 
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 1, '소너스 오토 샴푸', '소너스', 'pH 중성 고농축 카 샴푸. 왁스 및 코팅 보호막을 유지하면서 세정력이 뛰어납니다.', 22000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- 2-1. 기존 초기 데이터 (1~9) - 바뀐 카테고리 번호 적용
+INSERT IGNORE INTO products (id, user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
+VALUES
+(1, NULL, 1, '머구스 카 샴푸', '머구스', '고농축 중성 세차 샴푸. 차량 도장면에 안전하며 풍부한 거품으로 오염을 효과적으로 제거합니다.', 18000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, NULL, 1, '소너스 오토 샴푸', '소너스', 'pH 중성 고농축 카 샴푸. 왁스 및 코팅 보호막을 유지하면서 세정력이 뛰어납니다.', 22000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, NULL, 1, '맥과이어스 골드 클래스 샴푸', '맥과이어스', '카나우바 왁스 성분이 함유된 프리미엄 카 샴푸. 세정과 동시에 광택을 부여합니다.', 15000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, NULL, 3, '악렉스 휠 클리너', '악렉스', '철분 반응형 휠 클리너. 보라색으로 변하며 철분 오염을 강력하게 제거합니다.', 25000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, NULL, 3, '소너스 폴리시 휠 클리너', '소너스', '산성 베이스 휠 클리너. 브레이크 더스트와 도로 오염을 효과적으로 제거합니다.', 19000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(6, NULL, 4, '스타머 유리 클리너', '스타머', '발수 성분이 포함된 유리 세정제. 유막 제거 및 발수 코팅 효과를 동시에 제공합니다.', 12000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(7, NULL, 5, '머구스 하이드로 스프레이 왁스', '머구스', '스프레이 타입 왁스. 빠른 도포와 높은 광택을 자랑하며 방수 효과가 뛰어납니다.', 32000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(8, NULL, 7, '악렉스 아이런 아웃', '악렉스', '철분 반응형 제거제. 도장면, 휠, 유리에 사용 가능하며 강력한 철분 오염 제거력을 가집니다.', 28000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(9, NULL, 6, '악렉스 타이어 젤', '악렉스', '물 타입 타이어 드레싱. 번들거림 없는 자연스러운 광택과 오래 지속되는 보호막을 형성합니다.', 20000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 1, '맥과이어스 골드 클래스 샴푸', '맥과이어스', '카나우바 왁스 성분이 함유된 프리미엄 카 샴푸. 세정과 동시에 광택을 부여합니다.', 15000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- 2-2. 50종 세차용품 (201~250) - 바뀐 카테고리 번호 적용
+INSERT IGNORE INTO products (id, user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
+VALUES
+(201, NULL, 1, '세차장 샴푸 (일명: 소낙스 식용유)', '소낙스', '가성비 끝판왕. 향이 없고 거품이 풍부하며 코팅층에 안전한 국민 세차 샴푸입니다.', 12000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(202, NULL, 1, '버블밤 카샴푸', '글로스브로', '달콤한 풍선껌 향과 쫀쫀한 거품, 뛰어난 윤활력을 자랑하는 국내 인기 카샴푸.', 14000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(203, NULL, 1, '펄 (Pearl) 카샴푸', '파이어볼', '고농축 중성 샴푸로, 도장면의 마찰을 극단적으로 줄여주는 부드러운 슬릭감이 특징입니다.', 18000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(204, NULL, 1, '블랙 체리 카샴푸', '마프라', '달콤한 블랙 체리 향과 함께 풍성한 폼을 제공하며 윤활력이 매우 뛰어납니다.', 16000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(205, NULL, 1, '매니악 블랙 & 화이트 샴푸', '마프라 매니악', '어두운 차량과 밝은 차량 모두에 탁월한 세정력과 광택감을 부여하는 하이엔드 샴푸.', 25000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(206, NULL, 1, '아쿠아 카샴푸', '루미너스', '청량한 향과 맑은 거품이 특징이며, 잔여물 없이 깔끔하게 헹궈지는 중성 샴푸.', 15000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(207, NULL, 1, '맥시머스 카샴푸', '더클래스', '강력한 세정력과 세차 후 은은한 광택감을 남겨주는 왁스 세이프 중성 샴푸.', 19000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(208, NULL, 1, '본 투 비 마일드', '도도쥬스', '고급 카나우바 왁스층을 보호하기 위해 탄생한 영국산 프리미엄 고농축 샴푸.', 28000, 250.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(209, NULL, 1, '허니듀 스노우 폼', '케미컬가이', '버킷 세차와 폼랜스 모두 사용 가능한 멜론향의 다목적 고농축 샴푸.', 21000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(210, NULL, 1, '하이브리드 솔루션 세라믹 워시 & 왁스', '터틀왁스', '세차와 동시에 SiO2 코팅막을 입혀 발수력을 끌어올리는 기능성 샴푸.', 22000, 1420.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(211, NULL, 1, 'Q2M 바스 플러스', '기온쿼츠', '강력한 발수 코팅 성분이 포함되어 세차만으로도 뛰어난 비딩을 만들어주는 샴푸.', 28000, 400.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(212, NULL, 1, '바디클린', '센샤', '유리막 코팅 차량의 유지 관리에 최적화된 일본의 디테일링 중성 카샴푸.', 19000, 800.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(213, NULL, 1, '체리밤', '디크로닉', '가성비와 퀄리티를 모두 잡은 체리향의 고농축 샴푸. 윤활력이 우수합니다.', 12000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(214, NULL, 1, '퓨어 샴푸', '블라스크', '불필요한 첨가물 없이 오직 세정에만 집중한 코팅 유지보수용 순수 샴푸.', 20000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(215, NULL, 1, '글로스 샴푸', '오토글림', '영국 왕실 인증 브랜드. 부드러운 세정과 함께 광택을 살려주는 컨디셔너 샴푸.', 23000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(216, NULL, 2, '오렌지 크러쉬 (APC)', '글로스브로', '상큼한 오렌지향의 다목적 세정제. 도장면 프리워시부터 실내, 엔진룸까지 사용 가능.', 13000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(217, NULL, 2, '익스트림 안심 프리워시', '소낙스', '알칼리성이지만 도장면과 코팅층에 안전하게 설계된 마일드한 프리워시제.', 18000, 750.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(218, NULL, 2, '퓨리피카 (Purifica)', '라보코스메티카', '도장면에 쌓인 미네랄과 워터스팟을 제거해 코팅의 발수력을 되살리는 산성 샴푸/프리워시.', 34000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(219, NULL, 2, '네베 (Neve)', '라보코스메티카', '찰진 폼을 생성하는 중성 스노우폼 샴푸. 고가의 코팅 차량에 안전하게 사용 가능.', 32000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(220, NULL, 2, '엑티브 스노우폼', '파이어볼', '쫀득한 거품이 도장면에 오래 머물러 묵은 때를 불려주는 스노우폼 전용 샴푸.', 18000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(221, NULL, 2, '리프트 (Lift)', '카프로', '알칼리성 스노우폼으로 벌레 사체와 도로의 찌든 오염물을 강력하게 분해합니다.', 23000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(222, NULL, 2, '매니악 APC', '마프라 매니악', '희석비에 따라 프리워시, 휠, 실내까지 모든 부위에 사용 가능한 고농축 다목적 세정제.', 21000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(223, NULL, 2, '논센스 (Nonsense) APC', '케미컬가이', '색상과 향이 없는 무색무취의 투명한 다목적 세정제. 오염물 분해 능력이 탁월합니다.', 18000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(224, NULL, 2, '다이나믹 APC 프리워시', '더클래스', '찌든 때, 벌레, 새똥을 분해하는 데 탁월한 효과를 보이는 강력한 알칼리성 프리워시.', 15000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(225, NULL, 2, '버그 & 타르 리무버', '바인더', '여름철 도장면에 눌어붙은 벌레 사체와 타르를 안전하게 녹여주는 전용 제거제.', 9000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(226, NULL, 2, 'Q2M 폼 (Foam)', '기온쿼츠', '코팅막을 손상시키지 않는 안전한 스노우폼. 두꺼운 거품으로 안전한 예비세척을 돕습니다.', 23000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(227, NULL, 2, '바인 프리워시', '센샤', '진흙, 모래 등의 굵은 오염물을 안전하게 씻어내리기 위해 개발된 일본산 프리워시.', 19000, 800.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(228, NULL, 2, '시트러스 블링', '발렛프로', '퀵디테일러, 프리워시, 점토 윤활제 등 다용도로 쓰이는 시트러스 기반의 마법의 용액.', 21000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(229, NULL, 2, '아발란치 (Avalanche)', '오토피네스', '영국 디테일러들이 사랑하는 시트러스 인퓨즈드 스노우폼. 향긋하고 세정력이 좋습니다.', 30000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(230, NULL, 2, '블루 스노우폼', '디크로닉', '파란색 쫀쫀한 폼을 분사하여 시각적인 즐거움과 세정력을 동시에 주는 폼 샴푸.', 15000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(231, NULL, 3, '더스트 크래커 (휠 클리너)', '글로스브로', '철분 제거 성분이 포함된 반응형 휠 클리너. 분진이 많은 수입차 휠에 탁월합니다.', 18000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(232, NULL, 3, '익스트림 휠 클리너', '소낙스', '전 세계에서 가장 많이 팔린 철분 반응형 휠 클리너의 정석.', 22000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(233, NULL, 3, '브라이트 휠 클리너', '바인더', '갈변과 분진을 동시에 제거하는 알칼리성 휠/타이어 전용 세정제.', 11000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(234, NULL, 7, '아이언X (Iron X)', '카프로', '철분 제거제의 원조. 도장면에 박힌 철분을 보라색으로 녹여 내리는 강력한 성능.', 26000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(235, NULL, 7, '블러드 아이언', '글로스브로', '가성비가 뛰어나며 역한 파마약 냄새를 많이 줄인 국산 철분 제거제.', 16000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(236, NULL, 7, 'Q2M 아이언', '기온쿼츠', '코팅된 차량에도 안전하게 사용 가능한 빠르고 부드러운 철분 제거제.', 24000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(237, NULL, 3, '임페리얼 휠 클리너', '오토피네스', '희석해서 사용하는 비산성 휠 클리너로 주기적인 휠 관리에 적합합니다.', 19000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(238, NULL, 7, '아이언 터미네이터', '소프트99', '빠른 반응속도와 강력한 분해력으로 도장면의 거칠거칠한 철분을 제거합니다.', 18000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(239, NULL, 4, '인비저블 글래스 (틴트 안전)', '스토너', '잔사가 남지 않아 전 세계 디테일러들이 가장 많이 사용하는 유리 세정제.', 12000, 650.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(240, NULL, 4, '퓨어 글래스', '글로스브로', '알코올 베이스로 빠르게 증발하여 얼룩 없이 깨끗한 시야를 확보해 줍니다.', 9000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(241, NULL, 4, '클리어 글래스', '오토브라이트 다이렉트(AD)', '진한 오염과 담배 찌든 때까지 쉽게 지워주는 강력한 실내외 유리 세정제.', 16000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(242, NULL, 5, '브릴리언트 샤인 디테일러 (브샤디)', '소낙스', '발수 코팅 퀵디테일러의 전설. 웬만한 왁스보다 뛰어난 비딩(물방울)을 만들어냅니다.', 19000, 750.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(243, NULL, 5, '크리스탈 코트 플러스', '불스원', '마트에서도 쉽게 구할 수 있는 한국형 국민 물왁스. 작업성이 매우 좋습니다.', 14000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(244, NULL, 5, '불렛 타이거', '더클래스', '강력한 슬릭감과 광택, 뛰어난 지속력을 자랑하는 실록산 베이스의 코팅제.', 32000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(245, NULL, 5, 'LM 그래핀 워터골드', '루미너스', '그래핀 성분이 함유되어 강력한 방오성과 내화학성을 띠는 차세대 물왁스.', 28000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(246, NULL, 5, 'Q2M 세라믹 디테일러', '기온쿼츠', '유리막 코팅 차량의 유지보수를 위한 제품으로 압도적인 슬릭감을 제공합니다.', 30000, 400.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(247, NULL, 5, '얼티메이트 퀵 디테일러 (UQD)', '맥과이어스', '폴리머 기술이 적용되어 깊은 색감과 뛰어난 발수력을 주는 스테디셀러.', 18000, 709.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(248, NULL, 6, '엔듀런스 타이어 젤', '맥과이어스', '포도향이 나는 젤 타입 드레싱. 깊고 진한 웻룩(Wet-look) 광택이 아주 오래갑니다.', 16000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(249, NULL, 6, '익스트림 타이어 글로스 젤', '소낙스', '갈변을 방지하고 타이어 본연의 매트하고 진한 블랙 색상을 오래 유지시켜 줍니다.', 15000, 250.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(250, NULL, 6, '딥블랙 타이어 코팅제', '글로스브로', '스프레이 타입으로 시공이 간편하며 번들거리지 않는 고급스러운 새 타이어 느낌을 줍니다.', 14000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 2, '악렉스 휠 클리너', '악렉스', '철분 반응형 휠 클리너. 보라색으로 변하며 철분 오염을 강력하게 제거합니다.', 25000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 2, '소너스 폴리시 휠 클리너', '소너스', '산성 베이스 휠 클리너. 브레이크 더스트와 도로 오염을 효과적으로 제거합니다.', 19000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- 2-3. 카샴푸/프리워시 대량 추가 100종 (301~400) - 카테고리 2번(프리워시) 적용
+INSERT IGNORE INTO products (id, user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
+VALUES
+-- 카샴푸 50개 (category_id: 1)
+(301, NULL, 1, '미스터 핑크 수퍼 서즈', '케미컬가이', '풍성한 거품과 달콤한 풍선껌 향이 특징인 데일리 카샴푸의 대명사.', 18000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(302, NULL, 1, '바나나 글로스 카샴푸', '오토브라이트 다이렉트(AD)', '달콤한 바나나향과 부드러운 윤활력으로 도장면 스트레스를 줄여주는 중성 샴푸.', 19000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(303, NULL, 1, '익스트림 세차 샴푸', '소낙스', '독일 소낙스의 베스트셀러. 코팅층을 보호하며 오염만 깔끔하게 제거합니다.', 13000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(304, NULL, 1, '울티마 페인트 가드 워시', '울티마', '고농축 폴리머 성분으로 세차 후 놀라운 슬릭감을 제공하는 프리미엄 샴푸.', 26000, 650.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(305, NULL, 1, '글로서워크 오토워시', '케미컬가이', '광택 증진제가 포함되어 세차 후 반짝이는 도장면을 만들어주는 샴푸.', 21000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(306, NULL, 1, '버블매직 카샴푸', '더클래스', '풍부한 거품과 쫀쫀한 밀도감으로 미트질의 즐거움을 더해주는 국내 제품.', 14000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(307, NULL, 1, '샴푸 플러스', '맥과이어스', '전문가용 디테일러 라인. 거품 지속력이 좋고 세정력이 뛰어납니다.', 35000, 3780.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(308, NULL, 1, '셈퍼 (Semper)', '라보코스메티카', '초고농축(1:1500) 중성 샴푸. 경수(지하수) 환경에서도 거품이 풍성합니다.', 32000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(309, NULL, 1, '레비타 (Revita)', '라보코스메티카', '코팅된 차량의 발수력을 복원하고 보호막을 입혀주는 세차 샴푸.', 36000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(310, NULL, 1, '바스 에센스', '기온쿼츠', 'Q2M 바스의 초고농축 버전. 적은 양으로도 엄청난 윤활력을 자랑합니다.', 28000, 400.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(311, NULL, 1, '프리미엄 카샴푸', '파이어볼', '코팅막에 안전하며 부드러운 거품으로 미세 스크래치를 방지합니다.', 18000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(312, NULL, 1, '디센트 카샴푸', '디크로닉', '포도향이 은은하게 퍼지는 가성비 좋은 데일리 중성 카샴푸.', 11000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(313, NULL, 1, '아이언 글로스 샴푸', '바인더', '뛰어난 세정력과 기본기 탄탄한 거품을 자랑하는 실속형 제품.', 9000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(314, NULL, 1, '얼티메이트 워시 앤 왁스', '맥과이어스', '세차와 동시에 왁스 코팅 효과를 주는 카나우바 베이스의 샴푸.', 18000, 1420.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(315, NULL, 1, '워시 앤 코트', '소낙스', '세차 후 물방울이 맺히는 비딩 효과를 즉각적으로 보여주는 발수 샴푸.', 22000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(316, NULL, 1, 'V7 하이글로스 카샴푸', '케미컬가이', 'V7 실런트 성분이 포함되어 세차 후 놀라운 광택을 선사합니다.', 24000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(317, NULL, 1, '그래핀 카샴푸', '루미너스', '그래핀 코팅 차량의 유지관리에 최적화된 하이테크 카샴푸.', 25000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(318, NULL, 1, '사우어 파워', '도도쥬스', '카나우바 성분이 포함되어 광택을 살려주는 pH 중성 카샴푸.', 26000, 250.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(319, NULL, 1, '래더 (Lather)', '오토피네스', '감귤향이 나는 오토피네스의 대표 중성 샴푸. 거품이 찰집니다.', 23000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(320, NULL, 1, '체리 코코', '워시매니아', '초보자도 쉽게 쓸 수 있는 대용량 가성비 체리향 카샴푸.', 9900, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(321, NULL, 1, '워시 앤 왁스', '글로스브로', '부드러운 세정과 코팅 효과를 동시에 주는 올인원 카샴푸.', 13000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(322, NULL, 1, '하이드로 포밍 샴푸', '폼포나치', '유리막 코팅제 전문 브랜드에서 만든 안전하고 슬릭감 좋은 샴푸.', 28000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(323, NULL, 1, '퍼펙트 워시', '센샤', '풍성하고 미세한 거품으로 도장면의 모래 먼지를 부드럽게 감싸줍니다.', 19000, 800.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(324, NULL, 1, '오가닉 카샴푸', '잭스왁스', '환경 친화적인 성분으로 만들어져 손과 차량에 모두 안전한 샴푸.', 21000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(325, NULL, 1, '프로 카샴푸', '블라스크', '전문가들이 선호하는 무향 무색의 순수 고농축 세차 샴푸.', 18000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(326, NULL, 1, '나노매직 샴푸', '코흐케미', '독일 명품 케미컬. 세차 후 독특한 광택과 나노 보호막을 형성합니다.', 32000, 750.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(327, NULL, 1, '블랙 라이트 샴푸', '케미컬가이', '어두운 색상 차량의 광택을 극대화하기 위해 개발된 전용 샴푸.', 25000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(328, NULL, 1, '화이트 라이트 샴푸', '케미컬가이', '밝은 색상 및 흰색 차량의 맑은 광을 살려주는 전용 카샴푸.', 25000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(329, NULL, 1, '워터멜론 스노우폼 샴푸', '케미컬가이', '수박향이 가득한 폼랜스 및 버킷 겸용 고농축 카샴푸.', 21000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(330, NULL, 1, '퓨어 샴푸 (무향)', '아담스폴리쉬', '기존 왁스나 코팅을 훼손하지 않는 가장 순수한 형태의 샴푸.', 20000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(331, NULL, 1, '메가폼 샴푸', '아담스폴리쉬', '아담스 라인업 중 가장 풍성하고 두꺼운 거품을 생성하는 샴푸.', 24000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(332, NULL, 1, '골드 워시', '마프라', '풍성한 거품과 은은한 향기로 세차의 품격을 높여주는 고급 샴푸.', 22000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(333, NULL, 1, '딥 클린 샴푸', '더클래스', '오염이 심할 때 사용하는 세정력 특화 마일드 알칼리성 샴푸.', 16000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(334, NULL, 1, '루미너스 펄워시', '루미너스', '진주 추출물이 함유되어 도장면에 고급스러운 윤기를 부여합니다.', 21000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(335, NULL, 1, '세라믹 코팅 샴푸', '터틀왁스', '세라믹 폴리머가 함유되어 세차만으로 코팅막을 보수해 줍니다.', 23000, 1420.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(336, NULL, 1, '아이스 카워시', '터틀왁스', '투명한 젤 타입으로 거품이 풍성하고 헹굼이 매우 빠릅니다.', 19000, 1420.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(337, NULL, 1, '넥스트젠 카샴푸', '맥과이어스', '합성 폴리머 기술로 이물질을 캡슐화하여 흠집을 예방하는 샴푸.', 25000, 1890.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(338, NULL, 1, '베리 코코 카샴푸', '디크로닉', '딸기와 코코넛 향이 섞인 기분 좋은 데일리 중성 카샴푸.', 12000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(339, NULL, 1, '크리스탈 카샴푸', '불스원', '빠른 헹굼력과 도장면 왁스 보호 기능이 탁월한 대중적인 샴푸.', 11000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(340, NULL, 1, '퍼스트 클래스 세차 샴푸', '불스원', '마트에서 쉽게 구매 가능하며 세정력과 기본기가 좋은 샴푸.', 9000, 800.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(341, NULL, 1, '슬릭 앤 워시', '오토브라이트 다이렉트(AD)', '세차 후 미끄러질 듯한 슬릭감을 자랑하는 기능성 샴푸.', 22000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(342, NULL, 1, '엑스트라 클리어 샴푸', '글로스브로', '맑은 거품으로 도장면의 오염상태를 확인하며 세차할 수 있습니다.', 13000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(343, NULL, 1, '마일드 알칼리 샴푸', '기온쿼츠', '왁스 오프나 심한 오염 제거 전용으로 쓰이는 알칼리 샴푸.', 26000, 400.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(344, NULL, 1, '센서티브 워시', '엔공구', '민감한 피부와 도장면을 위해 순한 성분으로 만든 자체 제작 샴푸.', 10000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(345, NULL, 1, '리터 카샴푸', '리터', '향긋한 피치향과 함께 뛰어난 거품을 보여주는 국산 가성비 샴푸.', 8500, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(346, NULL, 1, '쇼카 샴푸', '파이어볼', '전시 차량이나 디테일링 마무리 세차용으로 쓰이는 초고광택 샴푸.', 24000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(347, NULL, 1, '매니악 데일리 워시', '마프라 매니악', '자주 세차하는 환자들을 위해 도장면 데미지를 제로에 가깝게 만든 샴푸.', 21000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(348, NULL, 1, '슈퍼 슬릭 카샴푸', '블라스크', '이름 그대로 미트가 춤을 추듯 미끄러지는 극강의 윤활 샴푸.', 22000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(349, NULL, 1, '디테일러 워시', '우일', '세차장 사장님들이 박스 떼기로 쓴다는 전설의 가성비 말통 샴푸.', 18000, 18000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(350, NULL, 1, '글로스 인헨서 샴푸', '소낙스', '세차 후 별도의 왁스 없이도 훌륭한 광택을 남겨주는 프리미엄 샴푸.', 26000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 3, '스타머 유리 클리너', '스타머', '발수 성분이 포함된 유리 세정제. 유막 제거 및 발수 코팅 효과를 동시에 제공합니다.', 12000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- 프리워시 50개 (category_id: 2)
+(351, NULL, 2, '오토폼 (Auto Foam)', '빌트햄버', '영국 디테일링 포럼 극찬. 최상위 세정력을 자랑하는 비부식성 알칼리 스노우폼.', 36000, 5000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(352, NULL, 2, '터치리스 (Touch-less)', '빌트햄버', '사탕수수 추출물 베이스로 친환경적이면서도 세정력이 강력한 스노우폼.', 38000, 5000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(353, NULL, 2, '다이나믹 프리워시 (감귤향)', '더클래스', '기존 다이나믹의 강력한 세정력에 상큼한 감귤향을 더한 인기 모델.', 16000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(354, NULL, 2, '그린스타 (Green Star) APC', '코흐케미', '전 세계 디테일링 샵에서 가장 많이 쓰는 다목적 알칼리성 만능 세정제.', 21000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(355, NULL, 2, '멀티스타 (Multistar) APC', '소낙스', '외부 프리워시부터 실내 매트 청소까지 모두 가능한 고성능 다목적 세정제.', 18000, 750.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(356, NULL, 2, '시트러스 파워', '오토피네스', '희석 없이 바로 사용하는 퀵 프리워시제. 가벼운 오염과 벌레 사체에 직빵입니다.', 22000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(357, NULL, 2, '에코 터치 프리워시', '바인더', '생분해성 성분으로 환경과 도장면에 안전한 데일리 프리워시제.', 10000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(358, NULL, 2, '프리워시 T', '마프라', '압축 분무기용으로 특화된 프리워시. 묵은 때를 뿔리는 효과가 매우 탁월합니다.', 19000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(359, NULL, 2, '올클린 플러스 APC', '케미컬가이', '천연 시트러스 추출물로 만들어진 친환경 다목적 세정제. 실내외 모두 사용.', 19000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(360, NULL, 2, '크린 (Clean) APC', '라보코스메티카', '이탈리아 하이엔드 프리워시. 거품이 적고 찌든 때 분해력이 강력합니다.', 28000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(361, NULL, 2, '블리자드 스노우폼', '블라스크', '도장면에 찰싹 달라붙어 오랫동안 흘러내리지 않는 쫀득한 스노우폼.', 21000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(362, NULL, 2, '바나나 브리즈 폼', '오토브라이트 다이렉트(AD)', '매지폼의 바나나향 버전. 세정력은 유지하고 향기로운 세차 환경을 제공.', 26000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(363, NULL, 2, '스노우 블라인드 폼', '도도쥬스', '두껍고 밀도 높은 하얀 거품으로 시각적 즐거움과 세정력을 동시에.', 29000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(364, NULL, 2, '아담스 메가 폼', '아담스폴리쉬', '스노우폼의 끝판왕급 거품을 보여주는 미국의 프리미엄 폼 샴푸.', 25000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(365, NULL, 2, '데스케일 (Descale)', '카프로', '산성 프리워시 및 샴푸 겸용. 유리막 코팅 차량의 미네랄 오염 제거에 탁월.', 26000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(366, NULL, 2, '엔진룸 클리너', '글로스브로', '프리워시 단계에서 엔진룸의 찌든 기름때를 녹여내는 전용 세정제.', 14000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(367, NULL, 2, '버그 어웨이', '루미너스', '단백질 분해 효소가 들어있어 여름철 벌레 사체를 녹여버리는 특수 프리워시.', 16000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(368, NULL, 2, '타르 엑스 (Tar X)', '카프로', '시트러스 베이스의 천연 타르 및 접착제 제거용 프리워시 전처리제.', 28000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(369, NULL, 2, '프리워시 A', '마프라 매니악', '강력한 알칼리성 폼으로 하부 세차 및 심한 오염에 특화된 프리워시.', 22000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(370, NULL, 2, '오렌지 에이전트 APC', '더클래스', '강력한 기름때 분해 능력을 가진 오렌지향 고농축 다목적 클리너.', 13000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(371, NULL, 2, '폼 샴푸 액티브', '센샤', '모래 먼지를 효과적으로 부유시키는 일본 특유의 부드러운 스노우폼.', 21000, 800.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(372, NULL, 2, '올퍼포즈 클리너 플러스', '맥과이어스', '디테일링 샵에서 필수적으로 구비하는 대용량 범용 프리워시/실내 클리너.', 45000, 3780.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(373, NULL, 2, '디-버그 (D-Bug)', '오토피네스', '벌레 사체가 묻은 즉시 뿌려두면 도장면 손상 없이 녹여주는 버그리무버.', 20000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(374, NULL, 2, '폴라 블라스트', '오토글림', '영국 오토글림의 스노우폼 전용 샴푸. 거품이 무겁고 찰진 것이 특징.', 32000, 2500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(375, NULL, 2, '버그 스쿼시', '푸어보이스', '물과 3:1로 희석해서 쓰는 가성비 끝판왕 미국산 벌레 제거 프리워시.', 22000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(376, NULL, 2, '그라임 리퍼', '케미컬가이', '최강의 오염도를 자랑하는 휠 하우스, 엔진룸의 진흙/기름때 전용 클리너.', 24000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(377, NULL, 2, '프리워시 프로', '디크로닉', '전문가용으로 개발되어 세정력이 매우 강력한 알칼리 베이스 프리워시.', 12000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(378, NULL, 2, '폼캐논 스노우폼', '불스원', '마트에서 구하기 쉬운 대중적인 거품 세차용 폼 샴푸.', 12000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(379, NULL, 2, '워시 미스트 APC', '소프트99', '차량 내부와 외부에 모두 쓸 수 있는 일본 소프트99의 베스트셀러.', 18000, 300.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(380, NULL, 2, '맥시 수즈 투 (Maxi Suds II)', '케미컬가이', '체리향이 나는 알칼리성 샴푸 겸용 폼랜스용 강력 세정제.', 19000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(381, NULL, 2, '이븐 (Even) 프리워시', '워시매니아', '중성 pH로 왁스층에 절대적으로 안전한 데일리 프리워시.', 11000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(382, NULL, 2, '슈퍼 슬릭 폼', '엔공구', '거품 자체가 미끄러워서 오염물이 도장면을 긁지 않고 떨어지게 만드는 폼.', 14000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(383, NULL, 2, '시트러스 워시', '리터', '향긋한 귤향기와 함께 도장면의 가벼운 오염을 불려주는 프리워시.', 9000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(384, NULL, 2, '버그 앤 타르 디졸버', '스토너', '스프레이형 캔 타입으로 국소 부위의 심한 벌레 자국에 분사하여 제거.', 13000, 425.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(385, NULL, 2, '젠틀 스노우 폼', '코흐케미', '체리향의 중성 스노우폼으로 코흐케미 그린스타(APC)와 섞어 쓰기 좋습니다.', 24000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(386, NULL, 2, '에어로졸 스노우폼', '소낙스', '폼랜스가 없는 초보자를 위해 캔 스프레이 형태로 쏘는 간편 스노우폼.', 15000, 400.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(387, NULL, 2, '스파이더 웹 폼', '파이어볼', '거미줄처럼 끈적한 거품이 도장면에 초밀착하여 오염을 분해합니다.', 22000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(388, NULL, 2, '울트라 폼 클리너', '카처', '고압수 기계 전문 브랜드 카처에서 만든 전용 폼랜스 프리워시 액.', 14000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(389, NULL, 2, '핑크 폼', '글로스브로', '시각적인 즐거움을 위한 핑크색 거품이 분사되는 스노우폼 샴푸.', 16000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(390, NULL, 2, '프리워시 엑스', '더클래스', '최강의 찌든 때 제거를 목표로 만든 초강력 하드코어 프리워시.', 18000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(391, NULL, 2, '레몬 스쿼시 APC', '바인더', '레몬향이 첨가되어 실내 세정 시 쾌적함을 주는 다목적 클리너.', 9900, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(392, NULL, 2, '워터리스 워시', '아담스폴리쉬', '물이 없는 환경에서 프리워시 및 본세차를 한 번에 끝내는 특수 세정제.', 23000, 473.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(393, NULL, 2, '아이언 인퓨즈드 폼', '루미너스', '철분 제거 성분이 포함되어 철분과 오염을 동시에 불리는 기능성 스노우폼.', 27000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(394, NULL, 2, '인텐스 타르 리무버', '오토피네스', '도어 하단부에 까맣게 점착된 타르를 부드럽게 녹여내는 프리워시 제.', 24000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(395, NULL, 2, '알칼리 폼', '블라스크', '코팅 전 탈지 세차나 묵은 때 완벽 제거를 위한 고알칼리성 스노우폼.', 20000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(396, NULL, 2, '다이렉트 프리워시', '마프라', '압축분무기 희석 없이 바로 사용할 수 있게 농도가 맞춰진 레디-투-유즈 제품.', 15000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(397, NULL, 2, '스노우 블리자드 V2', '디크로닉', '거품의 밀도를 개선하여 흘러내림을 최소화한 2세대 스노우폼.', 16000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(398, NULL, 2, '인섹트 리무버', '소낙스', '벌레 사체 제거에 있어서 독일 최고의 기술력이 들어간 단백질 분해제.', 17000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(399, NULL, 2, '퓨어 APC', '기온쿼츠', '화학적인 냄새를 없애고 순수하게 오염 분해력만 높인 다목적 세정제.', 21000, 1000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(400, NULL, 2, '퍼펙트 스노우폼', '글로스브로', '대용량으로 부담 없이 폼랜스를 난사할 수 있는 가성비 스노우폼.', 19000, 4000.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 4, '머구스 하이드로 스프레이 왁스', '머구스', '스프레이 타입 왁스. 빠른 도포와 높은 광택을 자랑하며 방수 효과가 뛰어납니다.', 32000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 6, '악렉스 아이런 아웃', '악렉스', '철분 반응형 제거제. 도장면, 휠, 유리에 사용 가능하며 강력한 철분 오염 제거력을 가집니다.', 28000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- =========================================================================
+-- [3] 제품 희석비 가이드 더미 데이터 (에러 방지를 위해 여러 블록으로 분할)
+-- =========================================================================
 
-INSERT IGNORE INTO products (user_id, category_id, name, brand, description, price, capacity_ml, visibility, created_at, updated_at)
-VALUES (NULL, 5, '악렉스 타이어 젤', '악렉스', '물 타입 타이어 드레싱. 번들거림 없는 자연스러운 광택과 오래 지속되는 보호막을 형성합니다.', 20000, 500.0, 'PUBLIC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- 3-1. 초기 데이터 희석비 (1~9)
+INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES
+(1, '일반 세차', 500, '일반적인 세차 시 권장 희석비'),
+(1, '심한 오염', 200, '심한 오염 제거 시 권장 희석비'),
+(1, '예비 세척', 100, '고압 세척 전 예비 세척용'),
+(2, '일반 세차', 800, '일반적인 세차 시 권장 희석비'),
+(2, '심한 오염', 300, '심한 오염 제거 시 권장 희석비'),
+(3, '일반 세차', 400, '일반적인 세차 시 권장 희석비'),
+(3, '폼건 사용', 100, '폼건 사용 시 권장 희석비'),
+(4, '원액 사용', 1, '심한 오염 시 원액 그대로 사용'),
+(4, '일반 사용', 3, '일반적인 휠 세정 시 희석비'),
+(5, '일반 사용', 5, '일반적인 휠 세정 시 희석비'),
+(5, '심한 오염', 2, '심한 브레이크 더스트 제거 시');
 
--- 희석비 더미 데이터
--- 머구스 카 샴푸 (product_id = 1)
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (1, '일반 세차', 500, '일반적인 세차 시 권장 희석비');
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (1, '심한 오염', 200, '심한 오염 제거 시 권장 희석비');
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (1, '예비 세척', 100, '고압 세척 전 예비 세척용');
+-- 3-2. 201~250 희석비
+INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES
+(201, '일반 버킷 세차', 200, '뚜껑 2컵(약 50ml)을 물 10L에 희석'),
+(202, '일반 버킷 세차', 500, '물 10L 기준 20ml 희석'),
+(203, '일반 버킷 세차', 800, '고농축. 물 10L 기준 10~15ml 희석'),
+(204, '일반 버킷 세차', 500, '물 10L 기준 20ml 사용'),
+(205, '버킷 세차', 300, '오염도에 따라 1:300 비율 권장'),
+(206, '일반 버킷 세차', 500, '물 10L 기준 20ml 희석'),
+(207, '일반 버킷 세차', 500, '물 10L 기준 20ml 사용'),
+(208, '일반 버킷 세차', 800, '물 10L 기준 10~15ml 희석'),
+(209, '스노우 폼랜스', 10, '샴푸 1 : 물 9 비율로 폼랜스 바틀에 희석'),
+(209, '버킷 세차', 400, '물 10L 기준 25ml 사용'),
+(210, '버킷 세차', 300, '뚜껑 2컵을 물 10L에 희석 (코팅 효과 극대화)'),
+(211, '버킷 세차', 500, '물 10L 기준 20ml 희석'),
+(212, '일반 버킷 세차', 100, '물 10L 기준 100ml 넉넉히 희석'),
+(213, '일반 버킷 세차', 500, '물 10L 기준 20ml 희석'),
+(214, '일반 버킷 세차', 500, '물 10L 기준 20ml 희석'),
+(215, '일반 버킷 세차', 400, '물 10L 기준 25ml 희석'),
+(216, '일반 프리워시', 10, '압축분무기 사용 시 물 1L에 100ml 희석'),
+(216, '실내 세정', 30, '실내 플라스틱 및 트림 오염 제거 시'),
+(217, '압축 분무기', 30, '물 1L 기준 30~50ml 희석하여 도장면 도포'),
+(218, '워터스팟 제거', 10, '심한 미네랄 오염/워터스팟 부분 제거 시'),
+(218, '유지보수 폼랜스', 50, '유리막 코팅 유지보수 시 폼랜스로 도포'),
+(219, '스노우 폼랜스', 10, '폼랜스 바틀 기준 (네베 1 : 물 9)'),
+(220, '스노우 폼랜스', 10, '찰진 거품을 원할 시 1:10 희석'),
+(221, '스노우 폼랜스', 10, '알칼리성 프리워시 폼 도포 시 1:10 희석'),
+(222, '도장면 프리워시', 20, '일반적인 외부 오염 제거 시'),
+(222, '엔진룸/타이어', 5, '심한 기름때나 찌든 오염 제거 시'),
+(223, '일반 다목적 세정', 20, '실내외 찌든 오염 무자극 세정 시'),
+(224, '벌레/찌든 때', 10, '오염이 심한 부위에 압축분무기로 도포'),
+(225, '원액 사용', 1, '도장면에 묻은 벌레 사체에 직접 분사 후 대기'),
+(226, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10 비율 혼합'),
+(227, '일반 프리워시', 10, '압축 분무기에 1:10으로 혼합하여 도포'),
+(228, '퀵 디테일러', 3, '세차 후 빠른 광택과 슬릭감 부여 시'),
+(228, '클레이 윤활제', 16, '클레이바/미트 작업 시 윤활 목적으로 희석'),
+(229, '스노우 폼랜스', 10, '폼랜스에 넣어 두꺼운 거품 형성 (1:10)'),
+(230, '스노우 폼랜스', 10, '컬러 폼랜스 도포 시 권장 비율'),
+(231, '원액 사용', 1, '열기가 식은 휠에 원액 그대로 분사'),
+(232, '원액 사용', 1, '휠 오염 부위에 직접 분사 후 철분 반응 확인'),
+(233, '심한 오염 (원액)', 1, '타이어 갈변이 심할 경우 원액 도포'),
+(233, '일반 세정', 3, '가벼운 휠/타이어 오염 시 1:3 희석'),
+(234, '원액 사용', 1, '세차 전 건조한 도장면이나 휠에 직접 분사'),
+(235, '원액 사용', 1, '도장면 전체 또는 휠 철분 제거 시 원액 분사'),
+(236, '원액 사용', 1, '도장면에 직접 분사하여 보라색 반응 대기'),
+(237, '가벼운 오염', 10, '주기적인 휠 관리 시 1:10 희석 사용'),
+(237, '심한 오염', 2, '찌든 분진 제거 시 1:2 희석 사용'),
+(238, '원액 사용', 1, '휠이나 도장면 철분에 원액 분사'),
+(239, '원액 사용', 1, '유리 타월에 분사 후 유리면 닦기'),
+(240, '원액 사용', 1, '얼룩 없이 깨끗한 유리 세정 시 원액 사용'),
+(241, '원액 사용', 1, '기름때나 담배 진 등 찌든 때 제거 시 원액'),
+(242, '원액 사용', 1, '세차 후 물기를 닦아내고 도장면에 가볍게 분사'),
+(243, '원액 사용', 1, '건조되거나 젖은 도장면에 분사 후 버핑'),
+(244, '원액 사용', 1, '물기 제거 후 패드나 타월에 분사하여 시공'),
+(245, '원액 사용', 1, '세차 후 물기를 닦은 도장면에 분사 후 버핑'),
+(246, '원액 사용', 1, '도장면에 얇게 분사하고 극세사 타월로 닦아냄'),
+(247, '원액 사용', 1, '도장면 유지보수 시 가볍게 분사 후 닦아냄'),
+(248, '원액 사용', 1, '어플리케이터에 묻혀 깨끗한 타이어에 도포'),
+(249, '원액 사용', 1, '타이어 어플리케이터를 이용해 얇게 펴 바름'),
+(250, '원액 사용', 1, '건조된 타이어 표면에 스프레이로 직접 분사');
 
--- 소너스 오토 샴푸 (product_id = 2)
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (2, '일반 세차', 800, '일반적인 세차 시 권장 희석비');
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (2, '심한 오염', 300, '심한 오염 제거 시 권장 희석비');
+-- 3-3. 카샴푸 추가 50종 희석비 (301~350)
+INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES
+(301, '버킷 세차', 400, '물 10L 기준 25ml 사용 (약 뚜껑 1번)'),
+(302, '버킷 세차', 500, '물 10L 기준 20ml 희석'),
+(303, '일반 세차', 200, '뚜껑 2컵(50ml)을 물 10L에 희석'),
+(304, '초고농축 세차', 800, '물 10L에 10~15ml 소량만 사용해도 충분'),
+(305, '광택 증진 세차', 400, '물 10L에 25ml 희석'),
+(306, '일반 버킷', 500, '물 10L 기준 20ml 희석'),
+(307, '전문가 버킷', 400, '갤런 당 1oz 비율'),
+(308, '초고농축 버킷', 1500, '물 15L에 단 10ml 사용'),
+(309, '코팅 복원 세차', 500, '물 10L에 20ml 사용'),
+(310, '에센스 버킷', 1000, '물 10L에 10ml 사용'),
+(311, '프리미엄 세차', 800, '물 10L에 15ml 사용'),
+(312, '가성비 데일리', 300, '물 10L에 30ml 넉넉히 사용'),
+(313, '일반 버킷', 400, '물 10L에 25ml 사용'),
+(314, '왁스 세차', 128, '물 1갤런(약 3.8L) 당 1oz(30ml) 희석'),
+(315, '비딩 복원 버킷', 200, '물 10L에 50ml 희석'),
+(316, '하이글로스 버킷', 400, '물 10L에 25ml 희석'),
+(317, '그래핀 유지보수', 500, '물 10L에 20ml 희석'),
+(318, '카나우바 유지', 800, '물 10L에 15ml 희석'),
+(319, '일반 버킷', 500, '물 10L에 20ml 희석'),
+(320, '가성비 세차', 200, '물 10L에 50ml 듬뿍 사용'),
+(321, '올인원 버킷', 400, '물 10L에 25ml 희석'),
+(322, '코팅 차량 버킷', 500, '물 10L에 20ml 희석'),
+(323, '일반 버킷', 300, '물 10L에 30ml 희석'),
+(324, '친환경 세차', 400, '물 10L에 25ml 희석'),
+(325, '순수 세차', 500, '물 10L에 20ml 희석'),
+(326, '나노 코팅 버킷', 200, '물 10L에 50ml 사용'),
+(327, '어두운 도장면', 400, '물 10L에 25ml 사용'),
+(328, '밝은 도장면', 400, '물 10L에 25ml 사용'),
+(329, '폼랜스 겸용', 10, '폼랜스 사용 시 1:10 희석'),
+(330, '무향 세차', 500, '물 10L에 20ml 사용'),
+(331, '메가폼 버킷', 400, '물 10L에 25ml 사용'),
+(332, '프리미엄 버킷', 500, '물 10L에 20ml 사용'),
+(333, '찌든 때 버킷', 300, '물 10L에 30ml 희석'),
+(334, '펄 코팅 버킷', 400, '물 10L에 25ml 희석'),
+(335, '세라믹 세차', 300, '물 10L에 30ml 희석'),
+(336, '빠른 헹굼 버킷', 400, '물 10L에 25ml 사용'),
+(337, '폴리머 캡슐 세차', 400, '물 10L에 25ml 사용'),
+(338, '데일리 버킷', 400, '물 10L에 25ml 희석'),
+(339, '일반 세차', 200, '물 10L에 50ml 사용'),
+(340, '초보자 세차', 100, '물 10L에 종이컵 반 컵 사용'),
+(341, '슬릭 버킷', 500, '물 10L에 20ml 사용'),
+(342, '투명 버킷', 500, '물 10L에 20ml 사용'),
+(343, '알칼리 탈지', 200, '물 10L에 50ml 사용'),
+(344, '민감성 도장', 500, '물 10L에 20ml 희석'),
+(345, '데일리 버킷', 300, '물 10L에 30ml 사용'),
+(346, '쇼카 광택 세차', 500, '물 10L에 20ml 사용'),
+(347, '매니아 버킷', 800, '물 10L에 15ml 사용'),
+(348, '윤활 특화 세차', 600, '물 10L에 15~20ml 사용'),
+(349, '대용량 막세차', 100, '물 10L에 100ml 콸콸 사용'),
+(350, '글로스 업 세차', 200, '물 10L에 50ml 희석');
 
--- 맥과이어스 골드 클래스 샴푸 (product_id = 3)
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (3, '일반 세차', 400, '일반적인 세차 시 권장 희석비');
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (3, '폼건 사용', 100, '폼건 사용 시 권장 희석비');
-
--- 악렉스 휠 클리너 (product_id = 4)
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (4, '원액 사용', 1, '심한 오염 시 원액 그대로 사용');
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (4, '일반 사용', 3, '일반적인 휠 세정 시 희석비');
-
--- 소너스 폴리시 휠 클리너 (product_id = 5)
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (5, '일반 사용', 5, '일반적인 휠 세정 시 희석비');
-INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES (5, '심한 오염', 2, '심한 브레이크 더스트 제거 시');
+-- 3-4. 프리워시 추가 50종 희석비 (351~400)
+INSERT IGNORE INTO dilution_ratios (product_id, label, ratio, description) VALUES
+(351, '스노우 폼랜스', 20, '차량 도장면 도달 시점(PIR) 4~5% 타겟 (바틀엔 약 1:10)'),
+(352, '압축 분무기', 20, '물 1L에 50ml 희석 (PIR 4% 맞춤)'),
+(353, '일반 프리워시', 10, '압축분무기 1:10 희석 도포'),
+(354, '외장 프리워시', 10, '외장 및 엔진룸 1:10 희석'),
+(355, '도장면 도포', 20, '물 1L 기준 50ml 사용'),
+(356, '원액 사용', 1, '희석 없이 오염 부위에 바로 분사'),
+(357, '일반 오염', 10, '물 1L에 100ml 희석'),
+(358, '압축 분무기 전용', 30, '물 1L에 30~50ml 희석'),
+(359, '외부 세정', 10, '외부 1:10 희석 (실내는 1:20)'),
+(360, '심한 오염 (압분)', 10, '압축 분무기에 1:10 희석'),
+(361, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10'),
+(362, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10'),
+(363, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10'),
+(364, '스노우 폼랜스', 10, '폼랜스 바틀에 샴푸 1 : 물 9'),
+(365, '미네랄 제거 (압분)', 10, '워터스팟 제거 시 1:10 도포'),
+(366, '엔진룸 클리닝', 5, '심한 기름때 1:5 비율 희석'),
+(367, '여름철 버그 제거', 10, '물 1L에 100ml 희석 후 분사'),
+(368, '원액 사용 (타르)', 1, '타르 부위에 원액 도포 후 대기'),
+(369, '하부 및 휠 프리워시', 10, '오염이 심한 하단부 1:10 분사'),
+(370, '다목적 프리워시', 10, '압축 분무기 1:10 비율 혼합'),
+(371, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10'),
+(372, '외부 찌든 때', 4, '강력한 세정 시 1:4 희석'),
+(373, '원액 사용', 1, '벌레 사체에 직접 분사'),
+(374, '스노우 폼랜스', 5, '폼랜스 바틀에 1:5 비율로 진하게 세팅'),
+(375, '버그 제거', 3, '물과 3:1 비율로 희석하여 분사'),
+(376, '휠 하우스/엔진룸', 5, '심한 오염 부위 1:5 희석'),
+(377, '심한 오염', 10, '알칼리 프리워시 1:10 도포'),
+(378, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10'),
+(379, '원액/다목적', 1, '희석 없이 오염 부위 바로 분사'),
+(380, '스노우 폼랜스', 10, '샴푸 겸용 1:10 희석'),
+(381, '중성 프리워시', 10, '왁스 세이프를 위해 1:10 희석'),
+(382, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10'),
+(383, '가벼운 오염', 15, '압축 분무기 1:15 희석'),
+(384, '원액 분사 (캔)', 1, '캔 스프레이 직접 분사'),
+(385, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10 (APC 첨가 가능)'),
+(386, '원액 분사 (캔)', 1, '캔 흔든 후 도장면에 직접 폼 분사'),
+(387, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10'),
+(388, '스노우 폼랜스', 3, '카처 폼노즐 기준 1:3 희석 권장'),
+(389, '핑크 폼', 10, '폼랜스 바틀 기준 1:10'),
+(390, '초강력 오염 제거', 5, '물 1L에 200ml 희석'),
+(391, '실내 및 가벼운 외부', 20, '물 1L에 50ml 희석'),
+(392, '워터리스 워시', 1, '원액 그대로 타월에 묻혀 사용'),
+(393, '철분 분해 폼', 10, '폼랜스 바틀 기준 1:10'),
+(394, '원액 사용 (타르)', 1, '타르 부위에 분사 후 2~3분 대기'),
+(395, '탈지 폼랜스', 10, '폼랜스에 1:10 비율로 희석'),
+(396, '원액 사용 (RTU)', 1, '희석 없이 압축 분무기에 바로 넣고 분사'),
+(397, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10'),
+(398, '원액 사용 (벌레)', 1, '벌레 사체에 직접 분사 후 고압수 헹굼'),
+(399, '순수 다목적 세정', 10, '외부 프리워시 시 1:10 희석'),
+(400, '스노우 폼랜스', 10, '폼랜스 바틀 기준 1:10');
