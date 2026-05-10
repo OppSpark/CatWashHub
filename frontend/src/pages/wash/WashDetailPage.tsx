@@ -135,7 +135,8 @@ const WashDetailPage = () => {
       setSession(updated)
       setIsEditing(false)
       toast.success('수정되었습니다')
-    } catch {
+    } catch (err) {
+      console.error('[WashDetailPage] updateSession error:', err)
       toast.error('수정에 실패했습니다')
     } finally {
       setIsSaving(false)

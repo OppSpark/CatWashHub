@@ -112,7 +112,8 @@ const WashReviewPage = () => {
       })
       toast.success(WASH_MSGS.SESSION_CREATED)
       navigate(`/wash/${id}`, { replace: true })
-    } catch {
+    } catch (err) {
+      console.error('[WashReviewPage] completeSession error:', err)
       toast.error(WASH_MSGS.SESSION_CREATE_ERROR)
       setIsSubmitting(false)
     }

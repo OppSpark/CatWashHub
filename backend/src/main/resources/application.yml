@@ -12,7 +12,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # 테이블 없으면 생성, 있으면 유지
+      ddl-auto: validate
     show-sql: true
     defer-datasource-initialization: true
     properties:
