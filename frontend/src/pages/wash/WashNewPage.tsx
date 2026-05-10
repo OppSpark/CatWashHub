@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { getProductSets, createSession } from '@/api/washApi'
 import type { ProductSet } from '@/types/wash'
@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
 import ProductPickerSheet from '@/components/ProductPickerSheet'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, CalendarDays, MapPin } from 'lucide-react'
 
 interface SelectedProduct {
   productId: number | null
@@ -18,15 +18,22 @@ interface SelectedProduct {
   displayName: string
 }
 
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
+}
+
 const WashNewPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const toast = useToast()
   const preselectedSetId: number | null = location.state?.setId ?? null
+  const dateInputRef = useRef<HTMLInputElement>(null)
 
   const [sets, setSets] = useState<ProductSet[]>([])
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
   const [washDate, setWashDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [washLocation, setWashLocation] = useState('')
   const [showPicker, setShowPicker] = useState(false)
   const [isAddingCustom, setIsAddingCustom] = useState(false)
   const [customName, setCustomName] = useState('')
@@ -106,7 +113,7 @@ const WashNewPage = () => {
     try {
       const session = await createSession({
         washedAt: washDate,
-        location: null,
+        location: washLocation.trim() || null,
         products: selectedProducts.map(({ displayName: _, ...rest }) => rest),
       })
       toast.success(WASH_MSGS.PREPARING_SAVED)
@@ -128,12 +135,35 @@ const WashNewPage = () => {
         {/* 날짜 선택 */}
         <div className="bg-white rounded-2xl px-5 py-4">
           <p className="text-[13px] text-[#6B7684] mb-2">세차 날짜</p>
+          <button
+            onClick={() => dateInputRef.current?.showPicker?.()}
+            className="w-full flex items-center gap-3 border border-[#E5E8EB] rounded-xl px-3 py-2.5 active:brightness-95"
+          >
+            <CalendarDays size={18} className="text-[#3182F6] shrink-0" />
+            <span className="text-[14px] text-[#191F28]">{formatDate(washDate)}</span>
+          </button>
+          {/* 숨겨진 date input — showPicker()로만 열림 */}
           <input
+            ref={dateInputRef}
             type="date"
             value={washDate}
             onChange={e => setWashDate(e.target.value)}
-            className="w-full border border-[#E5E8EB] rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#3182F6]"
+            className="sr-only"
           />
+        </div>
+
+        {/* 세차 장소 */}
+        <div className="bg-white rounded-2xl px-5 py-4">
+          <p className="text-[13px] text-[#6B7684] mb-2">세차 장소</p>
+          <div className="flex items-center gap-3 border border-[#E5E8EB] rounded-xl px-3 py-2.5 focus-within:border-[#3182F6]">
+            <MapPin size={18} className="text-[#3182F6] shrink-0" />
+            <input
+              value={washLocation}
+              onChange={e => setWashLocation(e.target.value)}
+              placeholder="예) 셀프세차장, 집 앞 (선택)"
+              className="flex-1 text-[14px] outline-none bg-transparent"
+            />
+          </div>
         </div>
 
         {/* 즐겨찾기 세트 */}
