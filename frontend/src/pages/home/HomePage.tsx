@@ -5,6 +5,7 @@ import { getDashboard, getSessions } from '@/api/washApi'
 import type { WashDashboard, WashSession } from '@/types/wash'
 import { HOME_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr)
@@ -30,15 +31,36 @@ const StarRating = ({ rating }: { rating: number | null }) => {
 // ==================== 세차 캘린더 ====================
 const WashCalendar = ({ sessions }: { sessions: WashSession[] }) => {
   const today = new Date()
-  const year = today.getFullYear()
-  const month = today.getMonth()
+  const [viewYear, setViewYear] = useState(today.getFullYear())
+  const [viewMonth, setViewMonth] = useState(today.getMonth())
+
+  const isCurrentMonth = viewYear === today.getFullYear() && viewMonth === today.getMonth()
+
+  const goPrev = () => {
+    if (viewMonth === 0) {
+      setViewYear(y => y - 1)
+      setViewMonth(11)
+    } else {
+      setViewMonth(m => m - 1)
+    }
+  }
+
+  const goNext = () => {
+    if (isCurrentMonth) { return }
+    if (viewMonth === 11) {
+      setViewYear(y => y + 1)
+      setViewMonth(0)
+    } else {
+      setViewMonth(m => m + 1)
+    }
+  }
 
   const washedDays = new Set(
     sessions
       .filter(s => s.status === 'DONE')
       .map(s => {
         const d = new Date(s.washedAt)
-        if (d.getFullYear() === year && d.getMonth() === month) {
+        if (d.getFullYear() === viewYear && d.getMonth() === viewMonth) {
           return d.getDate()
         }
         return null
@@ -46,8 +68,8 @@ const WashCalendar = ({ sessions }: { sessions: WashSession[] }) => {
       .filter(Boolean)
   )
 
-  const firstDay = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
   const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)]
 
   const weeks: (number | null)[][] = []
@@ -58,9 +80,21 @@ const WashCalendar = ({ sessions }: { sessions: WashSession[] }) => {
   return (
     <div className="bg-white rounded-2xl px-5 py-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[14px] font-semibold text-[#191F28]">
-          {year}년 {month + 1}월 세차 캘린더
-        </p>
+        <div className="flex items-center gap-2">
+          <button onClick={goPrev} className="p-1 text-[#ADB5C0] active:text-[#191F28]">
+            <ChevronLeft size={18} />
+          </button>
+          <p className="text-[14px] font-semibold text-[#191F28]">
+            {viewYear}년 {viewMonth + 1}월
+          </p>
+          <button
+            onClick={goNext}
+            disabled={isCurrentMonth}
+            className="p-1 text-[#ADB5C0] disabled:opacity-30 active:text-[#191F28]"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
         <span className="text-[12px] text-[#3182F6] font-medium">{washedDays.size}회</span>
       </div>
       <div className="grid grid-cols-7 mb-1">
@@ -70,22 +104,23 @@ const WashCalendar = ({ sessions }: { sessions: WashSession[] }) => {
       </div>
       {weeks.map((week, wi) => (
         <div key={wi} className="grid grid-cols-7">
-          {week.map((day, di) => (
-            <div key={di} className="flex items-center justify-center py-1">
-              {day != null && (
-                <div className={`w-7 h-7 flex items-center justify-center rounded-full text-[12px] font-medium
-                  ${day === today.getDate() ? 'bg-[#3182F6] text-white' : ''}
-                  ${washedDays.has(day) && day !== today.getDate() ? 'bg-[#EBF3FF] text-[#3182F6]' : ''}
-                  ${!washedDays.has(day) && day !== today.getDate() ? 'text-[#191F28]' : ''}
-                `}>
-                  {day}
-                  {washedDays.has(day) && (
-                    <span className="absolute mt-5 w-1 h-1 rounded-full bg-[#3182F6]" />
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+          {week.map((day, di) => {
+            const isToday = isCurrentMonth && day === today.getDate()
+            const isWashed = washedDays.has(day)
+            return (
+              <div key={di} className="flex items-center justify-center py-1">
+                {day != null && (
+                  <div className={`w-7 h-7 flex items-center justify-center rounded-full text-[12px] font-medium
+                    ${isToday ? 'bg-[#3182F6] text-white' : ''}
+                    ${isWashed && !isToday ? 'bg-[#EBF3FF] text-[#3182F6]' : ''}
+                    ${!isWashed && !isToday ? 'text-[#191F28]' : ''}
+                  `}>
+                    {day}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       ))}
     </div>
