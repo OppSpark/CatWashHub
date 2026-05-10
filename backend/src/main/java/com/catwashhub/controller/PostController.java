@@ -50,8 +50,9 @@ public class PostController {
             @AuthenticationPrincipal UserDetails _userDetails,
             @PathVariable Long id,
             jakarta.servlet.http.HttpSession session) {
+        String email = (_userDetails != null) ? _userDetails.getUsername() : null;
         return ResponseEntity.ok(ApiResponse.ok(
-                m_PostService.getPost(_userDetails.getUsername(), id, session)));
+                m_PostService.getPost(email, id, session)));
     }
 
     // 게시글 작성
