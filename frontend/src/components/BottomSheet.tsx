@@ -13,7 +13,7 @@ interface BottomSheetProps {
 type SnapPoint = 'half' | 'full'
 
 const SNAP_HEIGHTS: Record<SnapPoint, string> = {
-  half: '50dvh',
+  half: '65dvh',
   full: '92dvh',
 }
 

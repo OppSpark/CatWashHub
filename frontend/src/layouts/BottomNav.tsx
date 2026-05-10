@@ -14,7 +14,7 @@ const BottomNav = () => {
   const { pathname } = useLocation()
 
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#E5E8EB] flex z-50">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#E5E8EB] flex z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {c_NavItems.map(({ path, label, icon: Icon }) => {
         const isActive = pathname === path
         return (
