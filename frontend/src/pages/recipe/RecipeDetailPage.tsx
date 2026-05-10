@@ -24,13 +24,13 @@ const ShareCard = ({ recipe }: { recipe: Recipe }) => (
     {/* 차종 + 시간 */}
     <div className="flex items-center gap-3 mb-3">
       {recipe.carModel && (
-        <span className="text-[12px] text-[#6B7684] flex items-center gap-1">
-          <Car size={11} /> {recipe.carModel}
+        <span className="text-[12px] text-[#6B7684] flex items-center gap-1 leading-none">
+          <Car size={11} className="shrink-0" />{recipe.carModel}
         </span>
       )}
       {recipe.estimatedMinutes && (
-        <span className="text-[12px] text-[#6B7684] flex items-center gap-1">
-          <Clock size={11} /> {recipe.estimatedMinutes}분
+        <span className="text-[12px] text-[#6B7684] flex items-center gap-1 leading-none">
+          <Clock size={11} className="shrink-0" />{recipe.estimatedMinutes}분
         </span>
       )}
     </div>
@@ -43,7 +43,7 @@ const ShareCard = ({ recipe }: { recipe: Recipe }) => (
       {recipe.steps.map((step, i) => (
         <div key={i} className="flex items-start gap-2.5">
           <span
-            className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white mt-0.5"
+            className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white mt-0.5"
             style={{ backgroundColor: STEP_TYPE_COLORS[step.stepType] }}
           >
             {i + 1}
