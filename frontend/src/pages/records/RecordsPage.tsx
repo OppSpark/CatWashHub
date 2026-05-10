@@ -130,6 +130,7 @@ const RecordsPage = () => {
   return (
     <PageLayout
       title="세차 기록"
+      headerVariant="large"
       headerRight={
         <button onClick={() => navigate('/wash/new')} className="text-[14px] text-[#3182F6] font-medium">
           + 새 기록

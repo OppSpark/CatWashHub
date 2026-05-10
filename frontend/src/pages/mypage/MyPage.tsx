@@ -104,7 +104,7 @@ const MyPage = () => {
   }
 
   return (
-    <PageLayout title="마이페이지">
+    <PageLayout title="마이페이지" headerVariant="large">
       <div className="flex flex-col gap-3 pb-24">
 
         {/* 프로필 카드 */}
