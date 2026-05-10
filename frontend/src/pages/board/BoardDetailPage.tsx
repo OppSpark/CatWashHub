@@ -6,6 +6,8 @@ import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/hooks/useToast'
 import { BOARD_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
+import LoginPromptSheet from '@/components/LoginPromptSheet'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Heart, MessageSquare, Eye, Send, ChevronRight, CornerDownRight, ClipboardList, MapPin, Clock, Star, Droplets } from 'lucide-react'
 
 const WEATHER_LABEL: Record<string, string> = {
@@ -277,6 +279,7 @@ const BoardDetailPage = () => {
   const { id } = useParams<{ id: string }>()
   const toast = useToast()
   const userId = useAuthStore(s => s.userId)
+  const { showLoginSheet, setShowLoginSheet } = useRequireAuth()
 
   const [post, setPost] = useState<Post | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -530,39 +533,52 @@ const BoardDetailPage = () => {
 
       {/* 댓글 입력 바 */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#F2F4F6] px-4 pb-safe z-20">
-        {replyTo && (
-          <div className="flex items-center justify-between pt-2 pb-1">
-            <span className="text-[12px] text-[#3182F6] font-medium">
-              @{replyTo.nickname} 에게 답글
-            </span>
-            <button onClick={cancelReply} className="text-[12px] text-[#ADB5C0]">취소</button>
-          </div>
-        )}
-        <div className="flex items-end gap-2 py-3">
-          <textarea
-            ref={commentInputRef}
-            value={commentText}
-            onChange={e => setCommentText(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                handleSubmitComment()
-              }
-            }}
-            placeholder={replyTo ? `${replyTo.nickname}에게 답글...` : BOARD_MSGS.PLACEHOLDER_COMMENT}
-            rows={1}
-            className="flex-1 bg-[#F2F4F6] rounded-2xl px-4 py-2.5 text-[14px] outline-none resize-none max-h-24 overflow-y-auto"
-            style={{ minHeight: '42px' }}
-          />
+        {userId === null ? (
           <button
-            onClick={handleSubmitComment}
-            disabled={!commentText.trim() || isSubmitting}
-            className="w-10 h-10 bg-[#3182F6] text-white rounded-full flex items-center justify-center disabled:opacity-40 shrink-0 mb-0.5"
+            onClick={() => setShowLoginSheet(true)}
+            className="w-full py-3 text-[14px] text-[#ADB5C0] text-left"
           >
-            <Send size={15} />
+            로그인하고 댓글을 남겨보세요
           </button>
-        </div>
+        ) : (
+          <>
+            {replyTo && (
+              <div className="flex items-center justify-between pt-2 pb-1">
+                <span className="text-[12px] text-[#3182F6] font-medium">
+                  @{replyTo.nickname} 에게 답글
+                </span>
+                <button onClick={cancelReply} className="text-[12px] text-[#ADB5C0]">취소</button>
+              </div>
+            )}
+            <div className="flex items-end gap-2 py-3">
+              <textarea
+                ref={commentInputRef}
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmitComment()
+                  }
+                }}
+                placeholder={replyTo ? `${replyTo.nickname}에게 답글...` : BOARD_MSGS.PLACEHOLDER_COMMENT}
+                rows={1}
+                className="flex-1 bg-[#F2F4F6] rounded-2xl px-4 py-2.5 text-[14px] outline-none resize-none max-h-24 overflow-y-auto"
+                style={{ minHeight: '42px' }}
+              />
+              <button
+                onClick={handleSubmitComment}
+                disabled={!commentText.trim() || isSubmitting}
+                className="w-10 h-10 bg-[#3182F6] text-white rounded-full flex items-center justify-center disabled:opacity-40 shrink-0 mb-0.5"
+              >
+                <Send size={15} />
+              </button>
+            </div>
+          </>
+        )}
       </div>
+
+      <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} />
     </PageLayout>
   )
 }

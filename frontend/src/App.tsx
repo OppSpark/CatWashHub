@@ -19,7 +19,7 @@ import MobileShell from '@/layouts/MobileShell'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
 
-// 인증 체크만 담당
+// 로그인 필요 페이지 — 미로그인 시 /login으로
 const AuthGuard = () => {
   const isLoggedIn = useAuthStore(s => s.isLoggedIn)
   if (!isLoggedIn) {
@@ -28,7 +28,7 @@ const AuthGuard = () => {
   return <Outlet />
 }
 
-// BottomNav가 있는 메인 탭 페이지
+// BottomNav가 있는 탭 레이아웃
 const WithBottomNav = () => (
   <>
     <Outlet />
@@ -41,35 +41,45 @@ const App = () => {
     <MobileShell>
       <Toast />
       <Routes>
+        {/* 인증 페이지 */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
+        {/* 공개 탭 페이지 (BottomNav 포함) */}
+        <Route element={<WithBottomNav />}>
+          <Route path="/calculator" element={<CalculatorPage />} />
+          <Route path="/board" element={<BoardListPage />} />
+          <Route path="/board/:id" element={<BoardDetailPage />} />
+        </Route>
+
+        {/* 로그인 필요 페이지 */}
         <Route element={<AuthGuard />}>
-          {/* BottomNav 있는 탭 페이지 */}
           <Route element={<WithBottomNav />}>
             <Route path="/home" element={<HomePage />} />
-            <Route path="/calculator" element={<CalculatorPage />} />
             <Route path="/records" element={<RecordsPage />} />
-            <Route path="/board" element={<BoardListPage />} />
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/mypage" element={<MyPage />} />
           </Route>
 
-          {/* BottomNav 없는 서브 페이지 */}
           <Route path="/wash/new" element={<WashNewPage />} />
           <Route path="/wash/sets" element={<ProductSetsPage />} />
           <Route path="/wash/sets/new" element={<ProductSetsPage />} />
           <Route path="/wash/:id" element={<WashDetailPage />} />
           <Route path="/wash/:id/review" element={<WashReviewPage />} />
           <Route path="/board/new" element={<BoardNewPage />} />
-          <Route path="/board/:id" element={<BoardDetailPage />} />
           <Route path="/board/:id/edit" element={<BoardEditPage />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* 기본 진입 — 비로그인: 게시판, 로그인: 홈 */}
+        <Route path="*" element={<DefaultRedirect />} />
       </Routes>
     </MobileShell>
   )
+}
+
+const DefaultRedirect = () => {
+  const isLoggedIn = useAuthStore(s => s.isLoggedIn)
+  return <Navigate to={isLoggedIn ? '/home' : '/board'} replace />
 }
 
 export default App

@@ -4,6 +4,8 @@ import { getPosts } from '@/api/boardApi'
 import type { PostSummary } from '@/types/board'
 import { BOARD_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
+import LoginPromptSheet from '@/components/LoginPromptSheet'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { MessageSquare, Heart, Eye, Plus, Search, X, ClipboardList, Star, MapPin } from 'lucide-react'
 
 type TabType = 'ALL' | 'FREE' | 'WASH_LOG'
@@ -109,6 +111,7 @@ const PostSkeleton = () => (
 // ==================== 메인 ====================
 const BoardListPage = () => {
   const navigate = useNavigate()
+  const { showLoginSheet, setShowLoginSheet, requireAuth } = useRequireAuth()
   const [posts, setPosts] = useState<PostSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [page, setPage] = useState(0)
@@ -271,11 +274,13 @@ const BoardListPage = () => {
 
       {/* 글쓰기 버튼 */}
       <button
-        onClick={() => navigate('/board/new')}
+        onClick={() => requireAuth(() => navigate('/board/new'))}
         className="fixed bottom-[84px] right-4 w-14 h-14 bg-[#3182F6] text-white rounded-full shadow-lg flex items-center justify-center active:brightness-90 z-10"
       >
         <Plus size={24} />
       </button>
+
+      <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} />
     </PageLayout>
   )
 }
