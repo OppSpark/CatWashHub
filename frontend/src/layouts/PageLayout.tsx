@@ -1,6 +1,24 @@
-import { useCallback, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
+
+const DebugBanner = () => {
+  const [info, setInfo] = useState('')
+  useEffect(() => {
+    const el = document.createElement('div')
+    el.style.position = 'fixed'
+    el.style.paddingTop = 'env(safe-area-inset-top)'
+    document.body.appendChild(el)
+    const sat = parseInt(getComputedStyle(el).paddingTop) || 0
+    document.body.removeChild(el)
+    setInfo(`SAT:${sat}px | ih:${window.innerHeight} | vvh:${Math.round(window.visualViewport?.height ?? 0)}`)
+  }, [])
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[9999] bg-red-500 text-white text-[11px] font-mono text-center py-1">
+      {info}
+    </div>
+  )
+}
 
 interface PageLayoutProps {
   children?: ReactNode
@@ -116,6 +134,8 @@ const PageLayout = ({
       className={`min-h-dvh flex flex-col ${bottomPadding}`}
       style={{ backgroundColor: bgColor }}
     >
+      {/* 임시 디버그 배너 */}
+      <DebugBanner />
       {/* 당겨서 새로고침 인디케이터 */}
       {onRefresh && (pullY > 0 || isRefreshing) && (
         <div
