@@ -449,6 +449,7 @@ const BoardDetailPage = () => {
     <PageLayout
       title="자유게시판"
       onBack={true}
+      hasFixedButton
       headerRight={
         isOwner ? (
           <div className="flex items-center gap-4">
