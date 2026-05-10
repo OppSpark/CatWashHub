@@ -45,10 +45,7 @@ const ProductSetsPage = () => {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    Promise.all([
-      getProductSets().catch(() => [] as ProductSet[]),
-      fetchProducts().catch(() => [] as Product[]),
-    ])
+    Promise.all([getProductSets(), fetchProducts()])
       .then(([setsData, productsData]) => {
         setSets(setsData)
         setDbProducts(productsData)
