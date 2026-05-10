@@ -11,6 +11,7 @@ interface PageLayoutProps {
   headerSubtitle?: string               // large 전용 서브텍스트
   onBack?: (() => void) | boolean       // 함수: 커스텀 동작, true: navigate(-1), 생략: 버튼 없음
   headerRight?: ReactNode               // 우상단 액션 버튼 영역
+  stickyTab?: ReactNode                 // 헤더 바로 아래 고정 탭바
 
   // 하단 여백
   hasFixedButton?: boolean              // fixed 저장버튼 있는 페이지 → pb 더 크게
@@ -38,6 +39,7 @@ const PageLayout = ({
   headerSubtitle,
   onBack,
   headerRight,
+  stickyTab,
   hasFixedButton = false,
   noPadding = false,
   bgColor = '#F2F4F6',
@@ -153,6 +155,13 @@ const PageLayout = ({
             {headerRight && <div className="shrink-0">{headerRight}</div>}
           </div>
         )
+      )}
+
+      {/* 헤더 아래 고정 탭바 */}
+      {stickyTab && (
+        <div className="bg-white shrink-0">
+          {stickyTab}
+        </div>
       )}
 
       {/* 콘텐츠 */}

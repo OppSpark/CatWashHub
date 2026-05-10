@@ -174,26 +174,27 @@ const BoardListPage = () => {
     setSearchInput('')
   }
 
-  return (
-    <PageLayout title="자유게시판" headerVariant="large">
-      <div className="flex flex-col gap-3">
+  const tabBar = (
+    <div className="flex px-4 gap-1 border-b border-[#F2F4F6]">
+      {TABS.map(tab => (
+        <button
+          key={tab.key}
+          onClick={() => handleTabChange(tab.key)}
+          className={`flex-1 py-3 text-[14px] font-semibold transition-all border-b-2 -mb-px ${
+            activeTab === tab.key
+              ? 'border-[#3182F6] text-[#3182F6]'
+              : 'border-transparent text-[#ADB5C0]'
+          }`}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  )
 
-        {/* 탭 */}
-        <div className="flex bg-white rounded-2xl p-1 gap-1">
-          {TABS.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => handleTabChange(tab.key)}
-              className={`flex-1 py-2 rounded-xl text-[13px] font-medium transition-all ${
-                activeTab === tab.key
-                  ? 'bg-[#3182F6] text-white'
-                  : 'text-[#6B7684]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+  return (
+    <PageLayout title="자유게시판" headerVariant="large" stickyTab={tabBar}>
+      <div className="flex flex-col gap-3">
 
         {/* 검색바 */}
         <div className="bg-white rounded-2xl px-4 py-3 flex items-center gap-2">
@@ -271,7 +272,7 @@ const BoardListPage = () => {
       {/* 글쓰기 버튼 */}
       <button
         onClick={() => navigate('/board/new')}
-        className="fixed bottom-24 right-4 w-14 h-14 bg-[#3182F6] text-white rounded-full shadow-lg flex items-center justify-center active:brightness-90 z-10"
+        className="fixed bottom-[84px] right-4 w-14 h-14 bg-[#3182F6] text-white rounded-full shadow-lg flex items-center justify-center active:brightness-90 z-10"
       >
         <Plus size={24} />
       </button>
