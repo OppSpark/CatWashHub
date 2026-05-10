@@ -15,6 +15,10 @@ import BoardListPage from '@/pages/board/BoardListPage'
 import BoardNewPage from '@/pages/board/BoardNewPage'
 import BoardDetailPage from '@/pages/board/BoardDetailPage'
 import BoardEditPage from '@/pages/board/BoardEditPage'
+import RecipeListPage from '@/pages/recipe/RecipeListPage'
+import RecipeDetailPage from '@/pages/recipe/RecipeDetailPage'
+import RecipeNewPage from '@/pages/recipe/RecipeNewPage'
+import RecipeEditPage from '@/pages/recipe/RecipeEditPage'
 import MobileShell from '@/layouts/MobileShell'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
@@ -50,6 +54,8 @@ const App = () => {
           <Route path="/calculator" element={<CalculatorPage />} />
           <Route path="/board" element={<BoardListPage />} />
           <Route path="/board/:id" element={<BoardDetailPage />} />
+          <Route path="/recipe" element={<RecipeListPage />} />
+          <Route path="/recipe/:id" element={<RecipeDetailPage />} />
         </Route>
 
         {/* 로그인 필요 페이지 */}
@@ -68,6 +74,8 @@ const App = () => {
           <Route path="/wash/:id/review" element={<WashReviewPage />} />
           <Route path="/board/new" element={<BoardNewPage />} />
           <Route path="/board/:id/edit" element={<BoardEditPage />} />
+          <Route path="/recipe/new" element={<RecipeNewPage />} />
+          <Route path="/recipe/:id/edit" element={<RecipeEditPage />} />
         </Route>
 
         {/* 기본 진입 — 비로그인: 게시판, 로그인: 홈 */}
