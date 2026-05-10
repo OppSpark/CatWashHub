@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/hooks/useToast'
 import {
-  User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet,
+  User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet, BarChart2,
 } from 'lucide-react'
 import PageLayout from '@/layouts/PageLayout'
 import BottomSheet from '@/components/BottomSheet'
@@ -147,6 +147,15 @@ const MyPage = () => {
               <span className="text-[12px] text-[#6B7684]">평균 비용</span>
             </div>
           </div>
+        </div>
+
+        {/* 세차 통계 링크 */}
+        <div className="bg-white rounded-2xl overflow-hidden">
+          <MenuItem
+            icon={<BarChart2 size={18} className="text-[#3182F6]" />}
+            label="세차 통계"
+            onClick={() => navigate('/stats')}
+          />
         </div>
 
         {/* 계정 설정 메뉴 */}

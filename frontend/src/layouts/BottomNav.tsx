@@ -1,12 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Droplets, ClipboardList, BarChart2, MessageSquare, User } from 'lucide-react'
+import { Home, Droplets, ClipboardList, MessageSquare, User } from 'lucide-react'
 
 const c_NavItems = [
   { path: '/home',       label: '홈',       icon: Home },
   { path: '/calculator', label: '희석계산기', icon: Droplets },
   { path: '/records',    label: '세차기록',  icon: ClipboardList },
   { path: '/board',      label: '게시판',   icon: MessageSquare },
-  { path: '/stats',      label: '통계',     icon: BarChart2 },
   { path: '/mypage',     label: '마이페이지', icon: User },
 ]
 
