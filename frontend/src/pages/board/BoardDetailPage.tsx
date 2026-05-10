@@ -454,7 +454,6 @@ const BoardDetailPage = () => {
     <PageLayout
       title="자유게시판"
       onBack={true}
-      hasFixedButton
       headerRight={
         isOwner ? (
           <div className="flex items-center gap-4">
@@ -545,7 +544,7 @@ const BoardDetailPage = () => {
       </div>
 
       {/* 댓글 입력 바 */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#F2F4F6] px-4 pb-safe z-20">
+      <div className="fixed left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#F2F4F6] px-4 z-20" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 56px)' }}>
         {userId === null ? (
           <button
             onClick={() => setShowLoginSheet(true)}
