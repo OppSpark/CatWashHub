@@ -19,6 +19,7 @@ const WEATHER_LABEL: Record<string, string> = {
 
 // ==================== 세차일지 임베드 카드 ====================
 const WashLogCard = ({ session }: { session: WashSessionEmbed }) => {
+  const navigate = useNavigate()
   const date = new Date(session.washedAt)
   const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
 
@@ -70,11 +71,15 @@ const WashLogCard = ({ session }: { session: WashSessionEmbed }) => {
         </div>
       )}
 
-      {session.recipeTitle && (
-        <div className="flex items-center gap-1.5 mt-2.5 border-t border-[#BFDBFE] pt-2.5">
+      {session.recipeId && session.recipeTitle && (
+        <button
+          onClick={() => navigate(`/recipe/${session.recipeId}`)}
+          className="w-full flex items-center gap-1.5 mt-2.5 border-t border-[#BFDBFE] pt-2.5 text-left active:opacity-70"
+        >
           <BookOpen size={12} className="text-[#3182F6] shrink-0" />
           <span className="text-[12px] text-[#3182F6] font-medium truncate">{session.recipeTitle}</span>
-        </div>
+          <ChevronRight size={11} className="text-[#3182F6] shrink-0 ml-auto" />
+        </button>
       )}
 
       {session.memo && (
