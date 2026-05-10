@@ -4,6 +4,7 @@ import com.catwashhub.domain.*;
 import com.catwashhub.dto.request.WashCompleteRequest;
 import com.catwashhub.dto.request.WashSessionRequest;
 import com.catwashhub.dto.request.WashUpdateRequest;
+import com.catwashhub.dto.response.MonthlyStatsResponse;
 import com.catwashhub.dto.response.WashDashboardResponse;
 import com.catwashhub.dto.response.WashSessionResponse;
 import com.catwashhub.exception.CustomException;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -170,6 +172,26 @@ public class WashService {
         User user = getUser(_email);
         WashSession session = getSessionOfUser(_sessionId, user.getId());
         m_WashSessionRepository.delete(session);
+    }
+
+    // ==================== 월별 통계 ====================
+
+    @Transactional(readOnly = true)
+    public MonthlyStatsResponse getMonthlyStats(String _email) {
+        User user = getUser(_email);
+        LocalDate from = LocalDate.now().minusMonths(11).withDayOfMonth(1);
+
+        List<Object[]> rows = m_WashSessionRepository.findMonthlyStats(user.getId(), from);
+        List<MonthlyStatsResponse.MonthlyData> monthly = new ArrayList<>();
+        for (Object[] row : rows) {
+            monthly.add(new MonthlyStatsResponse.MonthlyData(
+                    (String) row[0],
+                    ((Number) row[1]).longValue(),
+                    row[2] != null ? ((Number) row[2]).doubleValue() : null,
+                    row[3] != null ? ((Number) row[3]).doubleValue() : null
+            ));
+        }
+        return new MonthlyStatsResponse(monthly);
     }
 
     // ==================== 초기화 함수 ====================

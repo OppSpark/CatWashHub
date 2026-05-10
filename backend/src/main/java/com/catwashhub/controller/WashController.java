@@ -4,6 +4,7 @@ import com.catwashhub.common.ApiResponse;
 import com.catwashhub.dto.request.WashCompleteRequest;
 import com.catwashhub.dto.request.WashSessionRequest;
 import com.catwashhub.dto.request.WashUpdateRequest;
+import com.catwashhub.dto.response.MonthlyStatsResponse;
 import com.catwashhub.dto.response.WashDashboardResponse;
 import com.catwashhub.dto.response.WashSessionResponse;
 import com.catwashhub.service.WashService;
@@ -84,6 +85,14 @@ public class WashController {
             @RequestBody WashCompleteRequest _request) {
         return ResponseEntity.ok(ApiResponse.ok(
                 m_WashService.completeSession(_userDetails.getUsername(), id, _request)));
+    }
+
+    // 월별 통계
+    @GetMapping("/stats/monthly")
+    public ResponseEntity<ApiResponse<MonthlyStatsResponse>> getMonthlyStats(
+            @AuthenticationPrincipal UserDetails _userDetails) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                m_WashService.getMonthlyStats(_userDetails.getUsername())));
     }
 
     // 삭제

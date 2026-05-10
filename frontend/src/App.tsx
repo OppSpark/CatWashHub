@@ -6,6 +6,7 @@ import CalculatorPage from '@/pages/calculator/CalculatorPage'
 import HomePage from '@/pages/home/HomePage'
 import RecordsPage from '@/pages/records/RecordsPage'
 import MyPage from '@/pages/mypage/MyPage'
+import StatsPage from '@/pages/stats/StatsPage'
 import WashNewPage from '@/pages/wash/WashNewPage'
 import WashDetailPage from '@/pages/wash/WashDetailPage'
 import WashReviewPage from '@/pages/wash/WashReviewPage'
@@ -45,6 +46,7 @@ const App = () => {
             <Route path="/home" element={<HomePage />} />
             <Route path="/calculator" element={<CalculatorPage />} />
             <Route path="/records" element={<RecordsPage />} />
+            <Route path="/stats" element={<StatsPage />} />
             <Route path="/mypage" element={<MyPage />} />
           </Route>
 

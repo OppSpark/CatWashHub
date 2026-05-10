@@ -82,6 +82,17 @@ export interface WashDashboard {
   favoriteSets: ProductSetSummary[]
 }
 
+export interface MonthlyData {
+  month: string
+  count: number
+  avgCost: number | null
+  avgRating: number | null
+}
+
+export interface MonthlyStats {
+  monthly: MonthlyData[]
+}
+
 // 세차 준비 저장 요청 (1차 - PREPARING)
 export interface WashSessionRequest {
   washedAt: string | null

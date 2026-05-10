@@ -5,6 +5,7 @@ import type {
   WashSessionRequest,
   WashUpdateRequest,
   WashCompleteRequest,
+  MonthlyStats,
   ProductSet,
   ProductSetRequest,
 } from '@/types/wash'
@@ -54,6 +55,11 @@ export const completeSession = async (id: number, data: WashCompleteRequest): Pr
 
 export const deleteSession = async (id: number): Promise<void> => {
   await apiClient.delete(`/wash/${id}`)
+}
+
+export const getMonthlyStats = async (): Promise<MonthlyStats> => {
+  const res = await apiClient.get('/wash/stats/monthly')
+  return res.data.data
 }
 
 // ==================== 용품 세트 ====================

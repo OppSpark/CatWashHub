@@ -31,4 +31,19 @@ public interface WashSessionRepository extends JpaRepository<WashSession, Long> 
 
     @Query("SELECT AVG(w.rating) FROM WashSession w WHERE w.user.id = :userId AND w.status = 'DONE' AND w.rating IS NOT NULL")
     Double avgRatingByUserId(@Param("userId") Long userId);
+
+    // 월별 통계 (최근 12개월)
+    @Query("""
+        SELECT FUNCTION('DATE_FORMAT', w.washedAt, '%Y-%m') as month,
+               COUNT(w) as cnt,
+               AVG(CASE WHEN w.cost IS NOT NULL THEN w.cost END) as avgCost,
+               AVG(CASE WHEN w.rating IS NOT NULL THEN w.rating END) as avgRating
+        FROM WashSession w
+        WHERE w.user.id = :userId
+          AND w.status = 'DONE'
+          AND w.washedAt >= :from
+        GROUP BY FUNCTION('DATE_FORMAT', w.washedAt, '%Y-%m')
+        ORDER BY month ASC
+        """)
+    List<Object[]> findMonthlyStats(@Param("userId") Long userId, @Param("from") java.time.LocalDate from);
 }

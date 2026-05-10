@@ -1,6 +1,6 @@
 # 프로젝트 개요
 - 프론트엔드: React + TypeScript
-- 백엔드: Java 17 + Spring Boot 3
+- 백엔드: Java 21 + Spring Boot 3
 - DB: MySQL
 - 배포: Oracle Cloud
 
@@ -9,6 +9,8 @@
 - 코드 주석은 **한국어**로
 - 큰 작업 전엔 **계획 먼저** 보여줄 것
 - 작업 단위로 **커밋** 할 것
+- 파일 경로를 알고 있으면 바로 읽을 것 (탐색 최소화)
+- 작업 범위는 요청한 것만 (불필요한 리팩토링 금지)
 
 # 작업 규칙
 - 프론트엔드: Vite + React + TypeScript

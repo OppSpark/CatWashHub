@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
-import { getDashboard } from '@/api/washApi'
-import type { WashDashboard } from '@/types/wash'
+import { getDashboard, getSessions } from '@/api/washApi'
+import type { WashDashboard, WashSession } from '@/types/wash'
 import { HOME_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
 
@@ -27,15 +27,84 @@ const StarRating = ({ rating }: { rating: number | null }) => {
   )
 }
 
+// ==================== 세차 캘린더 ====================
+const WashCalendar = ({ sessions }: { sessions: WashSession[] }) => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = today.getMonth()
+
+  const washedDays = new Set(
+    sessions
+      .filter(s => s.status === 'DONE')
+      .map(s => {
+        const d = new Date(s.washedAt)
+        if (d.getFullYear() === year && d.getMonth() === month) {
+          return d.getDate()
+        }
+        return null
+      })
+      .filter(Boolean)
+  )
+
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)]
+
+  const weeks: (number | null)[][] = []
+  for (let i = 0; i < cells.length; i += 7) {
+    weeks.push(cells.slice(i, i + 7))
+  }
+
+  return (
+    <div className="bg-white rounded-2xl px-5 py-4">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[14px] font-semibold text-[#191F28]">
+          {year}년 {month + 1}월 세차 캘린더
+        </p>
+        <span className="text-[12px] text-[#3182F6] font-medium">{washedDays.size}회</span>
+      </div>
+      <div className="grid grid-cols-7 mb-1">
+        {['일', '월', '화', '수', '목', '금', '토'].map(d => (
+          <div key={d} className="text-center text-[11px] text-[#ADB5C0] py-1">{d}</div>
+        ))}
+      </div>
+      {weeks.map((week, wi) => (
+        <div key={wi} className="grid grid-cols-7">
+          {week.map((day, di) => (
+            <div key={di} className="flex items-center justify-center py-1">
+              {day != null && (
+                <div className={`w-7 h-7 flex items-center justify-center rounded-full text-[12px] font-medium
+                  ${day === today.getDate() ? 'bg-[#3182F6] text-white' : ''}
+                  ${washedDays.has(day) && day !== today.getDate() ? 'bg-[#EBF3FF] text-[#3182F6]' : ''}
+                  ${!washedDays.has(day) && day !== today.getDate() ? 'text-[#191F28]' : ''}
+                `}>
+                  {day}
+                  {washedDays.has(day) && (
+                    <span className="absolute mt-5 w-1 h-1 rounded-full bg-[#3182F6]" />
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const HomePage = () => {
   const navigate = useNavigate()
   const nickname = useAuthStore(s => s.nickname)
   const [dashboard, setDashboard] = useState<WashDashboard | null>(null)
+  const [sessions, setSessions] = useState<WashSession[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    getDashboard()
-      .then(setDashboard)
+    Promise.all([getDashboard(), getSessions()])
+      .then(([dash, sess]) => {
+        setDashboard(dash)
+        setSessions(sess)
+      })
       .finally(() => setIsLoading(false))
   }, [])
 
@@ -102,6 +171,9 @@ const HomePage = () => {
             </div>
           </div>
         )}
+
+        {/* 세차 캘린더 */}
+        {!isLoading && <WashCalendar sessions={sessions} />}
 
         {/* 즐겨찾기 용품 세트 */}
         <div className="bg-white rounded-2xl px-5 py-4">

@@ -36,14 +36,6 @@ const formatDate = (dateStr: string) => {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
 }
 
-const StarRating = ({ rating }: { rating: number | null }) => {
-  if (!rating) { return null }
-  return (
-    <span className="text-[12px] text-[#FFB800]">
-      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
-    </span>
-  )
-}
 
 const RecordsPage = () => {
   const navigate = useNavigate()
@@ -217,27 +209,39 @@ const RecordsPage = () => {
                   onClick={() => navigate(`/wash/${session.id}`)}
                   className="bg-white rounded-2xl px-5 py-4 text-left w-full active:brightness-95 transition-all"
                 >
+                  {/* 날짜 + 날씨 */}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[12px] text-[#ADB5C0]">{formatDate(session.washedAt)}</span>
+                    {session.weather && (
+                      <span className="text-[18px]">{WEATHER_EMOJI[session.weather]}</span>
+                    )}
+                  </div>
                   <div className="flex items-start justify-between">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-[15px] font-semibold text-[#191F28]">
-                          {session.location ?? '장소 미입력'}
-                        </p>
-                        {session.weather && (
-                          <span className="text-[14px]">{WEATHER_EMOJI[session.weather]}</span>
-                        )}
-                      </div>
-                      <StarRating rating={session.rating} />
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-[16px] font-bold text-[#191F28]">
+                        {session.location ?? '장소 미입력'}
+                      </p>
+                      {session.rating != null && (
+                        <div className="flex items-center gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <span key={s} className={`text-[14px] ${s <= session.rating! ? 'text-[#FFB800]' : 'text-[#E5E8EB]'}`}>★</span>
+                          ))}
+                        </div>
+                      )}
                       {session.products.length > 0 && (
-                        <p className="text-[12px] text-[#ADB5C0]">
-                          용품 {session.products.length}개 사용
-                        </p>
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {session.products.slice(0, 3).map(p => (
+                            <span key={p.id} className="bg-[#F2F4F6] text-[#6B7684] text-[11px] rounded-full px-2 py-0.5">{p.productName}</span>
+                          ))}
+                          {session.products.length > 3 && (
+                            <span className="text-[11px] text-[#ADB5C0]">+{session.products.length - 3}</span>
+                          )}
+                        </div>
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <p className="text-[13px] text-[#6B7684]">{formatDate(session.washedAt)}</p>
                       {session.cost != null && (
-                        <p className="text-[12px] text-[#ADB5C0]">{session.cost.toLocaleString()}원</p>
+                        <p className="text-[13px] font-medium text-[#191F28]">{session.cost.toLocaleString()}원</p>
                       )}
                       {session.durationMinutes != null && (
                         <p className="text-[12px] text-[#ADB5C0]">{session.durationMinutes}분</p>

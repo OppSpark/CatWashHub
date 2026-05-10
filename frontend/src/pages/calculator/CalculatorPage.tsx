@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronDown, Clock, Bookmark, BadgeCheck, User } from 'lucide-react'
+import { ChevronDown, Clock, Bookmark, BadgeCheck, User, Info } from 'lucide-react'
 import { calculate, getHistory } from '@/api/calculatorApi'
 import type { Product, DilutionRatio, CalculationResult } from '@/types/calculator'
 import PageLayout from '@/layouts/PageLayout'
 import ProductPickerSheet from '@/components/ProductPickerSheet'
+import BottomSheet from '@/components/BottomSheet'
 
 type TabType = 'calculator' | 'history'
 type RatioMode = 'preset' | 'custom'
@@ -14,6 +15,7 @@ const CalculatorPage = () => {
   // 제품 선택
   const [m_SelectedProduct, setM_SelectedProduct] = useState<Product | null>(null)
   const [m_ShowProductSheet, setM_ShowProductSheet] = useState(false)
+  const [m_ShowProductDetail, setM_ShowProductDetail] = useState(false)
 
   // 희석비 선택
   const [m_RatioMode, setM_RatioMode] = useState<RatioMode>('preset')
@@ -169,11 +171,20 @@ const CalculatorPage = () => {
               <ChevronDown size={18} className="text-[#ADB5C0]" />
             </button>
             {m_SelectedProduct && (
-              <p className="text-[12px] text-[#6B7684] mt-2 px-1">
-                {m_SelectedProduct.brand}
-                {m_SelectedProduct.categoryName && ` · ${m_SelectedProduct.categoryName}`}
-                {m_SelectedProduct.capacityMl && ` · ${m_SelectedProduct.capacityMl}ml`}
-              </p>
+              <div className="flex items-center justify-between mt-2 px-1">
+                <p className="text-[12px] text-[#6B7684]">
+                  {m_SelectedProduct.brand}
+                  {m_SelectedProduct.categoryName && ` · ${m_SelectedProduct.categoryName}`}
+                  {m_SelectedProduct.capacityMl && ` · ${m_SelectedProduct.capacityMl}ml`}
+                </p>
+                <button
+                  onClick={() => setM_ShowProductDetail(true)}
+                  className="flex items-center gap-1 text-[12px] text-[#3182F6] font-medium"
+                >
+                  <Info size={13} />
+                  상세 보기
+                </button>
+              </div>
             )}
           </div>
 
@@ -341,6 +352,80 @@ const CalculatorPage = () => {
         onClose={() => setM_ShowProductSheet(false)}
         onSelect={handleSelectProduct}
       />
+
+      {/* 제품 상세 모달 */}
+      <BottomSheet
+        open={m_ShowProductDetail}
+        onClose={() => setM_ShowProductDetail(false)}
+        title="제품 상세"
+      >
+        {m_SelectedProduct && (
+          <div className="flex flex-col gap-4 pb-2">
+            {/* 제품 기본 정보 */}
+            <div className="flex items-start gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                m_SelectedProduct.isOfficial ? 'bg-[#EBF3FF]' : 'bg-[#F2F4F6]'
+              }`}>
+                {m_SelectedProduct.isOfficial
+                  ? <BadgeCheck size={20} className="text-[#3182F6]" />
+                  : <User size={20} className="text-[#6B7684]" />
+                }
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-[17px] font-bold text-[#191F28]">{m_SelectedProduct.name}</p>
+                  {m_SelectedProduct.isOfficial && (
+                    <span className="text-[10px] bg-[#EBF3FF] text-[#3182F6] px-2 py-0.5 rounded-full font-medium">공식</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-x-2 mt-1">
+                  {m_SelectedProduct.brand && (
+                    <span className="text-[13px] text-[#6B7684]">{m_SelectedProduct.brand}</span>
+                  )}
+                  {m_SelectedProduct.categoryName && (
+                    <span className="text-[13px] text-[#ADB5C0]">· {m_SelectedProduct.categoryName}</span>
+                  )}
+                  {m_SelectedProduct.capacityMl && (
+                    <span className="text-[13px] text-[#ADB5C0]">· {m_SelectedProduct.capacityMl}ml</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 희석비 목록 */}
+            {m_SelectedProduct.dilutionRatios.length > 0 && (
+              <div>
+                <p className="text-[13px] font-semibold text-[#6B7684] mb-2.5">추천 희석비</p>
+                <div className="flex flex-col gap-2">
+                  {m_SelectedProduct.dilutionRatios.map(ratio => (
+                    <button
+                      key={ratio.id}
+                      onClick={() => {
+                        setM_SelectedRatio(ratio)
+                        setM_RatioMode('preset')
+                        setM_ShowProductDetail(false)
+                      }}
+                      className="flex items-center justify-between px-4 py-3 bg-[#F2F4F6] rounded-xl text-left"
+                    >
+                      <div>
+                        <p className="text-[14px] font-semibold text-[#191F28]">{ratio.label}</p>
+                        {ratio.description && (
+                          <p className="text-[12px] text-[#6B7684] mt-0.5">{ratio.description}</p>
+                        )}
+                      </div>
+                      <span className="text-[16px] font-bold text-[#3182F6]">1:{ratio.ratio}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {m_SelectedProduct.dilutionRatios.length === 0 && (
+              <p className="text-[13px] text-[#ADB5C0] text-center py-4">등록된 희석비가 없습니다</p>
+            )}
+          </div>
+        )}
+      </BottomSheet>
       </div>
     </PageLayout>
   )
