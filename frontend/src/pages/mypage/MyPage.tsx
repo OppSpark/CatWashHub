@@ -3,15 +3,88 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/hooks/useToast'
 import {
-  User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet, BarChart2,
+  User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet, BarChart2, BookOpen, Bookmark,
 } from 'lucide-react'
 import PageLayout from '@/layouts/PageLayout'
 import BottomSheet from '@/components/BottomSheet'
 import { MY_MSGS } from '@/constants/messages'
 import { updateNickname, updatePassword, deleteAccount } from '@/api/authApi'
 import { getDashboard } from '@/api/washApi'
+import { getMyRecipes, getSavedRecipes } from '@/api/recipeApi'
 import type { WashDashboard } from '@/types/wash'
+import type { Recipe } from '@/types/recipe'
+import { STEP_TYPE_COLORS } from '@/types/recipe'
 import { formatCost, formatRating } from '@/utils/format'
+
+// ==================== 레시피 목록 시트 ====================
+type RecipeSheetType = 'my' | 'saved' | null
+
+const RecipeListSheet = ({
+  open,
+  type,
+  onClose,
+  onNavigate,
+}: {
+  open: boolean
+  type: RecipeSheetType
+  onClose: () => void
+  onNavigate: (id: number) => void
+}) => {
+  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (!open || !type) { return }
+    setIsLoading(true)
+    const fetch = type === 'my' ? getMyRecipes : getSavedRecipes
+    fetch().then(setRecipes).finally(() => setIsLoading(false))
+  }, [open, type])
+
+  return (
+    <BottomSheet open={open} onClose={onClose} title={type === 'my' ? '내 레시피' : '즐겨찾기 레시피'}>
+      <div className="pb-4">
+        {isLoading ? (
+          <div className="py-10 flex justify-center">
+            <div className="w-5 h-5 border-2 border-[#3182F6] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : recipes.length === 0 ? (
+          <div className="py-10 text-center">
+            <p className="text-[14px] text-[#ADB5C0]">
+              {type === 'my' ? '작성한 레시피가 없어요' : '즐겨찾기한 레시피가 없어요'}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {recipes.map(recipe => (
+              <button
+                key={recipe.id}
+                onClick={() => { onClose(); onNavigate(recipe.id) }}
+                className="w-full bg-[#F8F9FA] rounded-2xl p-4 text-left active:brightness-95"
+              >
+                <p className="text-[15px] font-bold text-[#191F28] mb-1.5">{recipe.title}</p>
+                <div className="flex flex-wrap gap-1">
+                  {recipe.steps.slice(0, 4).map((step, i) => (
+                    <span
+                      key={i}
+                      className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: `${STEP_TYPE_COLORS[step.stepType]}20`,
+                        color: STEP_TYPE_COLORS[step.stepType],
+                      }}
+                    >
+                      {step.displayLabel}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-[12px] text-[#ADB5C0] mt-1.5">by {recipe.authorNickname}</p>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </BottomSheet>
+  )
+}
 
 // ==================== 모달 타입 ====================
 type ModalType = 'nickname' | 'password' | null
@@ -23,6 +96,7 @@ const MyPage = () => {
 
   const [dashboard, setDashboard] = useState<WashDashboard | null>(null)
   const [activeModal, setActiveModal] = useState<ModalType>(null)
+  const [recipeSheet, setRecipeSheet] = useState<RecipeSheetType>(null)
 
   // 닉네임 변경 폼
   const [newNickname, setNewNickname] = useState('')
@@ -158,6 +232,23 @@ const MyPage = () => {
           />
         </div>
 
+        {/* 레시피 */}
+        <div className="bg-white rounded-2xl overflow-hidden">
+          <p className="text-[12px] font-semibold text-[#6B7684] px-5 pt-4 pb-2">레시피</p>
+          <MenuItem
+            icon={<BookOpen size={18} className="text-[#3182F6]" />}
+            label="내 레시피"
+            onClick={() => setRecipeSheet('my')}
+          />
+          <div className="h-px bg-[#F2F4F6] mx-5" />
+          <MenuItem
+            icon={<Bookmark size={18} className="text-[#3182F6]" />}
+            label="즐겨찾기한 레시피"
+            onClick={() => setRecipeSheet('saved')}
+          />
+          <div className="pb-2" />
+        </div>
+
         {/* 계정 설정 메뉴 */}
         <div className="bg-white rounded-2xl overflow-hidden">
           <p className="text-[12px] font-semibold text-[#6B7684] px-5 pt-4 pb-2">계정</p>
@@ -201,6 +292,14 @@ const MyPage = () => {
         </div>
 
       </div>
+
+      {/* 레시피 목록 시트 */}
+      <RecipeListSheet
+        open={recipeSheet !== null}
+        type={recipeSheet}
+        onClose={() => setRecipeSheet(null)}
+        onNavigate={id => navigate(`/recipe/${id}`)}
+      />
 
       {/* 닉네임 변경 시트 */}
       <BottomSheet

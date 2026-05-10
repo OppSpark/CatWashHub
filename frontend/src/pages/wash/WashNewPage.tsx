@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { getProductSets, createSession } from '@/api/washApi'
-import { getMyRecipes } from '@/api/recipeApi'
+import { getMyRecipes, getSavedRecipes } from '@/api/recipeApi'
 import type { ProductSet } from '@/types/wash'
 import type { Product } from '@/types/calculator'
 import type { Recipe } from '@/types/recipe'
@@ -44,7 +44,10 @@ const WashNewPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [showRecipePicker, setShowRecipePicker] = useState(false)
+  const [recipeTab, setRecipeTab] = useState<'my' | 'saved'>('my')
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([])
+  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([])
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(false)
   const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null)
   const [selectedRecipeTitle, setSelectedRecipeTitle] = useState<string | null>(null)
 
@@ -65,10 +68,13 @@ const WashNewPage = () => {
 
   // ==================== 기능별 함수 ====================
   const handleOpenRecipePicker = () => {
-    if (myRecipes.length === 0) {
-      getMyRecipes().then(setMyRecipes)
-    }
     setShowRecipePicker(true)
+    if (myRecipes.length === 0 && savedRecipes.length === 0) {
+      setIsLoadingRecipes(true)
+      Promise.all([getMyRecipes(), getSavedRecipes()])
+        .then(([my, saved]) => { setMyRecipes(my); setSavedRecipes(saved) })
+        .finally(() => setIsLoadingRecipes(false))
+    }
   }
 
   const handleSelectRecipe = (recipe: Recipe) => {
@@ -339,16 +345,39 @@ const WashNewPage = () => {
       />
 
       {/* 레시피 선택 시트 */}
-      <BottomSheet open={showRecipePicker} onClose={() => setShowRecipePicker(false)}>
-        <div className="px-4 pb-4">
-          <p className="text-[16px] font-bold text-[#191F28] mb-4">내 레시피</p>
-          {myRecipes.length === 0 ? (
+      <BottomSheet open={showRecipePicker} onClose={() => setShowRecipePicker(false)} title="레시피로 불러오기">
+        <div className="pb-4">
+          {/* 탭 */}
+          <div className="flex border-b border-[#F2F4F6] mb-3">
+            {([
+              { key: 'my' as const, label: '내 레시피' },
+              { key: 'saved' as const, label: '즐겨찾기' },
+            ]).map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setRecipeTab(key)}
+                className={`flex-1 py-2.5 text-[14px] font-semibold border-b-2 -mb-px transition-all ${
+                  recipeTab === key ? 'border-[#3182F6] text-[#3182F6]' : 'border-transparent text-[#ADB5C0]'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {isLoadingRecipes ? (
+            <div className="py-10 flex justify-center">
+              <div className="w-5 h-5 border-2 border-[#3182F6] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (recipeTab === 'my' ? myRecipes : savedRecipes).length === 0 ? (
             <div className="py-10 text-center">
-              <p className="text-[14px] text-[#ADB5C0]">작성한 레시피가 없어요</p>
+              <p className="text-[14px] text-[#ADB5C0]">
+                {recipeTab === 'my' ? '작성한 레시피가 없어요' : '즐겨찾기한 레시피가 없어요'}
+              </p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              {myRecipes.map(recipe => (
+              {(recipeTab === 'my' ? myRecipes : savedRecipes).map(recipe => (
                 <button
                   key={recipe.id}
                   onClick={() => handleSelectRecipe(recipe)}
@@ -357,7 +386,7 @@ const WashNewPage = () => {
                   <div>
                     <p className="text-[14px] font-semibold text-[#191F28]">{recipe.title}</p>
                     <p className="text-[12px] text-[#ADB5C0] mt-0.5">
-                      {recipe.steps.filter(s => s.productId).length}개 제품
+                      {recipe.steps.filter(s => s.productId).length}개 제품 · by {recipe.authorNickname}
                     </p>
                   </div>
                   <ChevronRight size={16} className="text-[#ADB5C0]" />
