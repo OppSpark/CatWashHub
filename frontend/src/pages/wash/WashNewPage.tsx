@@ -135,21 +135,19 @@ const WashNewPage = () => {
         {/* 날짜 선택 */}
         <div className="bg-white rounded-2xl px-5 py-4">
           <p className="text-[13px] text-[#6B7684] mb-2">세차 날짜</p>
-          <button
-            onClick={() => dateInputRef.current?.showPicker?.()}
-            className="w-full flex items-center gap-3 border border-[#E5E8EB] rounded-xl px-3 py-2.5 active:brightness-95"
-          >
-            <CalendarDays size={18} className="text-[#3182F6] shrink-0" />
-            <span className="text-[14px] text-[#191F28]">{formatDate(washDate)}</span>
-          </button>
-          {/* 숨겨진 date input — showPicker()로만 열림 */}
-          <input
-            ref={dateInputRef}
-            type="date"
-            value={washDate}
-            onChange={e => setWashDate(e.target.value)}
-            className="sr-only"
-          />
+          <div className="relative">
+            <div className="w-full flex items-center gap-3 border border-[#E5E8EB] rounded-xl px-3 py-2.5 pointer-events-none">
+              <CalendarDays size={18} className="text-[#3182F6] shrink-0" />
+              <span className="text-[14px] text-[#191F28]">{formatDate(washDate)}</span>
+            </div>
+            <input
+              ref={dateInputRef}
+              type="date"
+              value={washDate}
+              onChange={e => setWashDate(e.target.value)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          </div>
         </div>
 
         {/* 세차 장소 */}
