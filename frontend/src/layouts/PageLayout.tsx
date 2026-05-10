@@ -167,7 +167,8 @@ const PageLayout = ({
       {/* 콘텐츠 */}
       <div
         ref={scrollRef}
-        className={`flex-1 ${noPadding ? '' : 'px-4 pt-4'}`}
+        className={`flex-1 overflow-y-auto ${noPadding ? '' : 'px-4 pt-4'}`}
+        style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

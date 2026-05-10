@@ -10,6 +10,12 @@ body {
   background-color: #D1D5DB;
   color: #191F28;
   font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', sans-serif;
+  overscroll-behavior: none;
+}
+
+/* iOS에서 input 포커스 시 자동 줌인 방지 */
+input, textarea, select {
+  font-size: max(16px, 1em);
 }
 
 @keyframes slide-up {
