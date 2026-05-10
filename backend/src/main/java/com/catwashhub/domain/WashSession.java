@@ -47,6 +47,10 @@ public class WashSession {
     @Column(columnDefinition = "TEXT")
     private String memo;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipe_id")
+    private Recipe recipe;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -60,12 +64,18 @@ public class WashSession {
     private List<WashProduct> washProducts = new ArrayList<>();
 
     @Builder
-    public WashSession(User user, LocalDate washedAt, String location) {
+    public WashSession(User user, LocalDate washedAt, String location, Recipe recipe) {
         this.user = user;
         this.status = Status.PREPARING;
         this.washedAt = washedAt;
         this.location = location;
+        this.recipe = recipe;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void linkRecipe(Recipe _recipe) {
+        this.recipe = _recipe;
         this.updatedAt = LocalDateTime.now();
     }
 

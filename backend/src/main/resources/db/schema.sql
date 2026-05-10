@@ -129,9 +129,11 @@ CREATE TABLE IF NOT EXISTS wash_sessions
     cost             INT,
     rating           INT,
     memo             TEXT,
+    recipe_id        BIGINT,
     created_at       DATETIME                      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       DATETIME                      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS wash_products

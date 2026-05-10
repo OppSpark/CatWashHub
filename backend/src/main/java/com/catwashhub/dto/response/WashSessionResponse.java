@@ -18,6 +18,8 @@ public record WashSessionResponse(
         Integer cost,
         Integer rating,
         String memo,
+        Long recipeId,
+        String recipeTitle,
         List<WashPhotoResponse> photos,
         List<WashProductResponse> products,
         LocalDateTime createdAt
@@ -82,6 +84,8 @@ public record WashSessionResponse(
                 session.getCost(),
                 session.getRating(),
                 session.getMemo(),
+                session.getRecipe() != null ? session.getRecipe().getId() : null,
+                session.getRecipe() != null ? session.getRecipe().getTitle() : null,
                 photos,
                 products,
                 session.getCreatedAt()

@@ -35,6 +35,8 @@ export interface WashSession {
   cost: number | null
   rating: number | null
   memo: string | null
+  recipeId: number | null
+  recipeTitle: string | null
   photos: WashPhoto[]
   products: WashProductItem[]
   createdAt: string
@@ -97,6 +99,7 @@ export interface MonthlyStats {
 export interface WashSessionRequest {
   washedAt: string | null
   location: string | null
+  recipeId: number | null
   products: WashProductRequest[]
 }
 

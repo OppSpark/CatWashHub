@@ -7,6 +7,7 @@ import java.util.List;
 public record WashSessionRequest(
         LocalDate washedAt,
         String location,
+        Long recipeId,
         List<WashProductRequest> products
 ) {
     public record WashProductRequest(

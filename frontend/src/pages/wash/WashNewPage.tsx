@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { getProductSets, createSession } from '@/api/washApi'
+import { getMyRecipes } from '@/api/recipeApi'
 import type { ProductSet } from '@/types/wash'
 import type { Product } from '@/types/calculator'
+import type { Recipe } from '@/types/recipe'
 import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
 import ProductPickerSheet from '@/components/ProductPickerSheet'
-import { Plus, X, CalendarDays, MapPin } from 'lucide-react'
+import BottomSheet from '@/components/BottomSheet'
+import { Plus, X, CalendarDays, MapPin, BookOpen, ChevronRight } from 'lucide-react'
 
 interface SelectedProduct {
   productId: number | null
@@ -40,6 +43,10 @@ const WashNewPage = () => {
   const [customCategory, setCustomCategory] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [showRecipePicker, setShowRecipePicker] = useState(false)
+  const [myRecipes, setMyRecipes] = useState<Recipe[]>([])
+  const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null)
+  const [selectedRecipeTitle, setSelectedRecipeTitle] = useState<string | null>(null)
 
   // ==================== 초기화 함수 ====================
   useEffect(() => {
@@ -57,6 +64,35 @@ const WashNewPage = () => {
   }, [])
 
   // ==================== 기능별 함수 ====================
+  const handleOpenRecipePicker = () => {
+    if (myRecipes.length === 0) {
+      getMyRecipes().then(setMyRecipes)
+    }
+    setShowRecipePicker(true)
+  }
+
+  const handleSelectRecipe = (recipe: Recipe) => {
+    setSelectedRecipeId(recipe.id)
+    setSelectedRecipeTitle(recipe.title)
+    const newProducts: SelectedProduct[] = recipe.steps
+      .filter(s => s.productId !== null)
+      .map((s, i) => ({
+        productId: s.productId,
+        customName: null,
+        category: null,
+        memo: s.memo ?? null,
+        sortOrder: i,
+        displayName: s.productName!,
+      }))
+    setSelectedProducts(newProducts)
+    setShowRecipePicker(false)
+  }
+
+  const clearRecipe = () => {
+    setSelectedRecipeId(null)
+    setSelectedRecipeTitle(null)
+  }
+
   const applySet = (set: ProductSet) => {
     setSelectedProducts(
       set.items.map(item => ({
@@ -114,6 +150,7 @@ const WashNewPage = () => {
       const session = await createSession({
         washedAt: washDate,
         location: washLocation.trim() || null,
+        recipeId: selectedRecipeId,
         products: selectedProducts.map(({ displayName: _, ...rest }) => rest),
       })
       toast.success(WASH_MSGS.PREPARING_SAVED)
@@ -162,6 +199,29 @@ const WashNewPage = () => {
               className="flex-1 text-[14px] outline-none bg-transparent"
             />
           </div>
+        </div>
+
+        {/* 레시피 불러오기 */}
+        <div className="bg-white rounded-2xl px-5 py-4">
+          <p className="text-[13px] text-[#6B7684] mb-2">레시피로 불러오기</p>
+          {selectedRecipeTitle ? (
+            <div className="flex items-center gap-2 bg-[#EFF6FF] rounded-xl px-3 py-2.5">
+              <BookOpen size={16} className="text-[#3182F6] shrink-0" />
+              <p className="flex-1 text-[13px] font-medium text-[#3182F6]">{selectedRecipeTitle}</p>
+              <button onClick={clearRecipe} className="text-[#ADB5C0]"><X size={14} /></button>
+            </div>
+          ) : (
+            <button
+              onClick={handleOpenRecipePicker}
+              className="w-full flex items-center justify-between border border-dashed border-[#C8D0DA] rounded-xl px-3 py-2.5"
+            >
+              <span className="flex items-center gap-2 text-[13px] text-[#ADB5C0]">
+                <BookOpen size={15} />
+                내 레시피에서 불러오기
+              </span>
+              <ChevronRight size={15} className="text-[#ADB5C0]" />
+            </button>
+          )}
         </div>
 
         {/* 즐겨찾기 세트 */}
@@ -277,6 +337,36 @@ const WashNewPage = () => {
         selectedIds={selectedIds}
         onConfirm={handlePickerConfirm}
       />
+
+      {/* 레시피 선택 시트 */}
+      <BottomSheet open={showRecipePicker} onClose={() => setShowRecipePicker(false)}>
+        <div className="px-4 pb-4">
+          <p className="text-[16px] font-bold text-[#191F28] mb-4">내 레시피</p>
+          {myRecipes.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-[14px] text-[#ADB5C0]">작성한 레시피가 없어요</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {myRecipes.map(recipe => (
+                <button
+                  key={recipe.id}
+                  onClick={() => handleSelectRecipe(recipe)}
+                  className="w-full flex items-center justify-between bg-[#F2F4F6] rounded-xl px-4 py-3 text-left active:brightness-95"
+                >
+                  <div>
+                    <p className="text-[14px] font-semibold text-[#191F28]">{recipe.title}</p>
+                    <p className="text-[12px] text-[#ADB5C0] mt-0.5">
+                      {recipe.steps.filter(s => s.productId).length}개 제품
+                    </p>
+                  </div>
+                  <ChevronRight size={16} className="text-[#ADB5C0]" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </BottomSheet>
 
       {/* 하단 저장 버튼 */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-[#F2F4F6] px-4 py-4 pb-safe">

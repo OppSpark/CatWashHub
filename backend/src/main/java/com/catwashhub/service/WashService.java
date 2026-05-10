@@ -29,6 +29,7 @@ public class WashService {
     private final ProductRepository m_ProductRepository;
     private final ProductSetRepository m_ProductSetRepository;
     private final UserRepository m_UserRepository;
+    private final RecipeRepository m_RecipeRepository;
 
     // ==================== 대시보드 ====================
 
@@ -77,10 +78,16 @@ public class WashService {
     public WashSessionResponse createSession(String _email, WashSessionRequest _request) {
         User user = getUser(_email);
 
+        Recipe recipe = null;
+        if (_request.recipeId() != null) {
+            recipe = m_RecipeRepository.findById(_request.recipeId()).orElse(null);
+        }
+
         WashSession session = WashSession.builder()
                 .user(user)
                 .washedAt(_request.washedAt() != null ? _request.washedAt() : LocalDate.now())
                 .location(_request.location())
+                .recipe(recipe)
                 .build();
 
         addProducts(session, _request.products());
