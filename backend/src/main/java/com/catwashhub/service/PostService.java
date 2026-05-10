@@ -5,6 +5,7 @@ import com.catwashhub.domain.Post;
 import com.catwashhub.domain.PostLike;
 import com.catwashhub.domain.User;
 import com.catwashhub.dto.request.CommentRequest;
+import com.catwashhub.dto.request.CommentUpdateRequest;
 import com.catwashhub.dto.request.PostRequest;
 import com.catwashhub.dto.response.CommentResponse;
 import com.catwashhub.dto.response.PostResponse;
@@ -34,7 +35,12 @@ public class PostService {
     // ==================== 게시글 목록 ====================
 
     @Transactional(readOnly = true)
-    public Page<PostResponse.PostSummary> getPosts(Pageable pageable) {
+    public Page<PostResponse.PostSummary> getPosts(String _keyword, Pageable pageable) {
+        if (_keyword != null && !_keyword.isBlank()) {
+            return m_PostRepository
+                    .findByTitleContainingOrContentContainingOrderByCreatedAtDesc(_keyword, _keyword, pageable)
+                    .map(PostResponse.PostSummary::from);
+        }
         return m_PostRepository.findAllByOrderByCreatedAtDesc(pageable)
                 .map(PostResponse.PostSummary::from);
     }
@@ -42,10 +48,16 @@ public class PostService {
     // ==================== 게시글 상세 ====================
 
     @Transactional
-    public PostResponse getPost(String _email, Long _postId) {
+    public PostResponse getPost(String _email, Long _postId, jakarta.servlet.http.HttpSession _session) {
         User user = getUser(_email);
         Post post = getPostById(_postId);
-        post.incrementViewCount();
+
+        String sessionKey = "viewed_post_" + _postId;
+        if (_session.getAttribute(sessionKey) == null) {
+            post.incrementViewCount();
+            _session.setAttribute(sessionKey, true);
+        }
+
         boolean likedByMe = m_PostLikeRepository.existsByPostIdAndUserId(_postId, user.getId());
         return PostResponse.from(post, likedByMe);
     }
@@ -133,6 +145,20 @@ public class PostService {
                 .content(_request.content())
                 .build();
         m_CommentRepository.save(comment);
+        return CommentResponse.from(comment);
+    }
+
+    // ==================== 댓글 수정 ====================
+
+    @Transactional
+    public CommentResponse updateComment(String _email, Long _commentId, CommentUpdateRequest _request) {
+        User user = getUser(_email);
+        Comment comment = m_CommentRepository.findById(_commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+        if (!comment.getUser().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.COMMENT_FORBIDDEN);
+        }
+        comment.update(_request.content());
         return CommentResponse.from(comment);
     }
 

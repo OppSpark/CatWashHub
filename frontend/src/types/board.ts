@@ -3,6 +3,7 @@ export interface PostSummary {
   authorId: number
   authorNickname: string
   title: string
+  contentPreview: string
   viewCount: number
   likeCount: number
   commentCount: number

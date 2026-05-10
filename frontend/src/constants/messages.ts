@@ -38,6 +38,7 @@ export const BOARD_MSGS = {
   POST_DELETE_ERROR: '삭제 중 오류가 발생했어요.',
   CONFIRM_DELETE_POST: '게시글을 삭제할까요?',
   COMMENT_CREATED: '댓글이 작성됐어요.',
+  COMMENT_UPDATED: '댓글이 수정됐어요.',
   COMMENT_DELETED: '댓글이 삭제됐어요.',
   COMMENT_SAVE_ERROR: '댓글 저장 중 오류가 발생했어요.',
   CONFIRM_DELETE_COMMENT: '댓글을 삭제할까요?',

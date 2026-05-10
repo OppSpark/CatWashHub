@@ -3,8 +3,8 @@ import type { Post, PostSummary, Comment, PageResponse, PostRequest, CommentRequ
 
 // ==================== 게시글 ====================
 
-export const getPosts = async (page = 0, size = 20): Promise<PageResponse<PostSummary>> => {
-  const res = await apiClient.get('/posts', { params: { page, size } })
+export const getPosts = async (page = 0, size = 20, keyword?: string): Promise<PageResponse<PostSummary>> => {
+  const res = await apiClient.get('/posts', { params: { page, size, keyword } })
   return res.data.data
 }
 
@@ -41,6 +41,11 @@ export const getComments = async (postId: number): Promise<Comment[]> => {
 
 export const createComment = async (postId: number, data: CommentRequest): Promise<Comment> => {
   const res = await apiClient.post(`/posts/${postId}/comments`, data)
+  return res.data.data
+}
+
+export const updateComment = async (commentId: number, content: string): Promise<Comment> => {
+  const res = await apiClient.patch(`/posts/comments/${commentId}`, { content })
   return res.data.data
 }
 

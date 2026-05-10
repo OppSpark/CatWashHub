@@ -25,17 +25,23 @@ public record PostResponse(
             Long authorId,
             String authorNickname,
             String title,
+            String contentPreview,
             int viewCount,
             long likeCount,
             int commentCount,
             LocalDateTime createdAt
     ) {
         public static PostSummary from(Post post) {
+            String preview = post.getContent();
+            if (preview != null && preview.length() > 100) {
+                preview = preview.substring(0, 100);
+            }
             return new PostSummary(
                     post.getId(),
                     post.getUser().getId(),
                     post.getUser().getNickname(),
                     post.getTitle(),
+                    preview,
                     post.getViewCount(),
                     post.getLikes().size(),
                     post.getComments().size(),

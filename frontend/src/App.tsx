@@ -14,6 +14,7 @@ import ProductSetsPage from '@/pages/wash/ProductSetsPage'
 import BoardListPage from '@/pages/board/BoardListPage'
 import BoardNewPage from '@/pages/board/BoardNewPage'
 import BoardDetailPage from '@/pages/board/BoardDetailPage'
+import BoardEditPage from '@/pages/board/BoardEditPage'
 import MobileShell from '@/layouts/MobileShell'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
@@ -62,6 +63,7 @@ const App = () => {
           <Route path="/wash/:id/review" element={<WashReviewPage />} />
           <Route path="/board/new" element={<BoardNewPage />} />
           <Route path="/board/:id" element={<BoardDetailPage />} />
+          <Route path="/board/:id/edit" element={<BoardEditPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

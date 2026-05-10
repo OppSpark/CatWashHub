@@ -2,6 +2,7 @@ package com.catwashhub.controller;
 
 import com.catwashhub.common.ApiResponse;
 import com.catwashhub.dto.request.CommentRequest;
+import com.catwashhub.dto.request.CommentUpdateRequest;
 import com.catwashhub.dto.request.PostRequest;
 import com.catwashhub.dto.response.CommentResponse;
 import com.catwashhub.dto.response.PostResponse;
@@ -23,22 +24,24 @@ public class PostController {
 
     private final PostService m_PostService;
 
-    // 게시글 목록
+    // 게시글 목록 (검색 지원)
     @GetMapping
     public ResponseEntity<ApiResponse<Page<PostResponse.PostSummary>>> getPosts(
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ApiResponse.ok(
-                m_PostService.getPosts(PageRequest.of(page, size))));
+                m_PostService.getPosts(keyword, PageRequest.of(page, size))));
     }
 
     // 게시글 상세
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PostResponse>> getPost(
             @AuthenticationPrincipal UserDetails _userDetails,
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            jakarta.servlet.http.HttpSession session) {
         return ResponseEntity.ok(ApiResponse.ok(
-                m_PostService.getPost(_userDetails.getUsername(), id)));
+                m_PostService.getPost(_userDetails.getUsername(), id, session)));
     }
 
     // 게시글 작성
@@ -94,6 +97,16 @@ public class PostController {
             @RequestBody CommentRequest _request) {
         return ResponseEntity.ok(ApiResponse.ok(
                 m_PostService.createComment(_userDetails.getUsername(), id, _request)));
+    }
+
+    // 댓글 수정
+    @PatchMapping("/comments/{commentId}")
+    public ResponseEntity<ApiResponse<CommentResponse>> updateComment(
+            @AuthenticationPrincipal UserDetails _userDetails,
+            @PathVariable Long commentId,
+            @RequestBody CommentUpdateRequest _request) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                m_PostService.updateComment(_userDetails.getUsername(), commentId, _request)));
     }
 
     // 댓글 삭제
