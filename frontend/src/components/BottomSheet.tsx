@@ -9,22 +9,34 @@ interface BottomSheetProps {
   footer?: ReactNode
 }
 
-const DRAG_CLOSE_THRESHOLD = 120  // px — 이 이상 내리면 닫힘
-const DRAG_VELOCITY_THRESHOLD = 0.5  // px/ms — 빠르게 내리면 닫힘
+// snap 단계: 'half' = 50dvh, 'full' = 92dvh
+type SnapPoint = 'half' | 'full'
+
+const SNAP_HEIGHTS: Record<SnapPoint, string> = {
+  half: '50dvh',
+  full: '92dvh',
+}
+
+const DRAG_CLOSE_THRESHOLD = 100   // px — half에서 이 이상 내리면 닫힘
+const DRAG_EXPAND_THRESHOLD = 80   // px — half에서 이 이상 올리면 full로
+const DRAG_SHRINK_THRESHOLD = 80   // px — full에서 이 이상 내리면 half로
+const VELOCITY_THRESHOLD = 0.4     // px/ms
 
 const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProps) => {
   const sheetRef = useRef<HTMLDivElement>(null)
   const dragStartY = useRef(0)
   const dragStartTime = useRef(0)
-  const currentTranslateY = useRef(0)
+  const dragDelta = useRef(0)
+  const [snap, setSnap] = useState<SnapPoint>('half')
   const [translateY, setTranslateY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
 
-  // 열릴 때 애니메이션
+  // 열릴 때 half로 시작
   useEffect(() => {
     if (open) {
+      setSnap('half')
       setTranslateY(600)
       setIsVisible(true)
       requestAnimationFrame(() => {
@@ -32,7 +44,10 @@ const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProp
       })
     } else {
       setTranslateY(600)
-      const timer = setTimeout(() => setIsVisible(false), 300)
+      const timer = setTimeout(() => {
+        setIsVisible(false)
+        setSnap('half')
+      }, 300)
       return () => clearTimeout(timer)
     }
   }, [open])
@@ -72,39 +87,61 @@ const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProp
   // ==================== 드래그 핸들러 ====================
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    // 콘텐츠 스크롤 중이면 드래그 무시
     const target = e.target as HTMLElement
-    if (target.closest('[data-scroll]')) { return }
+    // full 상태에서 콘텐츠 스크롤 영역은 드래그 무시
+    if (snap === 'full' && target.closest('[data-scroll]')) { return }
     dragStartY.current = e.touches[0].clientY
     dragStartTime.current = Date.now()
-    currentTranslateY.current = 0
+    dragDelta.current = 0
     setIsDragging(true)
-  }, [])
+  }, [snap])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!isDragging) { return }
     const delta = e.touches[0].clientY - dragStartY.current
-    if (delta < 0) { return }  // 위로 드래그는 무시
-    currentTranslateY.current = delta
-    setTranslateY(delta)
+    dragDelta.current = delta
+    // 범위 제한: 위로는 40px까지만 당겨지는 느낌
+    const clamped = delta < 0 ? Math.max(delta, -40) : delta
+    setTranslateY(clamped)
   }, [isDragging])
 
   const handleTouchEnd = useCallback(() => {
     if (!isDragging) { return }
     setIsDragging(false)
-    const elapsed = Date.now() - dragStartTime.current
-    const velocity = currentTranslateY.current / elapsed
 
-    if (
-      currentTranslateY.current > DRAG_CLOSE_THRESHOLD ||
-      velocity > DRAG_VELOCITY_THRESHOLD
-    ) {
-      onClose()
+    const elapsed = Date.now() - dragStartTime.current
+    const velocity = dragDelta.current / Math.max(elapsed, 1)
+    const delta = dragDelta.current
+
+    if (snap === 'half') {
+      if (delta > DRAG_CLOSE_THRESHOLD || velocity > VELOCITY_THRESHOLD) {
+        // 닫기
+        onClose()
+      } else if (delta < -DRAG_EXPAND_THRESHOLD || velocity < -VELOCITY_THRESHOLD) {
+        // full로 확장
+        setSnap('full')
+        setTranslateY(0)
+      } else {
+        setTranslateY(0)
+      }
     } else {
-      setTranslateY(0)
+      // full 상태
+      if (delta > DRAG_SHRINK_THRESHOLD || velocity > VELOCITY_THRESHOLD) {
+        if (delta > DRAG_SHRINK_THRESHOLD * 2.5 || velocity > VELOCITY_THRESHOLD * 2) {
+          // 많이 내리면 바로 닫기
+          onClose()
+        } else {
+          // half로 축소
+          setSnap('half')
+          setTranslateY(0)
+        }
+      } else {
+        setTranslateY(0)
+      }
     }
-    currentTranslateY.current = 0
-  }, [isDragging, onClose])
+
+    dragDelta.current = 0
+  }, [isDragging, snap, onClose])
 
   if (!isVisible) { return null }
 
@@ -127,9 +164,9 @@ const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProp
         ref={sheetRef}
         className="relative bg-white rounded-t-3xl flex flex-col pointer-events-auto"
         style={{
-          maxHeight: '92dvh',
+          height: SNAP_HEIGHTS[snap],
           transform: `translateY(${translateY}px)`,
-          transition: isDragging ? 'none' : 'transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)',
+          transition: isDragging ? 'none' : 'transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), height 0.32s cubic-bezier(0.32, 0.72, 0, 1)',
           marginBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : undefined,
           paddingBottom: keyboardHeight > 0 ? 0 : 'env(safe-area-inset-bottom)',
         }}
