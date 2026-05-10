@@ -3,6 +3,7 @@ package com.catwashhub.controller;
 import com.catwashhub.common.ApiResponse;
 import com.catwashhub.dto.request.WashCompleteRequest;
 import com.catwashhub.dto.request.WashSessionRequest;
+import com.catwashhub.dto.request.WashUpdateRequest;
 import com.catwashhub.dto.response.WashDashboardResponse;
 import com.catwashhub.dto.response.WashSessionResponse;
 import com.catwashhub.service.WashService;
@@ -63,6 +64,16 @@ public class WashController {
             @RequestBody WashSessionRequest _request) {
         return ResponseEntity.ok(ApiResponse.ok(
                 m_WashService.updatePreparation(_userDetails.getUsername(), id, _request)));
+    }
+
+    // 완료된 세차 수정
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<WashSessionResponse>> updateSession(
+            @AuthenticationPrincipal UserDetails _userDetails,
+            @PathVariable Long id,
+            @RequestBody WashUpdateRequest _request) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                m_WashService.updateDone(_userDetails.getUsername(), id, _request)));
     }
 
     // 후기 작성 완료 (DONE으로 전환)

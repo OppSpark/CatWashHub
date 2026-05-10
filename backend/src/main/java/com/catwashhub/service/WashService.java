@@ -3,6 +3,7 @@ package com.catwashhub.service;
 import com.catwashhub.domain.*;
 import com.catwashhub.dto.request.WashCompleteRequest;
 import com.catwashhub.dto.request.WashSessionRequest;
+import com.catwashhub.dto.request.WashUpdateRequest;
 import com.catwashhub.dto.response.WashDashboardResponse;
 import com.catwashhub.dto.response.WashSessionResponse;
 import com.catwashhub.exception.CustomException;
@@ -96,6 +97,25 @@ public class WashService {
         session.updatePreparation(_request.location(), null);
         session.getWashProducts().clear();
         addProducts(session, _request.products());
+
+        return WashSessionResponse.from(session);
+    }
+
+    // ==================== 완료된 세차 수정 (DONE) ====================
+
+    @Transactional
+    public WashSessionResponse updateDone(String _email, Long _sessionId, WashUpdateRequest _request) {
+        User user = getUser(_email);
+        WashSession session = getSessionOfUser(_sessionId, user.getId());
+
+        session.updateDone(
+                _request.location(),
+                _request.weather(),
+                _request.durationMinutes(),
+                _request.cost(),
+                _request.rating(),
+                _request.memo()
+        );
 
         return WashSessionResponse.from(session);
     }

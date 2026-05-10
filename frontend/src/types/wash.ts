@@ -89,6 +89,16 @@ export interface WashSessionRequest {
   products: WashProductRequest[]
 }
 
+// 완료된 세차 수정 요청
+export interface WashUpdateRequest {
+  location: string | null
+  weather: Weather | null
+  durationMinutes: number | null
+  cost: number | null
+  rating: number | null
+  memo: string | null
+}
+
 // 후기 작성 완료 요청 (DONE)
 export interface WashCompleteRequest {
   weather: Weather | null

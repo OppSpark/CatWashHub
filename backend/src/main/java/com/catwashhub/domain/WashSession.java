@@ -76,6 +76,17 @@ public class WashSession {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void updateDone(String _location, Weather _weather, Integer _durationMinutes,
+                           Integer _cost, Integer _rating, String _memo) {
+        this.location = _location;
+        this.weather = _weather;
+        this.durationMinutes = _durationMinutes;
+        this.cost = _cost;
+        this.rating = _rating;
+        this.memo = _memo;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     // 후기 작성 완료 → DONE
     public void complete(Weather _weather, Integer _durationMinutes, Integer _cost,
                          Integer _rating, String _memo) {

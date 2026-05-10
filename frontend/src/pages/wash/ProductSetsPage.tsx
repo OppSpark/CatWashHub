@@ -38,6 +38,7 @@ const ProductSetsPage = () => {
   const [editingItems, setEditingItems] = useState<EditingItem[]>([])
 
   const [showProductPanel, setShowProductPanel] = useState(false)
+  const [productSearch, setProductSearch] = useState('')
   const [customName, setCustomName] = useState('')
   const [customCategory, setCustomCategory] = useState('')
   const [isAddingCustom, setIsAddingCustom] = useState(false)
@@ -281,13 +282,22 @@ const ProductSetsPage = () => {
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowProductPanel(false)} />
           <div className="relative bg-white rounded-t-3xl px-4 pt-4 pb-8 max-h-[70vh] flex flex-col">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <p className="text-[16px] font-bold text-[#191F28]">용품 추가</p>
-              <button onClick={() => setShowProductPanel(false)} className="text-[#ADB5C0] text-[22px]">×</button>
+              <button onClick={() => { setShowProductPanel(false); setProductSearch('') }} className="text-[#ADB5C0] text-[22px]">×</button>
             </div>
+            <input
+              value={productSearch}
+              onChange={e => setProductSearch(e.target.value)}
+              placeholder="용품 검색"
+              className="w-full border border-[#E5E8EB] rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#3182F6] mb-3"
+            />
             <div className="overflow-y-auto flex-1">
               <div className="flex flex-col gap-1">
-                {dbProducts.map(product => {
+                {dbProducts.filter(p =>
+                  p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                  (p.categoryName ?? '').toLowerCase().includes(productSearch.toLowerCase())
+                ).map(product => {
                   const added = editingItems.some(i => i.productId === product.id)
                   return (
                     <button

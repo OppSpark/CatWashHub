@@ -3,6 +3,7 @@ import type {
   WashDashboard,
   WashSession,
   WashSessionRequest,
+  WashUpdateRequest,
   WashCompleteRequest,
   ProductSet,
   ProductSetRequest,
@@ -36,6 +37,12 @@ export const createSession = async (data: WashSessionRequest): Promise<WashSessi
 // 세차 준비 수정 (용품/장소 수정)
 export const updatePreparation = async (id: number, data: WashSessionRequest): Promise<WashSession> => {
   const res = await apiClient.put(`/wash/${id}/preparation`, data)
+  return res.data.data
+}
+
+// 완료된 세차 수정
+export const updateSession = async (id: number, data: WashUpdateRequest): Promise<WashSession> => {
+  const res = await apiClient.patch(`/wash/${id}`, data)
   return res.data.data
 }
 
