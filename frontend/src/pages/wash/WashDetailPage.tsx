@@ -91,6 +91,7 @@ const WashDetailPage = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
+  const [editWashedAt, setEditWashedAt] = useState('')
   const [editLocation, setEditLocation] = useState('')
   const [editWeather, setEditWeather] = useState<Weather | null>(null)
   const [editDuration, setEditDuration] = useState('')
@@ -107,6 +108,7 @@ const WashDetailPage = () => {
 
   const openEdit = () => {
     if (!session) { return }
+    setEditWashedAt(session.washedAt.slice(0, 10))
     setEditLocation(session.location ?? '')
     setEditWeather(session.weather)
     setEditDuration(session.durationMinutes != null ? String(session.durationMinutes) : '')
@@ -121,6 +123,7 @@ const WashDetailPage = () => {
     setIsSaving(true)
     try {
       const req: WashUpdateRequest = {
+        washedAt: editWashedAt || null,
         location: editLocation.trim() || null,
         weather: editWeather,
         durationMinutes: editDuration ? Number(editDuration) : null,
@@ -209,6 +212,15 @@ const WashDetailPage = () => {
         {isEditing ? (
           <>
             <div className="bg-white rounded-2xl px-5 py-4 flex flex-col gap-3">
+              <div>
+                <p className="text-[12px] text-[#ADB5C0] mb-1.5">세차 날짜</p>
+                <input
+                  type="date"
+                  value={editWashedAt}
+                  onChange={e => setEditWashedAt(e.target.value)}
+                  className="w-full border border-[#E5E8EB] rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#3182F6]"
+                />
+              </div>
               <input
                 value={editLocation}
                 onChange={e => setEditLocation(e.target.value)}

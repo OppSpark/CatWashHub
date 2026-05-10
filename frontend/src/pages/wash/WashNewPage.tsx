@@ -26,6 +26,7 @@ const WashNewPage = () => {
 
   const [sets, setSets] = useState<ProductSet[]>([])
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
+  const [washDate, setWashDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [showPicker, setShowPicker] = useState(false)
   const [isAddingCustom, setIsAddingCustom] = useState(false)
   const [customName, setCustomName] = useState('')
@@ -104,7 +105,7 @@ const WashNewPage = () => {
     setIsSaving(true)
     try {
       const session = await createSession({
-        washedAt: null,
+        washedAt: washDate,
         location: null,
         products: selectedProducts.map(({ displayName: _, ...rest }) => rest),
       })
@@ -123,6 +124,17 @@ const WashNewPage = () => {
   return (
     <PageLayout title="세차 준비" onBack={true} hasFixedButton>
       <div className="flex flex-col gap-3">
+
+        {/* 날짜 선택 */}
+        <div className="bg-white rounded-2xl px-5 py-4">
+          <p className="text-[13px] text-[#6B7684] mb-2">세차 날짜</p>
+          <input
+            type="date"
+            value={washDate}
+            onChange={e => setWashDate(e.target.value)}
+            className="w-full border border-[#E5E8EB] rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#3182F6]"
+          />
+        </div>
 
         {/* 즐겨찾기 세트 */}
         {sets.length > 0 && (

@@ -76,8 +76,9 @@ public class WashSession {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateDone(String _location, Weather _weather, Integer _durationMinutes,
-                           Integer _cost, Integer _rating, String _memo) {
+    public void updateDone(LocalDate _washedAt, String _location, Weather _weather,
+                           Integer _durationMinutes, Integer _cost, Integer _rating, String _memo) {
+        if (_washedAt != null) { this.washedAt = _washedAt; }
         this.location = _location;
         this.weather = _weather;
         this.durationMinutes = _durationMinutes;

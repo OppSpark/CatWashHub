@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.format.DateTimeParseException;
 
 @Service
 @RequiredArgsConstructor
@@ -110,7 +111,15 @@ public class WashService {
         User user = getUser(_email);
         WashSession session = getSessionOfUser(_sessionId, user.getId());
 
+        LocalDate washedAt = null;
+        try {
+            if (_request.washedAt() != null && !_request.washedAt().isBlank()) {
+                washedAt = LocalDate.parse(_request.washedAt());
+            }
+        } catch (DateTimeParseException ignored) { }
+
         session.updateDone(
+                washedAt,
                 _request.location(),
                 _request.weather(),
                 _request.durationMinutes(),

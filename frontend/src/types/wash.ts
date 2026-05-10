@@ -102,6 +102,7 @@ export interface WashSessionRequest {
 
 // 완료된 세차 수정 요청
 export interface WashUpdateRequest {
+  washedAt: string | null
   location: string | null
   weather: Weather | null
   durationMinutes: number | null
