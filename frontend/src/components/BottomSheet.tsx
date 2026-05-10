@@ -168,7 +168,6 @@ const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProp
           transform: `translateY(${translateY}px)`,
           transition: isDragging ? 'none' : 'transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), height 0.32s cubic-bezier(0.32, 0.72, 0, 1)',
           marginBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : undefined,
-          paddingBottom: keyboardHeight > 0 ? 0 : 'env(safe-area-inset-bottom)',
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

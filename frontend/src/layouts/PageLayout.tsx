@@ -114,7 +114,7 @@ const PageLayout = ({
   return (
     <div
       className={`min-h-dvh flex flex-col ${bottomPadding}`}
-      style={{ backgroundColor: hasHeader ? '#ffffff' : bgColor }}
+      style={{ backgroundColor: bgColor }}
     >
       {/* 당겨서 새로고침 인디케이터 */}
       {onRefresh && (pullY > 0 || isRefreshing) && (
@@ -129,7 +129,7 @@ const PageLayout = ({
       {/* 헤더 — default: 타이틀바 / large: 대형 타이틀 */}
       {hasHeader && (
         headerVariant === 'large' ? (
-          <div className="bg-white px-5 pb-5 shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}>
+          <div className="bg-white px-5 pt-3 pb-5 shrink-0">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 {headerSubtitle && (
@@ -141,7 +141,7 @@ const PageLayout = ({
             </div>
           </div>
         ) : (
-          <div className="bg-white px-5 pb-4 flex items-center justify-between gap-3 shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}>
+          <div className="bg-white px-5 pt-3 pb-4 flex items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {onBack !== undefined && (
                 <button onClick={handleBack} className="p-1 -ml-1 text-[#191F28] shrink-0">
