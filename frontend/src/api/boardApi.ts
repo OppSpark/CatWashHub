@@ -1,10 +1,15 @@
 import apiClient from '@/api/axios'
-import type { Post, PostSummary, Comment, PageResponse, PostRequest, CommentRequest } from '@/types/board'
+import type { Post, PostSummary, Comment, PageResponse, PostRequest, CommentRequest, WashSessionEmbed } from '@/types/board'
 
 // ==================== 게시글 ====================
 
-export const getPosts = async (page = 0, size = 20, keyword?: string): Promise<PageResponse<PostSummary>> => {
-  const res = await apiClient.get('/posts', { params: { page, size, keyword } })
+export const getPosts = async (page = 0, size = 20, keyword?: string, postType?: string): Promise<PageResponse<PostSummary>> => {
+  const res = await apiClient.get('/posts', { params: { page, size, keyword, postType } })
+  return res.data.data
+}
+
+export const getMyWashSessions = async (): Promise<WashSessionEmbed[]> => {
+  const res = await apiClient.get('/posts/my-wash-sessions')
   return res.data.data
 }
 

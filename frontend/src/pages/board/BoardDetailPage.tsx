@@ -1,12 +1,81 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getPost, getComments, deletePost, toggleLike, createComment, updateComment, deleteComment } from '@/api/boardApi'
-import type { Post, Comment } from '@/types/board'
+import type { Post, Comment, WashSessionEmbed } from '@/types/board'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/hooks/useToast'
 import { BOARD_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
-import { Heart, MessageSquare, Eye, Send, ChevronRight, CornerDownRight } from 'lucide-react'
+import { Heart, MessageSquare, Eye, Send, ChevronRight, CornerDownRight, ClipboardList, MapPin, Clock, Star, Droplets } from 'lucide-react'
+
+const WEATHER_LABEL: Record<string, string> = {
+  SUNNY: '☀️ 맑음',
+  CLOUDY: '☁️ 흐림',
+  RAINY: '🌧️ 비',
+  SNOWY: '❄️ 눈',
+}
+
+// ==================== 세차일지 임베드 카드 ====================
+const WashLogCard = ({ session }: { session: WashSessionEmbed }) => {
+  const date = new Date(session.washedAt)
+  const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
+
+  return (
+    <div className="bg-[#F0F6FF] border border-[#BFDBFE] rounded-2xl px-4 py-4 mb-4">
+      <div className="flex items-center gap-1.5 mb-3">
+        <ClipboardList size={14} className="text-[#3182F6]" />
+        <span className="text-[12px] font-semibold text-[#3182F6]">첨부된 세차일지</span>
+        <span className="text-[12px] text-[#6B7684] ml-auto">{dateStr}</span>
+      </div>
+
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-3">
+        {session.location && (
+          <span className="flex items-center gap-1 text-[13px] text-[#191F28]">
+            <MapPin size={12} className="text-[#6B7684]" />
+            {session.location}
+          </span>
+        )}
+        {session.durationMinutes && (
+          <span className="flex items-center gap-1 text-[13px] text-[#191F28]">
+            <Clock size={12} className="text-[#6B7684]" />
+            {session.durationMinutes}분
+          </span>
+        )}
+        {session.cost && (
+          <span className="flex items-center gap-1 text-[13px] text-[#191F28]">
+            <Droplets size={12} className="text-[#6B7684]" />
+            {session.cost.toLocaleString()}원
+          </span>
+        )}
+        {session.rating && (
+          <span className="flex items-center gap-1 text-[13px] text-[#F59E0B]">
+            <Star size={12} fill="#F59E0B" />
+            {session.rating} / 5
+          </span>
+        )}
+        {session.weather && (
+          <span className="text-[13px] text-[#191F28]">{WEATHER_LABEL[session.weather] ?? session.weather}</span>
+        )}
+      </div>
+
+      {session.productNames.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {session.productNames.map((name, i) => (
+            <span key={i} className="text-[11px] bg-white border border-[#BFDBFE] text-[#3182F6] px-2.5 py-1 rounded-full">
+              {name}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {session.memo && (
+        <p className="mt-2.5 text-[12px] text-[#6B7684] leading-relaxed border-t border-[#BFDBFE] pt-2.5">
+          {session.memo}
+        </p>
+      )}
+    </div>
+  )
+}
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr)
@@ -393,7 +462,18 @@ const BoardDetailPage = () => {
               <p className="text-[13px] font-semibold text-[#191F28]">{post.authorNickname}</p>
               <p className="text-[11px] text-[#ADB5C0]">{formatDate(post.createdAt)}</p>
             </div>
+            {post.postType === 'WASH_LOG' && (
+              <span className="ml-auto flex items-center gap-0.5 text-[10px] font-semibold text-[#3182F6] bg-[#EFF6FF] px-1.5 py-0.5 rounded-md">
+                <ClipboardList size={9} />
+                세차일지
+              </span>
+            )}
           </div>
+
+          {/* 세차일지 첨부 카드 */}
+          {post.postType === 'WASH_LOG' && post.washSession && (
+            <WashLogCard session={post.washSession} />
+          )}
 
           <p className="text-[15px] text-[#191F28] whitespace-pre-wrap leading-[1.7]">{post.content}</p>
 

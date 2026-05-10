@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -24,14 +25,23 @@ public class PostController {
 
     private final PostService m_PostService;
 
-    // 게시글 목록 (검색 지원)
+    // 게시글 목록 (검색 + 타입 필터)
     @GetMapping
     public ResponseEntity<ApiResponse<Page<PostResponse.PostSummary>>> getPosts(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String postType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ApiResponse.ok(
-                m_PostService.getPosts(keyword, PageRequest.of(page, size))));
+                m_PostService.getPosts(keyword, postType, PageRequest.of(page, size))));
+    }
+
+    // 내 세차기록 목록 (게시글 작성 시 선택용)
+    @GetMapping("/my-wash-sessions")
+    public ResponseEntity<ApiResponse<List<PostResponse.WashSessionEmbed>>> getMyWashSessions(
+            @AuthenticationPrincipal UserDetails _userDetails) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                m_PostService.getMyWashSessions(_userDetails.getUsername())));
     }
 
     // 게시글 상세

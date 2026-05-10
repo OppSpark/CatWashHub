@@ -1,12 +1,26 @@
+export interface WashSessionEmbed {
+  id: number
+  washedAt: string
+  location: string | null
+  weather: string | null
+  durationMinutes: number | null
+  cost: number | null
+  rating: number | null
+  memo: string | null
+  productNames: string[]
+}
+
 export interface PostSummary {
   id: number
   authorId: number
   authorNickname: string
+  postType: 'FREE' | 'WASH_LOG'
   title: string
   contentPreview: string
   viewCount: number
   likeCount: number
   commentCount: number
+  washSession: WashSessionEmbed | null
   createdAt: string
 }
 
@@ -14,6 +28,7 @@ export interface Post {
   id: number
   authorId: number
   authorNickname: string
+  postType: 'FREE' | 'WASH_LOG'
   title: string
   content: string
   viewCount: number
@@ -21,6 +36,7 @@ export interface Post {
   likedByMe: boolean
   commentCount: number
   imageUrls: string[]
+  washSession: WashSessionEmbed | null
   createdAt: string
   updatedAt: string
 }
@@ -43,6 +59,8 @@ export interface PageResponse<T> {
 }
 
 export interface PostRequest {
+  postType: 'FREE' | 'WASH_LOG'
+  washSessionId?: number | null
   title: string
   content: string
 }

@@ -12,8 +12,12 @@ public interface WashSessionRepository extends JpaRepository<WashSession, Long> 
 
     List<WashSession> findByUserIdOrderByWashedAtDesc(Long userId);
 
-    // 상태별 조회
+    // 상태별 조회 (생성일순)
     List<WashSession> findByUserIdAndStatusOrderByCreatedAtDesc(
+            Long userId, WashSession.Status status);
+
+    // 상태별 조회 (세차일순) — 게시글 작성 시 세차기록 선택용
+    List<WashSession> findByUserIdAndStatusOrderByWashedAtDesc(
             Long userId, WashSession.Status status);
 
     Optional<WashSession> findByIdAndUserId(Long id, Long userId);

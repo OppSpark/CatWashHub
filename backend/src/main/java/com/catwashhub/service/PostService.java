@@ -4,6 +4,7 @@ import com.catwashhub.domain.Comment;
 import com.catwashhub.domain.Post;
 import com.catwashhub.domain.PostLike;
 import com.catwashhub.domain.User;
+import com.catwashhub.domain.WashSession;
 import com.catwashhub.dto.request.CommentRequest;
 import com.catwashhub.dto.request.CommentUpdateRequest;
 import com.catwashhub.dto.request.PostRequest;
@@ -15,6 +16,7 @@ import com.catwashhub.repository.CommentRepository;
 import com.catwashhub.repository.PostLikeRepository;
 import com.catwashhub.repository.PostRepository;
 import com.catwashhub.repository.UserRepository;
+import com.catwashhub.repository.WashSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,18 +33,36 @@ public class PostService {
     private final PostLikeRepository m_PostLikeRepository;
     private final CommentRepository m_CommentRepository;
     private final UserRepository m_UserRepository;
+    private final WashSessionRepository m_WashSessionRepository;
 
     // ==================== 게시글 목록 ====================
 
     @Transactional(readOnly = true)
-    public Page<PostResponse.PostSummary> getPosts(String _keyword, Pageable pageable) {
+    public Page<PostResponse.PostSummary> getPosts(String _keyword, String _postType, Pageable pageable) {
         if (_keyword != null && !_keyword.isBlank()) {
-            return m_PostRepository
-                    .findByTitleContainingOrContentContainingOrderByCreatedAtDesc(_keyword, _keyword, pageable)
+            Page<Post> result = (_postType != null && !_postType.isBlank())
+                    ? m_PostRepository.findByPostTypeAndKeyword(_postType, _keyword, pageable)
+                    : m_PostRepository.findByTitleContainingOrContentContainingOrderByCreatedAtDesc(_keyword, _keyword, pageable);
+            return result.map(PostResponse.PostSummary::from);
+        }
+        if (_postType != null && !_postType.isBlank()) {
+            return m_PostRepository.findByPostTypeOrderByCreatedAtDesc(_postType, pageable)
                     .map(PostResponse.PostSummary::from);
         }
         return m_PostRepository.findAllByOrderByCreatedAtDesc(pageable)
                 .map(PostResponse.PostSummary::from);
+    }
+
+    // ==================== 내 세차기록 목록 (게시글 작성용) ====================
+
+    @Transactional(readOnly = true)
+    public List<PostResponse.WashSessionEmbed> getMyWashSessions(String _email) {
+        User user = getUser(_email);
+        return m_WashSessionRepository
+                .findByUserIdAndStatusOrderByWashedAtDesc(user.getId(), WashSession.Status.DONE)
+                .stream()
+                .map(PostResponse.WashSessionEmbed::from)
+                .toList();
     }
 
     // ==================== 게시글 상세 ====================
@@ -67,8 +87,15 @@ public class PostService {
     @Transactional
     public PostResponse createPost(String _email, PostRequest _request) {
         User user = getUser(_email);
+        WashSession washSession = null;
+        if ("WASH_LOG".equals(_request.postType()) && _request.washSessionId() != null) {
+            washSession = m_WashSessionRepository.findByIdAndUserId(_request.washSessionId(), user.getId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.WASH_SESSION_NOT_FOUND));
+        }
         Post post = Post.builder()
                 .user(user)
+                .postType(_request.postType())
+                .washSession(washSession)
                 .title(_request.title())
                 .content(_request.content())
                 .build();

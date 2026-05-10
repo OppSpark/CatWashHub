@@ -24,6 +24,13 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false, length = 20)
+    private String postType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wash_session_id")
+    private WashSession washSession;
+
     @Column(nullable = false, length = 200)
     private String title;
 
@@ -49,8 +56,10 @@ public class Post {
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
-    public Post(User user, String title, String content) {
+    public Post(User user, String postType, WashSession washSession, String title, String content) {
         this.user = user;
+        this.postType = postType != null ? postType : "FREE";
+        this.washSession = washSession;
         this.title = title;
         this.content = content;
         this.viewCount = 0;

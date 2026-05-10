@@ -28,7 +28,7 @@ const BoardEditPage = () => {
     if (!id || !title.trim() || !content.trim() || isSaving) { return }
     setIsSaving(true)
     try {
-      await updatePost(Number(id), { title: title.trim(), content: content.trim() })
+      await updatePost(Number(id), { postType: 'FREE', title: title.trim(), content: content.trim() })
       toast.success(BOARD_MSGS.POST_UPDATED)
       navigate(`/board/${id}`, { replace: true })
     } catch {
