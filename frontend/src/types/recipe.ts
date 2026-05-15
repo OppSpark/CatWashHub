@@ -56,6 +56,7 @@ export interface RecipeStep {
 
 export interface Recipe {
   id: number
+  authorId: number
   authorNickname: string
   title: string
   description: string | null

@@ -91,7 +91,7 @@ const RecipeDetailPage = () => {
   const navigate = useNavigate()
   const toast = useToast()
   const cardRef = useRef<HTMLDivElement>(null)
-  const { isLoggedIn, nickname } = useAuthStore()
+  const { isLoggedIn, userId } = useAuthStore()
 
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -155,7 +155,7 @@ const RecipeDetailPage = () => {
     }
   }
 
-  const isOwner = recipe?.authorNickname === nickname
+  const isOwner = recipe?.authorId === userId
 
   return (
     <PageLayout

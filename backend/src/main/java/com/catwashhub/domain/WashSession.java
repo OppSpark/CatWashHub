@@ -80,9 +80,8 @@ public class WashSession {
     }
 
     // 세차장 도착 후 장소/금액 수정
-    public void updatePreparation(String _location, Integer _cost) {
+    public void updatePreparation(String _location) {
         this.location = _location;
-        this.cost = _cost;
         this.updatedAt = LocalDateTime.now();
     }
 

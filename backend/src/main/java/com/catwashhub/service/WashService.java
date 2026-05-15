@@ -104,7 +104,7 @@ public class WashService {
         User user = getUser(_email);
         WashSession session = getSessionOfUser(_sessionId, user.getId());
 
-        session.updatePreparation(_request.location(), null);
+        session.updatePreparation(_request.location());
         session.getWashProducts().clear();
         addProducts(session, _request.products());
 

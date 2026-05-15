@@ -291,7 +291,7 @@ const BoardDetailPage = () => {
   const { id } = useParams<{ id: string }>()
   const toast = useToast()
   const userId = useAuthStore(s => s.userId)
-  const { showLoginSheet, setShowLoginSheet } = useRequireAuth()
+  const { showLoginSheet, setShowLoginSheet, requireAuth } = useRequireAuth()
 
   const [post, setPost] = useState<Post | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -333,18 +333,20 @@ const BoardDetailPage = () => {
     }
   }
 
-  const handleLike = async () => {
+  const handleLike = () => {
     if (!id || !post) { return }
-    try {
-      const liked = await toggleLike(Number(id))
-      setPost(prev => prev ? {
-        ...prev,
-        likedByMe: liked,
-        likeCount: liked ? prev.likeCount + 1 : prev.likeCount - 1,
-      } : prev)
-    } catch {
-      toast.error('오류가 발생했어요.')
-    }
+    requireAuth(async () => {
+      try {
+        const liked = await toggleLike(Number(id))
+        setPost(prev => prev ? {
+          ...prev,
+          likedByMe: liked,
+          likeCount: liked ? prev.likeCount + 1 : prev.likeCount - 1,
+        } : prev)
+      } catch {
+        toast.error('오류가 발생했어요.')
+      }
+    })
   }
 
   const handleReply = (commentId: number, nickname: string) => {

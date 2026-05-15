@@ -8,6 +8,7 @@ import java.util.List;
 
 public record RecipeResponse(
         Long id,
+        Long authorId,
         String authorNickname,
         String title,
         String description,
@@ -22,6 +23,7 @@ public record RecipeResponse(
     public static RecipeResponse from(Recipe recipe, boolean isSaved) {
         return new RecipeResponse(
                 recipe.getId(),
+                recipe.getUser().getId(),
                 recipe.getUser().getNickname(),
                 recipe.getTitle(),
                 recipe.getDescription(),

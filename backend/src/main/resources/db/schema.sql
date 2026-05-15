@@ -161,14 +161,17 @@ CREATE TABLE IF NOT EXISTS wash_photos
 
 CREATE TABLE IF NOT EXISTS posts
 (
-    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id    BIGINT       NOT NULL,
-    title      VARCHAR(200) NOT NULL,
-    content    TEXT         NOT NULL,
-    view_count INT          NOT NULL DEFAULT 0,
-    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id          BIGINT                    NOT NULL,
+    post_type        ENUM('FREE', 'WASH_LOG')  NOT NULL DEFAULT 'FREE',
+    wash_session_id  BIGINT,
+    title            VARCHAR(200)              NOT NULL,
+    content          TEXT                      NOT NULL,
+    view_count       INT                       NOT NULL DEFAULT 0,
+    created_at       DATETIME                  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       DATETIME                  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (wash_session_id) REFERENCES wash_sessions (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS post_images

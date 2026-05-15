@@ -31,7 +31,9 @@ const BottomNav = () => {
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {c_NavItems.map(({ path, label, icon: Icon, authRequired }) => {
-          const isActive = pathname === path || pathname.startsWith(path + '/')
+          const isActive = pathname === path
+            || pathname.startsWith(path + '/')
+            || (path === '/board' && pathname.startsWith('/recipe'))
           return (
             <button
               key={path}

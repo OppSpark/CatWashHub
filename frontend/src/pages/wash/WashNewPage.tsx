@@ -92,6 +92,11 @@ const WashNewPage = () => {
       }))
     setSelectedProducts(newProducts)
     setShowRecipePicker(false)
+    if (newProducts.length === 0) {
+      toast.success(`'${recipe.title}' 레시피를 연결했어요. (등록된 제품 없음)`)
+    } else {
+      toast.success(`'${recipe.title}' 레시피에서 ${newProducts.length}개 제품을 불러왔어요.`)
+    }
   }
 
   const clearRecipe = () => {

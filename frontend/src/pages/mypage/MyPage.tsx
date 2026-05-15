@@ -32,12 +32,17 @@ const RecipeListSheet = ({
 }) => {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
 
   useEffect(() => {
     if (!open || !type) { return }
     setIsLoading(true)
+    setIsError(false)
     const fetch = type === 'my' ? getMyRecipes : getSavedRecipes
-    fetch().then(setRecipes).finally(() => setIsLoading(false))
+    fetch()
+      .then(setRecipes)
+      .catch(() => setIsError(true))
+      .finally(() => setIsLoading(false))
   }, [open, type])
 
   return (
@@ -46,6 +51,10 @@ const RecipeListSheet = ({
         {isLoading ? (
           <div className="py-10 flex justify-center">
             <div className="w-5 h-5 border-2 border-[#3182F6] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : isError ? (
+          <div className="py-10 text-center">
+            <p className="text-[14px] text-[#ADB5C0]">불러오는 중 오류가 발생했어요</p>
           </div>
         ) : recipes.length === 0 ? (
           <div className="py-10 text-center">
