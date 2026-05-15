@@ -30,6 +30,7 @@ public class WashService {
     private final ProductSetRepository m_ProductSetRepository;
     private final UserRepository m_UserRepository;
     private final RecipeRepository m_RecipeRepository;
+    private final PostRepository m_PostRepository;
 
     // ==================== 대시보드 ====================
 
@@ -187,6 +188,8 @@ public class WashService {
     public void deleteSession(String _email, Long _sessionId) {
         User user = getUser(_email);
         WashSession session = getSessionOfUser(_sessionId, user.getId());
+        // 연결된 게시글의 세차일지 참조 먼저 해제 (FK 제약 방지)
+        m_PostRepository.unlinkWashSession(session);
         m_WashSessionRepository.delete(session);
     }
 

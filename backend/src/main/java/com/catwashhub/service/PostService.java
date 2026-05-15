@@ -91,6 +91,9 @@ public class PostService {
     @Transactional
     public PostResponse createPost(String _email, PostRequest _request) {
         User user = getUser(_email);
+        if ("WASH_LOG".equals(_request.postType()) && _request.washSessionId() == null) {
+            throw new CustomException(ErrorCode.WASH_SESSION_NOT_FOUND);
+        }
         WashSession washSession = null;
         if ("WASH_LOG".equals(_request.postType()) && _request.washSessionId() != null) {
             washSession = m_WashSessionRepository.findByIdAndUserId(_request.washSessionId(), user.getId())
