@@ -153,6 +153,12 @@ public class WashService {
             addProducts(session, _request.products());
         }
 
+        // 레시피 변경 반영
+        if (_request.recipeId() != null) {
+            Recipe recipe = m_RecipeRepository.findById(_request.recipeId()).orElse(null);
+            session.linkRecipe(recipe);
+        }
+
         session.complete(
                 _request.weather(),
                 _request.durationMinutes(),

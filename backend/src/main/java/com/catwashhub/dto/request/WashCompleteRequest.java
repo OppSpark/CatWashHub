@@ -11,5 +11,6 @@ public record WashCompleteRequest(
         Integer cost,
         Integer rating,
         String memo,
+        Long recipeId,
         List<WashSessionRequest.WashProductRequest> products  // 세차 중 용품 수정분 반영
 ) { }

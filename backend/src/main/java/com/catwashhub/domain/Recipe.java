@@ -76,14 +76,8 @@ public class Recipe {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void incrementSaveCount() {
-        this.saveCount++;
-    }
-
-    public void decrementSaveCount() {
-        if (this.saveCount > 0) {
-            this.saveCount--;
-        }
+    public void syncSaveCount(long _count) {
+        this.saveCount = (int) _count;
     }
 
     public boolean isOwner(Long _userId) {

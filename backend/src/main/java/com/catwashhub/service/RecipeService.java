@@ -128,13 +128,13 @@ public class RecipeService {
         if (m_RecipeSaveRepository.existsByUserIdAndRecipeId(user.getId(), _recipeId)) {
             m_RecipeSaveRepository.findByUserIdAndRecipeId(user.getId(), _recipeId)
                     .ifPresent(m_RecipeSaveRepository::delete);
-            recipe.decrementSaveCount();
+            recipe.syncSaveCount(m_RecipeSaveRepository.countByRecipeId(_recipeId) - 1);
             return false;
         }
 
         RecipeSave save = RecipeSave.builder().user(user).recipe(recipe).build();
         m_RecipeSaveRepository.save(save);
-        recipe.incrementSaveCount();
+        recipe.syncSaveCount(m_RecipeSaveRepository.countByRecipeId(_recipeId));
         return true;
     }
 

@@ -121,6 +121,7 @@ export interface WashCompleteRequest {
   cost: number | null
   rating: number | null
   memo: string | null
+  recipeId: number | null
   products: WashProductRequest[]
 }
 

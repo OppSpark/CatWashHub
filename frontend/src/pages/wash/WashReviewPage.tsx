@@ -114,6 +114,7 @@ const WashReviewPage = () => {
         cost: cost ? Number(cost) : null,
         rating,
         memo: memo || null,
+        recipeId,
         products: products.map(({ displayName: _, ...rest }) => rest),
       })
       toast.success(WASH_MSGS.SESSION_CREATED)
