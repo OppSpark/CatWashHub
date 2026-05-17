@@ -1,19 +1,25 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { getUserProfile } from '@/api/userApi'
+import { useParams, useNavigate } from 'react-router-dom'
+import { getUserProfile, getUserPosts } from '@/api/userApi'
 import type { UserProfile } from '@/types/user'
+import type { PostSummary } from '@/types/board'
 import PageLayout from '@/layouts/PageLayout'
-import { Car, ThumbsUp, Droplets, User } from 'lucide-react'
+import { Car, ThumbsUp, Droplets, User, MessageSquare, Heart, Eye, ClipboardList } from 'lucide-react'
+
+type TabType = 'FREE' | 'WASH_LOG'
 
 const UserProfilePage = () => {
   const { userId } = useParams<{ userId: string }>()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [posts, setPosts] = useState<PostSummary[]>([])
+  const [tab, setTab] = useState<TabType>('FREE')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (!userId) { return }
-    getUserProfile(Number(userId))
-      .then(setProfile)
+    Promise.all([getUserProfile(Number(userId)), getUserPosts(Number(userId))])
+      .then(([p, ps]) => { setProfile(p); setPosts(ps) })
       .finally(() => setIsLoading(false))
   }, [userId])
 
@@ -28,9 +34,26 @@ const UserProfilePage = () => {
 
   const joinYear = new Date(profile.joinedAt).getFullYear()
   const joinMonth = new Date(profile.joinedAt).getMonth() + 1
+  const filteredPosts = posts.filter(p => p.postType === tab)
+
+  const tabBar = (
+    <div className="flex border-b border-[#F2F4F6]">
+      {([['FREE', '자유글'], ['WASH_LOG', '세차일지']] as [TabType, string][]).map(([key, label]) => (
+        <button
+          key={key}
+          onClick={() => setTab(key)}
+          className={`flex-1 py-3 text-[14px] font-semibold transition-colors ${
+            tab === key ? 'text-[#191F28] border-b-2 border-[#191F28]' : 'text-[#ADB5C0]'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
 
   return (
-    <PageLayout title="프로필" onBack>
+    <PageLayout title="프로필" onBack stickyTab={tabBar}>
       <div className="flex flex-col gap-3 pb-10">
 
         {/* 프로필 헤더 */}
@@ -83,6 +106,46 @@ const UserProfilePage = () => {
             </div>
           </div>
         )}
+
+        {/* 게시글 목록 */}
+        <div className="flex flex-col gap-2">
+          {filteredPosts.length === 0 ? (
+            <div className="bg-white rounded-2xl px-5 py-10 text-center">
+              <p className="text-[14px] text-[#ADB5C0]">
+                {tab === 'FREE' ? '작성한 자유글이 없어요' : '작성한 세차일지가 없어요'}
+              </p>
+            </div>
+          ) : (
+            filteredPosts.map(post => (
+              <button
+                key={post.id}
+                onClick={() => navigate(`/board/${post.id}`)}
+                className="bg-white rounded-2xl px-5 py-4 text-left active:brightness-95"
+              >
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <p className="text-[14px] font-semibold text-[#191F28] line-clamp-1 flex-1">{post.title}</p>
+                  {post.postType === 'WASH_LOG' && (
+                    <ClipboardList size={14} className="text-[#3182F6] shrink-0 mt-0.5" />
+                  )}
+                </div>
+                {post.contentPreview && (
+                  <p className="text-[13px] text-[#6B7684] line-clamp-2 mb-2">{post.contentPreview}</p>
+                )}
+                <div className="flex items-center gap-3 text-[#ADB5C0]">
+                  <span className="flex items-center gap-1 text-[12px]">
+                    <Heart size={11} /> {post.likeCount}
+                  </span>
+                  <span className="flex items-center gap-1 text-[12px]">
+                    <MessageSquare size={11} /> {post.commentCount}
+                  </span>
+                  <span className="flex items-center gap-1 text-[12px]">
+                    <Eye size={11} /> {post.viewCount}
+                  </span>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
 
       </div>
     </PageLayout>

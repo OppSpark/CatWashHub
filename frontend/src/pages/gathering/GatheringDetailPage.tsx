@@ -221,7 +221,10 @@ const GatheringDetailPage = () => {
         {/* 개설자 */}
         <div className="bg-white rounded-2xl px-5 py-4">
           <p className="text-[13px] font-semibold text-[#6B7684] mb-2">벙장</p>
-          <div className="flex items-center gap-3">
+          <button
+            className="flex items-center gap-3 active:opacity-70"
+            onClick={() => navigate(`/user/${gathering.hostId}`)}
+          >
             <div className="w-9 h-9 rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0">
               <span className="text-[14px] font-bold text-[#3182F6]">{gathering.hostNickname[0]}</span>
             </div>
@@ -236,7 +239,7 @@ const GatheringDetailPage = () => {
                 </p>
               )}
             </div>
-          </div>
+          </button>
 
           {isHost && (
             <div className="flex gap-2 mt-3">

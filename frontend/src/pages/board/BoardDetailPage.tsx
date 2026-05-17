@@ -485,13 +485,18 @@ const BoardDetailPage = () => {
           <h1 className="text-[18px] font-bold text-[#191F28] mb-2 leading-snug">{post.title}</h1>
 
           <div className="flex items-center gap-2 pb-4 mb-4 border-b border-[#F2F4F6]">
-            <div className="w-7 h-7 bg-[#3182F6] rounded-full flex items-center justify-center shrink-0">
-              <span className="text-[11px] font-bold text-white">{post.authorNickname.charAt(0)}</span>
-            </div>
-            <div>
-              <p className="text-[13px] font-semibold text-[#191F28]">{post.authorNickname}</p>
-              <p className="text-[11px] text-[#ADB5C0]">{formatDate(post.createdAt)}</p>
-            </div>
+            <button
+              className="flex items-center gap-2 active:opacity-70"
+              onClick={() => navigate(`/user/${post.authorId}`)}
+            >
+              <div className="w-7 h-7 bg-[#3182F6] rounded-full flex items-center justify-center shrink-0">
+                <span className="text-[11px] font-bold text-white">{post.authorNickname.charAt(0)}</span>
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-[#191F28]">{post.authorNickname}</p>
+                <p className="text-[11px] text-[#ADB5C0]">{formatDate(post.createdAt)}</p>
+              </div>
+            </button>
             {post.postType === 'WASH_LOG' && (
               <span className="ml-auto flex items-center gap-0.5 text-[10px] font-semibold text-[#3182F6] bg-[#EFF6FF] px-1.5 py-0.5 rounded-md">
                 <ClipboardList size={9} />
