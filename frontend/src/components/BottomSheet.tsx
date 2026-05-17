@@ -14,8 +14,8 @@ interface BottomSheetProps {
 type SnapPoint = 'half' | 'full'
 
 const SNAP_HEIGHTS: Record<SnapPoint, string> = {
-  half: '65dvh',
-  full: '92dvh',
+  half: 'calc(65dvh + env(safe-area-inset-bottom))',
+  full: 'calc(92dvh + env(safe-area-inset-bottom))',
 }
 
 const DRAG_CLOSE_THRESHOLD = 100   // px — half에서 이 이상 내리면 닫힘
@@ -163,7 +163,7 @@ const BottomSheet = ({ open, onClose, title, children, footer, bottomOffset = 0 
       {/* 시트 본체 */}
       <div
         ref={sheetRef}
-        className="relative bg-white rounded-t-3xl pointer-events-auto overflow-hidden"
+        className="relative bg-white rounded-t-3xl pointer-events-auto"
         style={{
           height: SNAP_HEIGHTS[snap],
           transform: `translateY(${translateY}px)`,
