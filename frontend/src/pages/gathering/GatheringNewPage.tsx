@@ -4,6 +4,9 @@ import { createGathering } from '@/api/gatheringApi'
 import type { GatheringRequest } from '@/types/gathering'
 import PageLayout from '@/layouts/PageLayout'
 import { useToast } from '@/hooks/useToast'
+import DatePicker from '@/components/DatePicker'
+import TimePicker from '@/components/TimePicker'
+import { CalendarDays, Clock } from 'lucide-react'
 
 const GatheringNewPage = () => {
   const navigate = useNavigate()
@@ -12,8 +15,10 @@ const GatheringNewPage = () => {
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [date, setDate] = useState('')
-  const [time, setTime] = useState('')
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [time, setTime] = useState('09:00')
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [showTimePicker, setShowTimePicker] = useState(false)
   const [location, setLocation] = useState('')
   const [locationDetail, setLocationDetail] = useState('')
   const [maxParticipants, setMaxParticipants] = useState('')
@@ -78,23 +83,32 @@ const GatheringNewPage = () => {
           <div className="flex gap-3">
             <div className="flex-1">
               <p className="text-[12px] text-[#ADB5C0] mb-1.5">날짜 *</p>
-              <input
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                className="w-full border border-[#E5E8EB] rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#3182F6]"
-              />
+              <button
+                onClick={() => setShowDatePicker(true)}
+                className="w-full flex items-center gap-2 border border-[#E5E8EB] rounded-xl px-3 py-2.5 active:border-[#3182F6]"
+              >
+                <CalendarDays size={15} className="text-[#3182F6] shrink-0" />
+                <span className="text-[13px] text-[#191F28]">
+                  {(() => { const d = new Date(date); return `${d.getMonth()+1}/${d.getDate()}` })()}
+                </span>
+              </button>
             </div>
             <div className="flex-1">
               <p className="text-[12px] text-[#ADB5C0] mb-1.5">시간 *</p>
-              <input
-                type="time"
-                value={time}
-                onChange={e => setTime(e.target.value)}
-                className="w-full border border-[#E5E8EB] rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#3182F6]"
-              />
+              <button
+                onClick={() => setShowTimePicker(true)}
+                className="w-full flex items-center gap-2 border border-[#E5E8EB] rounded-xl px-3 py-2.5 active:border-[#3182F6]"
+              >
+                <Clock size={15} className="text-[#3182F6] shrink-0" />
+                <span className="text-[13px] text-[#191F28]">
+                  {(() => { const [h, m] = time.split(':').map(Number); const ampm = h < 12 ? '오전' : '오후'; return `${ampm} ${h % 12 || 12}:${String(m).padStart(2,'0')}` })()}
+                </span>
+              </button>
             </div>
           </div>
+
+          <DatePicker open={showDatePicker} value={date} onClose={() => setShowDatePicker(false)} onConfirm={setDate} />
+          <TimePicker open={showTimePicker} value={time} onClose={() => setShowTimePicker(false)} onConfirm={setTime} />
 
           <div>
             <p className="text-[12px] text-[#ADB5C0] mb-1.5">세차장 *</p>

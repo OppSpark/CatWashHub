@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { getProductSets, createSession } from '@/api/washApi'
 import { getMyRecipes, getSavedRecipes } from '@/api/recipeApi'
@@ -10,6 +10,7 @@ import { WASH_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
 import ProductPickerSheet from '@/components/ProductPickerSheet'
 import BottomSheet from '@/components/BottomSheet'
+import DatePicker from '@/components/DatePicker'
 import { Plus, X, CalendarDays, MapPin, BookOpen, ChevronRight } from 'lucide-react'
 
 interface SelectedProduct {
@@ -31,7 +32,7 @@ const WashNewPage = () => {
   const location = useLocation()
   const toast = useToast()
   const preselectedSetId: number | null = location.state?.setId ?? null
-  const dateInputRef = useRef<HTMLInputElement>(null)
+  const [showDatePicker, setShowDatePicker] = useState(false)
 
   const [sets, setSets] = useState<ProductSet[]>([])
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
@@ -183,20 +184,21 @@ const WashNewPage = () => {
         {/* 날짜 선택 */}
         <div className="bg-white rounded-2xl px-5 py-4">
           <p className="text-[13px] text-[#6B7684] mb-2">세차 날짜</p>
-          <div className="relative">
-            <div className="w-full flex items-center gap-3 border border-[#E5E8EB] rounded-xl px-3 py-2.5 pointer-events-none">
-              <CalendarDays size={18} className="text-[#3182F6] shrink-0" />
-              <span className="text-[14px] text-[#191F28]">{formatDate(washDate)}</span>
-            </div>
-            <input
-              ref={dateInputRef}
-              type="date"
-              value={washDate}
-              onChange={e => setWashDate(e.target.value)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-          </div>
+          <button
+            onClick={() => setShowDatePicker(true)}
+            className="w-full flex items-center gap-3 border border-[#E5E8EB] rounded-xl px-3 py-2.5 active:border-[#3182F6]"
+          >
+            <CalendarDays size={18} className="text-[#3182F6] shrink-0" />
+            <span className="text-[14px] text-[#191F28]">{formatDate(washDate)}</span>
+          </button>
         </div>
+
+        <DatePicker
+          open={showDatePicker}
+          value={washDate}
+          onClose={() => setShowDatePicker(false)}
+          onConfirm={setWashDate}
+        />
 
         {/* 세차 장소 */}
         <div className="bg-white rounded-2xl px-5 py-4">

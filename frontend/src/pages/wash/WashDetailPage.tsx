@@ -6,9 +6,10 @@ import type { WashSession, WashProductItem, DilutionRatio, Weather, WashUpdateRe
 import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
-import { BookOpen, ImagePlus, X, Download } from 'lucide-react'
+import { BookOpen, ImagePlus, X, Download, CalendarDays } from 'lucide-react'
 import BeforeAfterSlider from '@/components/BeforeAfterSlider'
 import WashShareCard from '@/components/WashShareCard'
+import DatePicker from '@/components/DatePicker'
 import html2canvas from 'html2canvas'
 
 const WEATHER_LABEL: Record<string, string> = {
@@ -99,6 +100,7 @@ const WashDetailPage = () => {
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const [selectedPhotoType, setSelectedPhotoType] = useState<PhotoType>('ETC')
   const [isSavingCard, setIsSavingCard] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
   const shareCardRef = useRef<HTMLDivElement>(null)
 
@@ -275,12 +277,16 @@ const WashDetailPage = () => {
             <div className="bg-white rounded-2xl px-5 py-4 flex flex-col gap-3">
               <div>
                 <p className="text-[12px] text-[#ADB5C0] mb-1.5">세차 날짜</p>
-                <input
-                  type="date"
-                  value={editWashedAt}
-                  onChange={e => setEditWashedAt(e.target.value)}
-                  className="w-full border border-[#E5E8EB] rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#3182F6]"
-                />
+                <button
+                  onClick={() => setShowDatePicker(true)}
+                  className="w-full flex items-center gap-3 border border-[#E5E8EB] rounded-xl px-3 py-2.5 active:border-[#3182F6]"
+                >
+                  <CalendarDays size={16} className="text-[#3182F6] shrink-0" />
+                  <span className="text-[14px] text-[#191F28]">
+                    {editWashedAt ? (() => { const d = new Date(editWashedAt); return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일` })() : '날짜 선택'}
+                  </span>
+                </button>
+                <DatePicker open={showDatePicker} value={editWashedAt} onClose={() => setShowDatePicker(false)} onConfirm={setEditWashedAt} />
               </div>
               <input
                 value={editLocation}
