@@ -64,9 +64,15 @@ const GatheringDetailPage = () => {
   }
 
   const handleBookmark = async () => {
-    if (!id || !isLoggedIn) { return }
-    await toggleBookmark(Number(id))
-    await refresh()
+    if (!id || !isLoggedIn || !gathering) { return }
+    // 낙관적 업데이트 — API 응답 전에 UI 즉시 반영
+    setGathering(prev => prev ? { ...prev, isBookmarked: !prev.isBookmarked } : prev)
+    try {
+      await toggleBookmark(Number(id))
+    } catch {
+      // 실패 시 원래대로 롤백
+      setGathering(prev => prev ? { ...prev, isBookmarked: !prev.isBookmarked } : prev)
+    }
   }
 
   const handleShare = () => {
@@ -244,6 +250,21 @@ const GatheringDetailPage = () => {
               </button>
             </div>
           )}
+
+          {/* 벙장 매너 평가 (마감 후, 본인이 아닐 때) */}
+          {isClosed && isLoggedIn && !isHost && (
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#F2F4F6]">
+              <span className="text-[12px] text-[#ADB5C0]">벙장 매너 평가</span>
+              <div className="flex gap-1.5">
+                <button onClick={() => handleRate(gathering.hostId, 1)} className="p-1.5 rounded-lg bg-[#EFF6FF]">
+                  <ThumbsUp size={13} className="text-[#3182F6]" />
+                </button>
+                <button onClick={() => handleRate(gathering.hostId, -1)} className="p-1.5 rounded-lg bg-[#FFF0F0]">
+                  <ThumbsDown size={13} className="text-[#FF4D4F]" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 참여자 목록 */}
@@ -300,7 +321,12 @@ const GatheringDetailPage = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[12px] font-semibold text-[#191F28]">{comment.nickname}</span>
+                      <button
+                        onClick={() => navigate(`/user/${comment.userId}`)}
+                        className="text-[12px] font-semibold text-[#191F28] active:opacity-70"
+                      >
+                        {comment.nickname}
+                      </button>
                       {(() => {
                         const p = gathering.participants.find(p => p.userId === comment.userId)
                         if (!p || p.status === 'CANCEL') { return null }
