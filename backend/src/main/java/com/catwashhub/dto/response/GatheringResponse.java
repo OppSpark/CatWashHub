@@ -44,7 +44,7 @@ public record GatheringResponse(
 
         if (hostCar != null) {
             if (Boolean.TRUE.equals(g.getShowPlate())) {
-                maskedPlate = PlateUtil.mask(hostCar.getPlateNumber());
+                maskedPlate = PlateUtil.mask(hostCar.getPlateNumber(), g.getPlateDigits() != null ? g.getPlateDigits() : 2);
             }
             if (Boolean.TRUE.equals(g.getShowCarInfo())) {
                 carModel = hostCar.getCarModel();

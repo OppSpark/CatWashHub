@@ -10,5 +10,6 @@ public record GatheringRequest(
         String locationDetail,
         Integer maxParticipants,
         Boolean showPlate,
+        Integer plateDigits,
         Boolean showCarInfo
 ) {}

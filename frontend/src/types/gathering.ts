@@ -69,12 +69,14 @@ export interface GatheringRequest {
   locationDetail: string | null
   maxParticipants: number | null
   showPlate: boolean
+  plateDigits: number
   showCarInfo: boolean
 }
 
 export interface GatheringParticipantRequest {
   status: ParticipantStatus
   showPlate: boolean
+  plateDigits: number
   showCarInfo: boolean
 }
 

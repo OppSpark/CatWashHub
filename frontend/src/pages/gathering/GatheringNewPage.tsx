@@ -6,6 +6,7 @@ import PageLayout from '@/layouts/PageLayout'
 import { useToast } from '@/hooks/useToast'
 import DatePicker from '@/components/DatePicker'
 import TimePicker from '@/components/TimePicker'
+import PlateVisibilityPicker from '@/components/PlateVisibilityPicker'
 import { CalendarDays, Clock } from 'lucide-react'
 
 const GatheringNewPage = () => {
@@ -23,6 +24,7 @@ const GatheringNewPage = () => {
   const [locationDetail, setLocationDetail] = useState('')
   const [maxParticipants, setMaxParticipants] = useState('')
   const [showPlate, setShowPlate] = useState(false)
+  const [plateDigits, setPlateDigits] = useState(2)
   const [showCarInfo, setShowCarInfo] = useState(false)
 
   const handleSubmit = async () => {
@@ -40,6 +42,7 @@ const GatheringNewPage = () => {
         locationDetail: locationDetail.trim() || null,
         maxParticipants: maxParticipants ? Number(maxParticipants) : null,
         showPlate,
+        plateDigits,
         showCarInfo,
       }
       const res = await createGathering(req)
@@ -144,35 +147,17 @@ const GatheringNewPage = () => {
         </div>
 
         {/* 차량 공개 설정 */}
-        <div className="bg-white rounded-2xl px-5 py-4 flex flex-col gap-3">
-          <p className="text-[14px] font-semibold text-[#191F28]">차량 공개 설정</p>
-          <p className="text-[12px] text-[#ADB5C0] -mt-1">마이페이지에서 차량 정보를 먼저 등록해야 표시돼요</p>
-
-          <button
-            onClick={() => setShowPlate(v => !v)}
-            className="flex items-center justify-between py-1"
-          >
-            <div>
-              <p className="text-[14px] text-[#191F28]">번호판 공개</p>
-              <p className="text-[12px] text-[#ADB5C0]">뒷 2자리 이상 표시, 나머지는 마스킹</p>
-            </div>
-            <div className={`w-11 h-6 rounded-full transition-colors ${showPlate ? 'bg-[#3182F6]' : 'bg-[#E5E8EB]'}`}>
-              <div className={`w-5 h-5 bg-white rounded-full shadow m-0.5 transition-transform ${showPlate ? 'translate-x-5' : ''}`} />
-            </div>
-          </button>
-
-          <button
-            onClick={() => setShowCarInfo(v => !v)}
-            className="flex items-center justify-between py-1"
-          >
-            <div>
-              <p className="text-[14px] text-[#191F28]">차종 · 색상 공개</p>
-              <p className="text-[12px] text-[#ADB5C0]">차종과 색상을 참여자에게 공개</p>
-            </div>
-            <div className={`w-11 h-6 rounded-full transition-colors ${showCarInfo ? 'bg-[#3182F6]' : 'bg-[#E5E8EB]'}`}>
-              <div className={`w-5 h-5 bg-white rounded-full shadow m-0.5 transition-transform ${showCarInfo ? 'translate-x-5' : ''}`} />
-            </div>
-          </button>
+        <div className="bg-white rounded-2xl px-5 py-4">
+          <p className="text-[14px] font-semibold text-[#191F28] mb-1">차량 공개 설정</p>
+          <p className="text-[12px] text-[#ADB5C0] mb-4">마이페이지에서 차량 정보를 먼저 등록해야 표시돼요</p>
+          <PlateVisibilityPicker
+            showPlate={showPlate}
+            plateDigits={plateDigits}
+            showCarInfo={showCarInfo}
+            onChangeShowPlate={setShowPlate}
+            onChangePlateDigits={setPlateDigits}
+            onChangeShowCarInfo={setShowCarInfo}
+          />
         </div>
 
       </div>

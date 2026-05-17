@@ -100,6 +100,7 @@ public class GatheringService {
                     .locationDetail(_req.locationDetail())
                     .maxParticipants(_req.maxParticipants())
                     .showPlate(_req.showPlate())
+                    .plateDigits(_req.plateDigits())
                     .showCarInfo(_req.showCarInfo())
                     .build();
             m_GatheringRepository.save(g);
@@ -122,7 +123,7 @@ public class GatheringService {
             }
             g.update(_req.title(), _req.description(), _req.gatheringAt(),
                     _req.location(), _req.locationDetail(), _req.maxParticipants(),
-                    _req.showPlate(), _req.showCarInfo());
+                    _req.showPlate(), _req.plateDigits(), _req.showCarInfo());
             return getDetail(_gatheringId, user.getId());
         } catch (CustomException e) {
             throw e;
@@ -188,11 +189,12 @@ public class GatheringService {
                         .user(user)
                         .status(status)
                         .showPlate(_req.showPlate())
+                        .plateDigits(_req.plateDigits())
                         .showCarInfo(_req.showCarInfo())
                         .build();
             } else {
                 participant.updateStatus(status);
-                participant.updateVisibility(_req.showPlate(), _req.showCarInfo());
+                participant.updateVisibility(_req.showPlate(), _req.plateDigits(), _req.showCarInfo());
             }
             m_ParticipantRepository.save(participant);
             return getDetail(_gatheringId, user.getId());

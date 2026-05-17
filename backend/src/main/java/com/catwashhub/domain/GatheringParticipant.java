@@ -36,6 +36,9 @@ public class GatheringParticipant {
     private Boolean showPlate;
 
     @Column(nullable = false)
+    private Integer plateDigits; // 공개할 뒷자리 수 (2~4)
+
+    @Column(nullable = false)
     private Boolean showCarInfo;
 
     @Column(nullable = false)
@@ -46,11 +49,12 @@ public class GatheringParticipant {
 
     @Builder
     public GatheringParticipant(Gathering gathering, User user, ParticipantStatus status,
-                                 Boolean showPlate, Boolean showCarInfo) {
+                                 Boolean showPlate, Integer plateDigits, Boolean showCarInfo) {
         this.gathering = gathering;
         this.user = user;
         this.status = status != null ? status : ParticipantStatus.JOIN;
         this.showPlate = showPlate != null ? showPlate : false;
+        this.plateDigits = (plateDigits != null && plateDigits >= 2 && plateDigits <= 4) ? plateDigits : 2;
         this.showCarInfo = showCarInfo != null ? showCarInfo : false;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -61,8 +65,9 @@ public class GatheringParticipant {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateVisibility(Boolean _showPlate, Boolean _showCarInfo) {
+    public void updateVisibility(Boolean _showPlate, Integer _plateDigits, Boolean _showCarInfo) {
         this.showPlate = _showPlate;
+        this.plateDigits = (_plateDigits != null && _plateDigits >= 2 && _plateDigits <= 4) ? _plateDigits : 2;
         this.showCarInfo = _showCarInfo;
         this.updatedAt = LocalDateTime.now();
     }

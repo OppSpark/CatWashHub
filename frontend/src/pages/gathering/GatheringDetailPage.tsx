@@ -9,6 +9,7 @@ import PageLayout from '@/layouts/PageLayout'
 import { useToast } from '@/hooks/useToast'
 import { useAuthStore } from '@/store/authStore'
 import { Bookmark, BookmarkCheck, Share2, Users, MapPin, Clock, Send, X, ThumbsUp, ThumbsDown } from 'lucide-react'
+import PlateVisibilityPicker from '@/components/PlateVisibilityPicker'
 
 const formatDate = (dateStr: string) => {
   const d = new Date(dateStr)
@@ -43,6 +44,10 @@ const GatheringDetailPage = () => {
   const [commentText, setCommentText] = useState('')
   const [isSendingComment, setIsSendingComment] = useState(false)
   const [showParticipateSheet, setShowParticipateSheet] = useState(false)
+  const [participateStatus, setParticipateStatus] = useState<ParticipantStatus>('JOIN')
+  const [participateShowPlate, setParticipateShowPlate] = useState(false)
+  const [participatePlateDigits, setParticipatePlateDigits] = useState(2)
+  const [participateShowCarInfo, setParticipateShowCarInfo] = useState(false)
   const commentEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -90,16 +95,30 @@ const GatheringDetailPage = () => {
     await refresh()
   }
 
-  const handleParticipate = async (status: ParticipantStatus) => {
+  const handleParticipate = async () => {
     if (!id) { return }
     setShowParticipateSheet(false)
     try {
-      await participate(Number(id), { status, showPlate: false, showCarInfo: false })
+      await participate(Number(id), {
+        status: participateStatus,
+        showPlate: participateShowPlate,
+        plateDigits: participatePlateDigits,
+        showCarInfo: participateShowCarInfo,
+      })
       await refresh()
-      toast.success(STATUS_LABELS[status] + '로 변경됐어요')
+      toast.success(STATUS_LABELS[participateStatus] + '로 변경됐어요')
     } catch {
       toast.error('참여 변경에 실패했어요')
     }
+  }
+
+  const openParticipateSheet = () => {
+    const current = gathering?.participants.find(p => p.userId === userId)
+    setParticipateStatus(gathering?.myStatus ?? 'JOIN')
+    setParticipateShowPlate(current?.maskedPlate != null)
+    setParticipatePlateDigits(2)
+    setParticipateShowCarInfo(current?.carModel != null || current?.carColor != null)
+    setShowParticipateSheet(true)
   }
 
   const handleClose = async () => {
@@ -282,6 +301,17 @@ const GatheringDetailPage = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="text-[12px] font-semibold text-[#191F28]">{comment.nickname}</span>
+                      {(() => {
+                        const p = gathering.participants.find(p => p.userId === comment.userId)
+                        if (!p || p.status === 'CANCEL') { return null }
+                        return (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                            p.status === 'JOIN' ? 'bg-[#EFF6FF] text-[#3182F6]' : 'bg-[#F2F4F6] text-[#6B7684]'
+                          }`}>
+                            {STATUS_LABELS[p.status]}
+                          </span>
+                        )
+                      })()}
                       <span className="text-[11px] text-[#ADB5C0]">{formatCommentTime(comment.createdAt)}</span>
                     </div>
                     <p className="text-[13px] text-[#191F28] whitespace-pre-wrap">{comment.content}</p>
@@ -324,14 +354,18 @@ const GatheringDetailPage = () => {
           {/* 참여 버튼 */}
           {!isHost && (
             <button
-              onClick={() => setShowParticipateSheet(true)}
+              onClick={openParticipateSheet}
               className={`w-full py-3 rounded-2xl text-[15px] font-semibold ${
-                gathering.myStatus === 'JOIN'
+                gathering.myStatus === 'CANCEL'
+                  ? 'bg-[#F2F4F6] text-[#6B7684]'
+                  : gathering.myStatus === 'JOIN'
                   ? 'bg-[#EFF6FF] text-[#3182F6]'
+                  : gathering.myStatus === 'MAYBE'
+                  ? 'bg-[#FFF9E6] text-[#F59E0B]'
                   : 'bg-[#3182F6] text-white'
               }`}
             >
-              {gathering.myStatus ? `현재: ${STATUS_LABELS[gathering.myStatus]} · 변경하기` : '참여하기'}
+              {gathering.myStatus ? `${STATUS_LABELS[gathering.myStatus]} · 변경하기` : '참여하기'}
             </button>
           )}
         </div>
@@ -341,21 +375,52 @@ const GatheringDetailPage = () => {
       {showParticipateSheet && (
         <div className="fixed inset-0 z-50 flex items-end">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowParticipateSheet(false)} />
-          <div className="relative w-full max-w-[480px] mx-auto bg-white rounded-t-3xl px-5 py-6 flex flex-col gap-3 pb-safe">
-            <p className="text-[16px] font-bold text-[#191F28] mb-1">참여 여부 선택</p>
-            {(['JOIN', 'MAYBE', 'CANCEL'] as ParticipantStatus[]).map(status => (
-              <button
-                key={status}
-                onClick={() => handleParticipate(status)}
-                className={`w-full py-3.5 rounded-2xl text-[15px] font-semibold border transition-colors
-                  ${gathering.myStatus === status
-                    ? 'bg-[#3182F6] text-white border-[#3182F6]'
-                    : 'bg-white text-[#191F28] border-[#E5E8EB]'
+          <div className="relative w-full max-w-[480px] mx-auto bg-white rounded-t-3xl px-5 pt-6 pb-safe flex flex-col gap-4 max-h-[85vh] overflow-y-auto">
+            <p className="text-[16px] font-bold text-[#191F28]">참여 여부 선택</p>
+
+            {/* 상태 선택 */}
+            <div className="flex gap-2">
+              {(['JOIN', 'MAYBE', 'CANCEL'] as ParticipantStatus[]).map(status => (
+                <button
+                  key={status}
+                  onClick={() => setParticipateStatus(status)}
+                  className={`flex-1 py-2.5 rounded-xl text-[14px] font-semibold border transition-colors ${
+                    participateStatus === status
+                      ? status === 'JOIN'
+                        ? 'bg-[#3182F6] text-white border-[#3182F6]'
+                        : status === 'MAYBE'
+                        ? 'bg-[#F59E0B] text-white border-[#F59E0B]'
+                        : 'bg-[#6B7684] text-white border-[#6B7684]'
+                      : 'bg-white text-[#191F28] border-[#E5E8EB]'
                   }`}
-              >
-                {STATUS_LABELS[status]}
-              </button>
-            ))}
+                >
+                  {STATUS_LABELS[status]}
+                </button>
+              ))}
+            </div>
+
+            {/* 차량 공개 설정 (참여/미정일 때만) */}
+            {participateStatus !== 'CANCEL' && (
+              <div>
+                <p className="text-[13px] font-semibold text-[#191F28] mb-1">차량 공개 설정</p>
+                <p className="text-[12px] text-[#ADB5C0] mb-3">마이페이지에서 차량 정보를 먼저 등록해야 표시돼요</p>
+                <PlateVisibilityPicker
+                  showPlate={participateShowPlate}
+                  plateDigits={participatePlateDigits}
+                  showCarInfo={participateShowCarInfo}
+                  onChangeShowPlate={setParticipateShowPlate}
+                  onChangePlateDigits={setParticipatePlateDigits}
+                  onChangeShowCarInfo={setParticipateShowCarInfo}
+                />
+              </div>
+            )}
+
+            <button
+              onClick={handleParticipate}
+              className="w-full py-3.5 bg-[#3182F6] text-white rounded-2xl text-[15px] font-semibold mb-2"
+            >
+              확인
+            </button>
           </div>
         </div>
       )}

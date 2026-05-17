@@ -48,6 +48,9 @@ public class Gathering {
     private Boolean showPlate;
 
     @Column(nullable = false)
+    private Integer plateDigits; // 공개할 뒷자리 수 (2~4)
+
+    @Column(nullable = false)
     private Boolean showCarInfo;
 
     @Column(nullable = false, updatable = false)
@@ -59,7 +62,7 @@ public class Gathering {
     @Builder
     public Gathering(User host, String title, String description, LocalDateTime gatheringAt,
                      String location, String locationDetail, Integer maxParticipants,
-                     Boolean showPlate, Boolean showCarInfo) {
+                     Boolean showPlate, Integer plateDigits, Boolean showCarInfo) {
         this.host = host;
         this.title = title;
         this.description = description;
@@ -68,6 +71,7 @@ public class Gathering {
         this.locationDetail = locationDetail;
         this.maxParticipants = maxParticipants;
         this.showPlate = showPlate != null ? showPlate : false;
+        this.plateDigits = (plateDigits != null && plateDigits >= 2 && plateDigits <= 4) ? plateDigits : 2;
         this.showCarInfo = showCarInfo != null ? showCarInfo : false;
         this.status = GatheringStatus.OPEN;
         this.createdAt = LocalDateTime.now();
@@ -76,7 +80,7 @@ public class Gathering {
 
     public void update(String _title, String _description, LocalDateTime _gatheringAt,
                        String _location, String _locationDetail, Integer _maxParticipants,
-                       Boolean _showPlate, Boolean _showCarInfo) {
+                       Boolean _showPlate, Integer _plateDigits, Boolean _showCarInfo) {
         this.title = _title;
         this.description = _description;
         this.gatheringAt = _gatheringAt;
@@ -84,6 +88,7 @@ public class Gathering {
         this.locationDetail = _locationDetail;
         this.maxParticipants = _maxParticipants;
         this.showPlate = _showPlate;
+        this.plateDigits = (_plateDigits != null && _plateDigits >= 2 && _plateDigits <= 4) ? _plateDigits : 2;
         this.showCarInfo = _showCarInfo;
         this.updatedAt = LocalDateTime.now();
     }
