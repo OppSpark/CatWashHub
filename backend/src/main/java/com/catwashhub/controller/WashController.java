@@ -103,4 +103,25 @@ public class WashController {
         m_WashService.deleteSession(_userDetails.getUsername(), id);
         return ResponseEntity.ok(ApiResponse.ok());
     }
+
+    // 사진 추가
+    @PostMapping("/{id}/photos")
+    public ResponseEntity<ApiResponse<WashSessionResponse>> addPhoto(
+            @AuthenticationPrincipal UserDetails _userDetails,
+            @PathVariable Long id,
+            @RequestParam String photoUrl,
+            @RequestParam(defaultValue = "ETC") String photoType) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                m_WashService.addPhoto(_userDetails.getUsername(), id, photoUrl, photoType)));
+    }
+
+    // 사진 삭제
+    @DeleteMapping("/{id}/photos/{photoId}")
+    public ResponseEntity<ApiResponse<WashSessionResponse>> deletePhoto(
+            @AuthenticationPrincipal UserDetails _userDetails,
+            @PathVariable Long id,
+            @PathVariable Long photoId) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                m_WashService.deletePhoto(_userDetails.getUsername(), id, photoId)));
+    }
 }

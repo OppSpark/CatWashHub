@@ -26,6 +26,7 @@ public class WashService {
     private static final int c_DashboardRecentCount = 5;
 
     private final WashSessionRepository m_WashSessionRepository;
+    private final WashPhotoRepository m_WashPhotoRepository;
     private final ProductRepository m_ProductRepository;
     private final ProductSetRepository m_ProductSetRepository;
     private final UserRepository m_UserRepository;
@@ -185,6 +186,48 @@ public class WashService {
     public WashSessionResponse getSession(String _email, Long _sessionId) {
         User user = getUser(_email);
         WashSession session = getSessionOfUser(_sessionId, user.getId());
+        return WashSessionResponse.from(session);
+    }
+
+    // ==================== 사진 ====================
+
+    @Transactional
+    public WashSessionResponse addPhoto(String _email, Long _sessionId, String _photoUrl, String _photoType) {
+        User user = getUser(_email);
+        WashSession session = getSessionOfUser(_sessionId, user.getId());
+
+        WashPhoto.PhotoType photoType;
+        try {
+            photoType = WashPhoto.PhotoType.valueOf(_photoType);
+        } catch (IllegalArgumentException e) {
+            photoType = WashPhoto.PhotoType.ETC;
+        }
+
+        WashPhoto photo = WashPhoto.builder()
+                .washSession(session)
+                .photoUrl(_photoUrl)
+                .photoType(photoType)
+                .build();
+        m_WashPhotoRepository.save(photo);
+
+        return WashSessionResponse.from(session);
+    }
+
+    @Transactional
+    public WashSessionResponse deletePhoto(String _email, Long _sessionId, Long _photoId) {
+        User user = getUser(_email);
+        WashSession session = getSessionOfUser(_sessionId, user.getId());
+
+        WashPhoto photo = m_WashPhotoRepository.findById(_photoId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INPUT));
+
+        if (!photo.getWashSession().getId().equals(_sessionId)) {
+            throw new CustomException(ErrorCode.WASH_SESSION_FORBIDDEN);
+        }
+
+        m_WashPhotoRepository.delete(photo);
+        session.getPhotos().remove(photo);
+
         return WashSessionResponse.from(session);
     }
 

@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getSession, deleteSession, updateSession } from '@/api/washApi'
-import type { WashSession, WashProductItem, DilutionRatio, Weather, WashUpdateRequest } from '@/types/wash'
+import { getSession, deleteSession, updateSession, addPhoto, deletePhoto } from '@/api/washApi'
+import { uploadImage } from '@/api/boardApi'
+import type { WashSession, WashProductItem, DilutionRatio, Weather, WashUpdateRequest, PhotoType } from '@/types/wash'
 import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, ImagePlus, X } from 'lucide-react'
 
 const WEATHER_LABEL: Record<string, string> = {
   SUNNY: '☀️ 맑음',
@@ -92,6 +93,10 @@ const WashDetailPage = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+  const [selectedPhotoType, setSelectedPhotoType] = useState<PhotoType>('ETC')
+  const photoInputRef = useRef<HTMLInputElement>(null)
+
   const [editWashedAt, setEditWashedAt] = useState('')
   const [editLocation, setEditLocation] = useState('')
   const [editWeather, setEditWeather] = useState<Weather | null>(null)
@@ -141,6 +146,32 @@ const WashDetailPage = () => {
       toast.error('수정에 실패했습니다')
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !id) { return }
+    setIsUploadingPhoto(true)
+    try {
+      const url = await uploadImage(file)
+      const updated = await addPhoto(Number(id), url, selectedPhotoType)
+      setSession(updated)
+    } catch {
+      toast.error('사진 업로드에 실패했습니다')
+    } finally {
+      setIsUploadingPhoto(false)
+      if (photoInputRef.current) { photoInputRef.current.value = '' }
+    }
+  }
+
+  const handlePhotoDelete = async (photoId: number) => {
+    if (!id) { return }
+    try {
+      const updated = await deletePhoto(Number(id), photoId)
+      setSession(updated)
+    } catch {
+      toast.error('사진 삭제에 실패했습니다')
     }
   }
 
@@ -375,16 +406,71 @@ const WashDetailPage = () => {
             )}
 
             {/* 사진 (DONE만) */}
-            {!isPreparing && session.photos.length > 0 && (
+            {!isPreparing && (
               <div className="bg-white rounded-2xl px-5 py-4">
-                <p className="text-[14px] font-semibold text-[#191F28] mb-3">
-                  사진 ({session.photos.length}장)
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {session.photos.map(photo => (
-                    <img key={photo.id} src={photo.photoUrl} alt={photo.photoType} className="w-full aspect-square object-cover rounded-xl" />
-                  ))}
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[14px] font-semibold text-[#191F28]">
+                    사진
+                    {session.photos.length > 0 && (
+                      <span className="ml-1.5 text-[13px] text-[#3182F6] font-medium">{session.photos.length}장</span>
+                    )}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {/* 사진 타입 선택 */}
+                    <div className="flex gap-1">
+                      {(['BEFORE', 'AFTER', 'ETC'] as PhotoType[]).map(type => (
+                        <button
+                          key={type}
+                          onClick={() => setSelectedPhotoType(type)}
+                          className={`text-[11px] px-2 py-1 rounded-lg border transition-colors ${
+                            selectedPhotoType === type
+                              ? 'bg-[#3182F6] text-white border-[#3182F6]'
+                              : 'border-[#E5E8EB] text-[#6B7684]'
+                          }`}
+                        >
+                          {type === 'BEFORE' ? '세차 전' : type === 'AFTER' ? '세차 후' : '기타'}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => photoInputRef.current?.click()}
+                      disabled={isUploadingPhoto}
+                      className="flex items-center gap-1 text-[13px] text-[#3182F6] font-medium disabled:opacity-40"
+                    >
+                      <ImagePlus size={15} />
+                      {isUploadingPhoto ? '업로드 중...' : '추가'}
+                    </button>
+                  </div>
                 </div>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                />
+                {session.photos.length === 0 ? (
+                  <p className="text-[13px] text-[#ADB5C0] py-1">사진이 없어요</p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {session.photos.map(photo => (
+                      <div key={photo.id} className="relative">
+                        <img src={photo.photoUrl} alt={photo.photoType} className="w-full aspect-square object-cover rounded-xl" />
+                        <div className="absolute top-1 left-1 bg-black/50 rounded px-1.5 py-0.5">
+                          <span className="text-[9px] text-white font-medium">
+                            {photo.photoType === 'BEFORE' ? '전' : photo.photoType === 'AFTER' ? '후' : '기타'}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handlePhotoDelete(photo.id)}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#191F28] rounded-full flex items-center justify-center"
+                        >
+                          <X size={11} className="text-white" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </>

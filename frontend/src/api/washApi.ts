@@ -8,6 +8,7 @@ import type {
   MonthlyStats,
   ProductSet,
   ProductSetRequest,
+  PhotoType,
 } from '@/types/wash'
 
 // ==================== 대시보드 ====================
@@ -55,6 +56,18 @@ export const completeSession = async (id: number, data: WashCompleteRequest): Pr
 
 export const deleteSession = async (id: number): Promise<void> => {
   await apiClient.delete(`/wash/${id}`)
+}
+
+export const addPhoto = async (id: number, photoUrl: string, photoType: PhotoType): Promise<WashSession> => {
+  const res = await apiClient.post(`/wash/${id}/photos`, null, {
+    params: { photoUrl, photoType },
+  })
+  return res.data.data
+}
+
+export const deletePhoto = async (id: number, photoId: number): Promise<WashSession> => {
+  const res = await apiClient.delete(`/wash/${id}/photos/${photoId}`)
+  return res.data.data
 }
 
 export const getMonthlyStats = async (): Promise<MonthlyStats> => {
