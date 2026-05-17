@@ -371,7 +371,7 @@ const BoardListPage = () => {
     return (
       <PageLayout title="커뮤니티" headerVariant="large" stickyTab={sectionBar}>
         <RecipeSection onNavigate={navigate} requireAuth={requireAuth} />
-        <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} bottomOffset={56} />
+        <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} />
       </PageLayout>
     )
   }

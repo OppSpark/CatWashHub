@@ -53,7 +53,7 @@ const BottomNav = () => {
         })}
       </div>
 
-      <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} bottomOffset={56} />
+      <LoginPromptSheet open={showLoginSheet} onClose={() => setShowLoginSheet(false)} />
     </>
   )
 }

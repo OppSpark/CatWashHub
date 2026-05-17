@@ -4,14 +4,13 @@ import BottomSheet from '@/components/BottomSheet'
 interface LoginPromptSheetProps {
   open: boolean
   onClose: () => void
-  bottomOffset?: number
 }
 
-const LoginPromptSheet = ({ open, onClose, bottomOffset }: LoginPromptSheetProps) => {
+const LoginPromptSheet = ({ open, onClose }: LoginPromptSheetProps) => {
   const navigate = useNavigate()
 
   return (
-    <BottomSheet open={open} onClose={onClose} bottomOffset={bottomOffset}>
+    <BottomSheet open={open} onClose={onClose}>
       <div className="flex flex-col items-center text-center py-6 gap-2">
         <div className="w-14 h-14 rounded-full bg-[#EFF6FF] flex items-center justify-center mb-2">
           <span className="text-3xl">🔐</span>
