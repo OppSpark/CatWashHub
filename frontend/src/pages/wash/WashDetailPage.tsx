@@ -6,7 +6,10 @@ import type { WashSession, WashProductItem, DilutionRatio, Weather, WashUpdateRe
 import { useToast } from '@/hooks/useToast'
 import { WASH_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
-import { BookOpen, ImagePlus, X } from 'lucide-react'
+import { BookOpen, ImagePlus, X, Download } from 'lucide-react'
+import BeforeAfterSlider from '@/components/BeforeAfterSlider'
+import WashShareCard from '@/components/WashShareCard'
+import html2canvas from 'html2canvas'
 
 const WEATHER_LABEL: Record<string, string> = {
   SUNNY: '☀️ 맑음',
@@ -95,7 +98,9 @@ const WashDetailPage = () => {
 
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const [selectedPhotoType, setSelectedPhotoType] = useState<PhotoType>('ETC')
+  const [isSavingCard, setIsSavingCard] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
+  const shareCardRef = useRef<HTMLDivElement>(null)
 
   const [editWashedAt, setEditWashedAt] = useState('')
   const [editLocation, setEditLocation] = useState('')
@@ -146,6 +151,26 @@ const WashDetailPage = () => {
       toast.error('수정에 실패했습니다')
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleSaveCard = async () => {
+    if (!shareCardRef.current || !session || isSavingCard) { return }
+    setIsSavingCard(true)
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        useCORS: true,
+        scale: 2,
+        backgroundColor: null,
+      })
+      const link = document.createElement('a')
+      link.download = `세차기록_${session.washedAt.slice(0, 10)}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch {
+      toast.error('카드 저장에 실패했습니다')
+    } finally {
+      setIsSavingCard(false)
     }
   }
 
@@ -203,6 +228,9 @@ const WashDetailPage = () => {
   }
 
   const isPreparing = session.status === 'PREPARING'
+
+  const beforeUrl = session.photos.find(p => p.photoType === 'BEFORE')?.photoUrl ?? null
+  const afterUrl = session.photos.find(p => p.photoType === 'AFTER')?.photoUrl ?? null
 
   return (
     <PageLayout
@@ -452,24 +480,51 @@ const WashDetailPage = () => {
                 {session.photos.length === 0 ? (
                   <p className="text-[13px] text-[#ADB5C0] py-1">사진이 없어요</p>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2">
-                    {session.photos.map(photo => (
-                      <div key={photo.id} className="relative">
-                        <img src={photo.photoUrl} alt={photo.photoType} className="w-full aspect-square object-cover rounded-xl" />
-                        <div className="absolute top-1 left-1 bg-black/50 rounded px-1.5 py-0.5">
-                          <span className="text-[9px] text-white font-medium">
-                            {photo.photoType === 'BEFORE' ? '전' : photo.photoType === 'AFTER' ? '후' : '기타'}
-                          </span>
+                  <>
+                    {/* 전/후 슬라이더 */}
+                    {(() => {
+                      const beforePhoto = session.photos.find(p => p.photoType === 'BEFORE')
+                      const afterPhoto = session.photos.find(p => p.photoType === 'AFTER')
+                      if (beforePhoto && afterPhoto) {
+                        return (
+                          <div className="mb-3">
+                            <p className="text-[11px] text-[#ADB5C0] mb-2 font-medium">전/후 비교 슬라이더</p>
+                            <BeforeAfterSlider beforeUrl={beforePhoto.photoUrl} afterUrl={afterPhoto.photoUrl} />
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
+
+                    <div className="grid grid-cols-3 gap-2">
+                      {session.photos.map(photo => (
+                        <div key={photo.id} className="relative">
+                          <img src={photo.photoUrl} alt={photo.photoType} className="w-full aspect-square object-cover rounded-xl" />
+                          <div className="absolute top-1 left-1 bg-black/50 rounded px-1.5 py-0.5">
+                            <span className="text-[9px] text-white font-medium">
+                              {photo.photoType === 'BEFORE' ? '전' : photo.photoType === 'AFTER' ? '후' : '기타'}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handlePhotoDelete(photo.id)}
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#191F28] rounded-full flex items-center justify-center"
+                          >
+                            <X size={11} className="text-white" />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => handlePhotoDelete(photo.id)}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#191F28] rounded-full flex items-center justify-center"
-                        >
-                          <X size={11} className="text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+
+                    {/* 카드 저장 */}
+                    <button
+                      onClick={handleSaveCard}
+                      disabled={isSavingCard}
+                      className="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#E5E8EB] text-[14px] font-medium text-[#3182F6] active:brightness-95 disabled:opacity-40"
+                    >
+                      <Download size={15} />
+                      {isSavingCard ? '저장 중...' : '세차 카드 저장'}
+                    </button>
+                  </>
                 )}
               </div>
             )}
@@ -500,6 +555,9 @@ const WashDetailPage = () => {
           </button>
         </div>
       )}
+
+      {/* html2canvas용 카드 (화면 밖 렌더링) */}
+      <WashShareCard ref={shareCardRef} session={session} beforeUrl={beforeUrl} afterUrl={afterUrl} />
     </PageLayout>
   )
 }
