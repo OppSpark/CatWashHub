@@ -5,6 +5,7 @@ import com.catwashhub.dto.request.WashCompleteRequest;
 import com.catwashhub.dto.request.WashSessionRequest;
 import com.catwashhub.dto.request.WashUpdateRequest;
 import com.catwashhub.dto.response.MonthlyStatsResponse;
+import com.catwashhub.dto.response.SummaryStatsResponse;
 import com.catwashhub.dto.response.WashDashboardResponse;
 import com.catwashhub.dto.response.WashSessionResponse;
 import com.catwashhub.service.WashService;
@@ -93,6 +94,14 @@ public class WashController {
             @AuthenticationPrincipal UserDetails _userDetails) {
         return ResponseEntity.ok(ApiResponse.ok(
                 m_WashService.getMonthlyStats(_userDetails.getUsername())));
+    }
+
+    // 요약 통계 (누적 비용, 이번 달 비용, 자주 쓴 용품)
+    @GetMapping("/stats/summary")
+    public ResponseEntity<ApiResponse<SummaryStatsResponse>> getSummaryStats(
+            @AuthenticationPrincipal UserDetails _userDetails) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                m_WashService.getSummaryStats(_userDetails.getUsername())));
     }
 
     // 삭제

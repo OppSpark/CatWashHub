@@ -5,6 +5,7 @@ import com.catwashhub.dto.request.WashCompleteRequest;
 import com.catwashhub.dto.request.WashSessionRequest;
 import com.catwashhub.dto.request.WashUpdateRequest;
 import com.catwashhub.dto.response.MonthlyStatsResponse;
+import com.catwashhub.dto.response.SummaryStatsResponse;
 import com.catwashhub.dto.response.WashDashboardResponse;
 import com.catwashhub.dto.response.WashSessionResponse;
 import com.catwashhub.exception.CustomException;
@@ -256,10 +257,36 @@ public class WashService {
                     (String) row[0],
                     ((Number) row[1]).longValue(),
                     row[2] != null ? ((Number) row[2]).doubleValue() : null,
-                    row[3] != null ? ((Number) row[3]).doubleValue() : null
+                    row[3] != null ? ((Number) row[3]).doubleValue() : null,
+                    row[4] != null ? ((Number) row[4]).longValue() : null
             ));
         }
         return new MonthlyStatsResponse(monthly);
+    }
+
+    // ==================== 요약 통계 ====================
+
+    @Transactional(readOnly = true)
+    public SummaryStatsResponse getSummaryStats(String _email) {
+        User user = getUser(_email);
+
+        Long totalCost = m_WashSessionRepository.sumCostByUserId(user.getId());
+
+        String thisMonth = LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM"));
+        String lastMonth = LocalDate.now().minusMonths(1).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM"));
+
+        Long thisMonthCost = m_WashSessionRepository.sumCostByUserIdAndMonth(user.getId(), thisMonth);
+        Long lastMonthCost = m_WashSessionRepository.sumCostByUserIdAndMonth(user.getId(), lastMonth);
+
+        List<Object[]> topRows = m_WashSessionRepository.findTopProducts(user.getId());
+        List<SummaryStatsResponse.TopProduct> topProducts = topRows.stream()
+                .map(row -> new SummaryStatsResponse.TopProduct(
+                        (String) row[0],
+                        ((Number) row[1]).longValue()
+                ))
+                .toList();
+
+        return new SummaryStatsResponse(totalCost, thisMonthCost, lastMonthCost, topProducts);
     }
 
     // ==================== 초기화 함수 ====================

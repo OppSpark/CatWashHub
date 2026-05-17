@@ -89,10 +89,23 @@ export interface MonthlyData {
   count: number
   avgCost: number | null
   avgRating: number | null
+  totalCost: number | null
 }
 
 export interface MonthlyStats {
   monthly: MonthlyData[]
+}
+
+export interface TopProduct {
+  name: string
+  count: number
+}
+
+export interface SummaryStats {
+  totalCost: number
+  thisMonthCost: number
+  lastMonthCost: number
+  topProducts: TopProduct[]
 }
 
 // 세차 준비 저장 요청 (1차 - PREPARING)

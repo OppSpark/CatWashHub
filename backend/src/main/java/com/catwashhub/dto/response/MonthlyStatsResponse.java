@@ -9,6 +9,7 @@ public record MonthlyStatsResponse(
             String month,   // "2026-01"
             long count,
             Double avgCost,
-            Double avgRating
+            Double avgRating,
+            Long totalCost
     ) { }
 }

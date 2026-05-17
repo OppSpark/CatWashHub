@@ -6,6 +6,7 @@ import type {
   WashUpdateRequest,
   WashCompleteRequest,
   MonthlyStats,
+  SummaryStats,
   ProductSet,
   ProductSetRequest,
   PhotoType,
@@ -72,6 +73,11 @@ export const deletePhoto = async (id: number, photoId: number): Promise<WashSess
 
 export const getMonthlyStats = async (): Promise<MonthlyStats> => {
   const res = await apiClient.get('/wash/stats/monthly')
+  return res.data.data
+}
+
+export const getSummaryStats = async (): Promise<SummaryStats> => {
+  const res = await apiClient.get('/wash/stats/summary')
   return res.data.data
 }
 

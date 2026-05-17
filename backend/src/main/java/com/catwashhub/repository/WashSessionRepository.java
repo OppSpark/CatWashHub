@@ -41,7 +41,8 @@ public interface WashSessionRepository extends JpaRepository<WashSession, Long> 
         SELECT FUNCTION('DATE_FORMAT', w.washedAt, '%Y-%m') as month,
                COUNT(w) as cnt,
                AVG(CASE WHEN w.cost IS NOT NULL THEN w.cost END) as avgCost,
-               AVG(CASE WHEN w.rating IS NOT NULL THEN w.rating END) as avgRating
+               AVG(CASE WHEN w.rating IS NOT NULL THEN w.rating END) as avgRating,
+               SUM(CASE WHEN w.cost IS NOT NULL THEN w.cost ELSE 0 END) as totalCost
         FROM WashSession w
         WHERE w.user.id = :userId
           AND w.status = 'DONE'
@@ -50,4 +51,29 @@ public interface WashSessionRepository extends JpaRepository<WashSession, Long> 
         ORDER BY month ASC
         """)
     List<Object[]> findMonthlyStats(@Param("userId") Long userId, @Param("from") java.time.LocalDate from);
+
+    // 누적 총 비용
+    @Query("SELECT COALESCE(SUM(w.cost), 0) FROM WashSession w WHERE w.user.id = :userId AND w.status = 'DONE' AND w.cost IS NOT NULL")
+    Long sumCostByUserId(@Param("userId") Long userId);
+
+    // 이번 달 총 비용
+    @Query("""
+        SELECT COALESCE(SUM(w.cost), 0) FROM WashSession w
+        WHERE w.user.id = :userId AND w.status = 'DONE' AND w.cost IS NOT NULL
+          AND FUNCTION('DATE_FORMAT', w.washedAt, '%Y-%m') = :month
+        """)
+    Long sumCostByUserIdAndMonth(@Param("userId") Long userId, @Param("month") String month);
+
+    // 자주 쓴 용품 TOP 5
+    @Query("""
+        SELECT COALESCE(wp.product.name, wp.customName) as name, COUNT(wp) as cnt
+        FROM WashProduct wp
+        WHERE wp.washSession.user.id = :userId
+          AND wp.washSession.status = 'DONE'
+          AND COALESCE(wp.product.name, wp.customName) IS NOT NULL
+        GROUP BY COALESCE(wp.product.name, wp.customName)
+        ORDER BY cnt DESC
+        LIMIT 5
+        """)
+    List<Object[]> findTopProducts(@Param("userId") Long userId);
 }
