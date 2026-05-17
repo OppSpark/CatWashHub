@@ -134,10 +134,10 @@ const BottomSheet = ({ open, onClose, title, children, footer }: BottomSheetProp
 
   if (!isVisible) { return null }
 
-  const portal = document.getElementById('modal-root') ?? document.body
+  const portal = document.body
 
   return createPortal(
-    <div className="absolute inset-0 z-50 flex flex-col justify-end pointer-events-none">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
       {/* 딤드 배경 */}
       <div
         className="absolute inset-0 pointer-events-auto transition-opacity duration-300"
