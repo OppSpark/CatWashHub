@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("GET", "/api/recipes", "/api/recipes/{id}", "/api/recipes/top").permitAll()
                         .requestMatchers("GET", "/uploads/**").permitAll()
                         .requestMatchers("GET", "/api/gatherings", "/api/gatherings/{id}").permitAll()
+                        .requestMatchers("GET", "/api/users/{userId}/profile").permitAll()
                         // .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )

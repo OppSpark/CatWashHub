@@ -56,6 +56,17 @@ public class PostService {
                 .map(PostResponse.PostSummary::from);
     }
 
+    // ==================== 내 게시글 목록 ====================
+
+    @Transactional(readOnly = true)
+    public List<PostResponse.PostSummary> getMyPosts(String _email) {
+        User user = getUser(_email);
+        return m_PostRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .map(PostResponse.PostSummary::from)
+                .toList();
+    }
+
     // ==================== 내 세차기록 목록 (게시글 작성용) ====================
 
     @Transactional(readOnly = true)

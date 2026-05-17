@@ -3,6 +3,7 @@ package com.catwashhub.repository;
 import com.catwashhub.domain.Post;
 import com.catwashhub.domain.WashSession;
 import org.springframework.data.domain.Page;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -27,4 +28,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Query("UPDATE Post p SET p.washSession = NULL WHERE p.washSession = :washSession")
     void unlinkWashSession(@Param("washSession") WashSession washSession);
+
+    List<Post> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

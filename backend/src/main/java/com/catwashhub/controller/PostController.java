@@ -36,6 +36,14 @@ public class PostController {
                 m_PostService.getPosts(keyword, postType, PageRequest.of(page, size))));
     }
 
+    // 내 게시글 목록
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<PostResponse.PostSummary>>> getMyPosts(
+            @AuthenticationPrincipal UserDetails _userDetails) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                m_PostService.getMyPosts(_userDetails.getUsername())));
+    }
+
     // 내 세차기록 목록 (게시글 작성 시 선택용)
     @GetMapping("/my-wash-sessions")
     public ResponseEntity<ApiResponse<List<PostResponse.WashSessionEmbed>>> getMyWashSessions(
