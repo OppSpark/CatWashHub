@@ -1,12 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Droplets, ClipboardList, MessageSquare, User } from 'lucide-react'
+import { Home, Droplets, MessageSquare, User, Users } from 'lucide-react'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import LoginPromptSheet from '@/components/LoginPromptSheet'
 
 const c_NavItems = [
   { path: '/home',       label: '홈',       icon: Home,          authRequired: true  },
   { path: '/calculator', label: '희석계산기', icon: Droplets,      authRequired: false },
-  { path: '/records',    label: '세차기록',  icon: ClipboardList, authRequired: true  },
+  { path: '/gathering',  label: '세차벙',    icon: Users,         authRequired: false },
   { path: '/board',      label: '게시판',   icon: MessageSquare, authRequired: false },
   { path: '/mypage',     label: '마이페이지', icon: User,          authRequired: true  },
 ]

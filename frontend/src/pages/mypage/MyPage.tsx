@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/hooks/useToast'
 import {
-  User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet, BarChart2, BookOpen, Bookmark,
+  User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet, BarChart2, BookOpen, Bookmark, Car, Users,
 } from 'lucide-react'
 import PageLayout from '@/layouts/PageLayout'
 import BottomSheet from '@/components/BottomSheet'
@@ -11,8 +11,10 @@ import { MY_MSGS } from '@/constants/messages'
 import { updateNickname, updatePassword, deleteAccount } from '@/api/authApi'
 import { getDashboard } from '@/api/washApi'
 import { getMyRecipes, getSavedRecipes } from '@/api/recipeApi'
+import { getMyCar, saveMyCar } from '@/api/gatheringApi'
 import type { WashDashboard } from '@/types/wash'
 import type { Recipe } from '@/types/recipe'
+import type { UserCar } from '@/types/gathering'
 import { STEP_TYPE_COLORS } from '@/types/recipe'
 import { formatCost, formatRating } from '@/utils/format'
 
@@ -106,6 +108,12 @@ const MyPage = () => {
   const [dashboard, setDashboard] = useState<WashDashboard | null>(null)
   const [activeModal, setActiveModal] = useState<ModalType>(null)
   const [recipeSheet, setRecipeSheet] = useState<RecipeSheetType>(null)
+  const [myCar, setMyCar] = useState<UserCar | null>(null)
+  const [showCarSheet, setShowCarSheet] = useState(false)
+  const [carModel, setCarModel] = useState('')
+  const [carColor, setCarColor] = useState('')
+  const [plateNumber, setPlateNumber] = useState('')
+  const [carLoading, setCarLoading] = useState(false)
 
   // 닉네임 변경 폼
   const [newNickname, setNewNickname] = useState('')
@@ -120,6 +128,9 @@ const MyPage = () => {
   useEffect(() => {
     getDashboard()
       .then(setDashboard)
+      .catch(() => {})
+    getMyCar()
+      .then(setMyCar)
       .catch(() => {})
   }, [])
 
@@ -170,6 +181,27 @@ const MyPage = () => {
     } finally {
       setPwLoading(false)
     }
+  }
+
+  const handleCarSave = async () => {
+    setCarLoading(true)
+    try {
+      const res = await saveMyCar({ carModel: carModel.trim() || null, carColor: carColor.trim() || null, plateNumber: plateNumber.trim() || null })
+      setMyCar(res)
+      setShowCarSheet(false)
+      toast.success('차량 정보가 저장됐어요')
+    } catch {
+      toast.error('저장에 실패했어요')
+    } finally {
+      setCarLoading(false)
+    }
+  }
+
+  const openCarSheet = () => {
+    setCarModel(myCar?.carModel ?? '')
+    setCarColor(myCar?.carColor ?? '')
+    setPlateNumber(myCar?.plateNumber ?? '')
+    setShowCarSheet(true)
   }
 
   const handleDeleteAccount = async () => {
@@ -232,12 +264,49 @@ const MyPage = () => {
           </div>
         </div>
 
+        {/* 차량 정보 카드 */}
+        <div className="bg-white rounded-2xl px-5 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[13px] font-semibold text-[#6B7684]">내 차량</p>
+            <button onClick={openCarSheet} className="text-[13px] text-[#3182F6] font-medium">
+              {myCar ? '수정' : '등록'}
+            </button>
+          </div>
+          {myCar ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center shrink-0">
+                <Car size={20} className="text-[#3182F6]" />
+              </div>
+              <div>
+                <p className="text-[14px] font-semibold text-[#191F28]">
+                  {myCar.carModel ?? '차종 미등록'}
+                  {myCar.carColor && <span className="text-[#6B7684] font-normal"> · {myCar.carColor}</span>}
+                </p>
+                <p className="text-[13px] text-[#ADB5C0]">{myCar.plateNumber ?? '번호판 미등록'}</p>
+              </div>
+            </div>
+          ) : (
+            <button onClick={openCarSheet} className="w-full py-3 border border-dashed border-[#E5E8EB] rounded-xl text-[13px] text-[#ADB5C0]">
+              차량 정보를 등록하면 벙에서 공유할 수 있어요
+            </button>
+          )}
+        </div>
+
         {/* 세차 통계 링크 */}
         <div className="bg-white rounded-2xl overflow-hidden">
           <MenuItem
             icon={<BarChart2 size={18} className="text-[#3182F6]" />}
             label="세차 통계"
             onClick={() => navigate('/stats')}
+          />
+        </div>
+
+        {/* 벙 히스토리 */}
+        <div className="bg-white rounded-2xl overflow-hidden">
+          <MenuItem
+            icon={<Users size={18} className="text-[#3182F6]" />}
+            label="참여한 벙 히스토리"
+            onClick={() => navigate('/gathering/history')}
           />
         </div>
 
@@ -334,6 +403,44 @@ const MyPage = () => {
             maxLength={50}
             className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] text-[#191F28] outline-none focus:ring-2 focus:ring-[#3182F6]"
           />
+        </div>
+      </BottomSheet>
+
+      {/* 차량 정보 시트 */}
+      <BottomSheet
+        open={showCarSheet}
+        onClose={() => setShowCarSheet(false)}
+        title="차량 정보 등록"
+        footer={
+          <button
+            onClick={handleCarSave}
+            disabled={carLoading}
+            className="w-full bg-[#3182F6] text-white rounded-xl py-3.5 text-[15px] font-semibold disabled:opacity-50"
+          >
+            {carLoading ? '저장 중...' : '저장'}
+          </button>
+        }
+      >
+        <div className="flex flex-col gap-3 py-2">
+          <input
+            value={carModel}
+            onChange={e => setCarModel(e.target.value)}
+            placeholder="차종 (예: 아반떼, 소나타)"
+            className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#3182F6]"
+          />
+          <input
+            value={carColor}
+            onChange={e => setCarColor(e.target.value)}
+            placeholder="색상 (예: 흰색, 검정)"
+            className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#3182F6]"
+          />
+          <input
+            value={plateNumber}
+            onChange={e => setPlateNumber(e.target.value)}
+            placeholder="번호판 (예: 12가 3456)"
+            className="w-full bg-[#F2F4F6] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#3182F6]"
+          />
+          <p className="text-[12px] text-[#ADB5C0]">번호판은 벙에서 뒷 2자리 이상 공개 선택 가능해요</p>
         </div>
       </BottomSheet>
 

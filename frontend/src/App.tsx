@@ -19,6 +19,10 @@ import RecipeListPage from '@/pages/recipe/RecipeListPage'
 import RecipeDetailPage from '@/pages/recipe/RecipeDetailPage'
 import RecipeNewPage from '@/pages/recipe/RecipeNewPage'
 import RecipeEditPage from '@/pages/recipe/RecipeEditPage'
+import GatheringListPage from '@/pages/gathering/GatheringListPage'
+import GatheringDetailPage from '@/pages/gathering/GatheringDetailPage'
+import GatheringNewPage from '@/pages/gathering/GatheringNewPage'
+import GatheringHistoryPage from '@/pages/gathering/GatheringHistoryPage'
 import MobileShell from '@/layouts/MobileShell'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
@@ -56,6 +60,7 @@ const App = () => {
           <Route path="/board/:id" element={<BoardDetailPage />} />
           <Route path="/recipe" element={<RecipeListPage />} />
           <Route path="/recipe/:id" element={<RecipeDetailPage />} />
+          <Route path="/gathering" element={<GatheringListPage />} />
         </Route>
 
         {/* 로그인 필요 페이지 */}
@@ -76,7 +81,12 @@ const App = () => {
           <Route path="/board/:id/edit" element={<BoardEditPage />} />
           <Route path="/recipe/new" element={<RecipeNewPage />} />
           <Route path="/recipe/:id/edit" element={<RecipeEditPage />} />
+          <Route path="/gathering/new" element={<GatheringNewPage />} />
+          <Route path="/gathering/history" element={<GatheringHistoryPage />} />
         </Route>
+
+        {/* 벙 상세는 비로그인도 조회 가능 */}
+        <Route path="/gathering/:id" element={<GatheringDetailPage />} />
 
         {/* 기본 진입 — 비로그인: 게시판, 로그인: 홈 */}
         <Route path="*" element={<DefaultRedirect />} />
