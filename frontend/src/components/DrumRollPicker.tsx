@@ -7,7 +7,7 @@ interface DrumRollColumnProps {
   width?: string
 }
 
-const ITEM_HEIGHT = 44
+const ITEM_HEIGHT = 48
 
 const DrumRollColumn = ({ items, selectedIndex, onSelect, width = 'flex-1' }: DrumRollColumnProps) => {
   const listRef = useRef<HTMLDivElement>(null)
@@ -85,16 +85,16 @@ const DrumRollColumn = ({ items, selectedIndex, onSelect, width = 'flex-1' }: Dr
   }
 
   return (
-    <div className={`relative ${width} overflow-hidden`} style={{ height: `${ITEM_HEIGHT * 5}px` }}>
+    <div className={`relative ${width} overflow-hidden`} style={{ height: `${ITEM_HEIGHT * 3}px` }}>
       {/* 선택 영역 하이라이트 */}
       <div
         className="absolute left-0 right-0 pointer-events-none z-10 border-y border-[#3182F6]"
-        style={{ top: `${ITEM_HEIGHT * 2}px`, height: `${ITEM_HEIGHT}px` }}
+        style={{ top: `${ITEM_HEIGHT * 1}px`, height: `${ITEM_HEIGHT}px` }}
       />
 
       {/* 상단/하단 그라데이션 */}
-      <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
-      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
       <div
         ref={listRef}
@@ -108,8 +108,8 @@ const DrumRollColumn = ({ items, selectedIndex, onSelect, width = 'flex-1' }: Dr
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
-          paddingTop: `${ITEM_HEIGHT * 2}px`,
-          paddingBottom: `${ITEM_HEIGHT * 2}px`,
+          paddingTop: `${ITEM_HEIGHT * 1}px`,
+          paddingBottom: `${ITEM_HEIGHT * 1}px`,
         }}
       >
         {items.map((item, i) => (
