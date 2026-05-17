@@ -58,6 +58,9 @@ public class User {
 
     private LocalDateTime deletedAt;
 
+    @Column(nullable = false)
+    private Double mannerTemperature;
+
     // ==================== 생성자 ====================
     @Builder
     public User(String email, String password, String nickname, Role role,
@@ -73,6 +76,7 @@ public class User {
         this.agreedPrivacy = agreedPrivacy;
         this.agreedMarketing = (agreedMarketing != null) ? agreedMarketing : false;
         this.isDeleted = false;
+        this.mannerTemperature = 36.5;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -96,6 +100,11 @@ public class User {
 
     public boolean isDeleted() {
         return Boolean.TRUE.equals(this.isDeleted);
+    }
+
+    public void updateMannerTemperature(double _delta) {
+        this.mannerTemperature = Math.min(100.0, Math.max(0.0, this.mannerTemperature + _delta));
+        this.updatedAt = LocalDateTime.now();
     }
 
     // ==================== Enum ====================
