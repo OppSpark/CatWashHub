@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createPost, getMyWashSessions } from '@/api/boardApi'
+import { createPost, getMyWashSessions, uploadImage } from '@/api/boardApi'
 import type { WashSessionEmbed } from '@/types/board'
 import { useToast } from '@/hooks/useToast'
 import { BOARD_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
-import { MessageSquare, ClipboardList, Star, MapPin, Clock, ChevronDown, ChevronUp, Check, BookOpen } from 'lucide-react'
+import { MessageSquare, ClipboardList, Star, MapPin, Clock, ChevronDown, ChevronUp, Check, BookOpen, ImagePlus, X } from 'lucide-react'
 
 type PostType = 'FREE' | 'WASH_LOG'
 
@@ -97,6 +97,11 @@ const BoardNewPage = () => {
   const [content, setContent] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
+  // 이미지
+  const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   // 세차일지 선택
   const [washSessions, setWashSessions] = useState<WashSessionEmbed[]>([])
   const [selectedSession, setSelectedSession] = useState<WashSessionEmbed | null>(null)
@@ -118,6 +123,29 @@ const BoardNewPage = () => {
     setShowSessionList(false)
   }
 
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    if (files.length === 0) { return }
+    if (imageUrls.length + files.length > 5) {
+      toast.error('이미지는 최대 5장까지 첨부할 수 있어요.')
+      return
+    }
+    setIsUploading(true)
+    try {
+      const uploaded = await Promise.all(files.map(f => uploadImage(f)))
+      setImageUrls(prev => [...prev, ...uploaded])
+    } catch {
+      toast.error('이미지 업로드에 실패했어요.')
+    } finally {
+      setIsUploading(false)
+      if (fileInputRef.current) { fileInputRef.current.value = '' }
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setImageUrls(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim() || isSaving) { return }
     if (postType === 'WASH_LOG' && !selectedSession) {
@@ -131,6 +159,7 @@ const BoardNewPage = () => {
         washSessionId: selectedSession?.id ?? null,
         title: title.trim(),
         content: content.trim(),
+        imageUrls,
       })
       toast.success(BOARD_MSGS.POST_CREATED)
       navigate(`/board/${post.id}`, { replace: true })
@@ -252,6 +281,49 @@ const BoardNewPage = () => {
             rows={12}
             className="w-full text-[14px] text-[#191F28] outline-none resize-none placeholder:text-[#ADB5C0]"
           />
+        </div>
+
+        {/* 이미지 첨부 */}
+        <div className="bg-white rounded-2xl px-5 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[14px] font-semibold text-[#191F28]">
+              사진
+              {imageUrls.length > 0 && (
+                <span className="ml-1.5 text-[13px] text-[#3182F6] font-medium">{imageUrls.length}/5</span>
+              )}
+            </p>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading || imageUrls.length >= 5}
+              className="flex items-center gap-1 text-[13px] text-[#3182F6] font-medium disabled:opacity-40"
+            >
+              <ImagePlus size={15} />
+              {isUploading ? '업로드 중...' : '추가'}
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleImageSelect}
+          />
+          {imageUrls.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {imageUrls.map((url, i) => (
+                <div key={i} className="relative shrink-0">
+                  <img src={url} alt="" className="w-20 h-20 object-cover rounded-xl" />
+                  <button
+                    onClick={() => removeImage(i)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#191F28] rounded-full flex items-center justify-center"
+                  >
+                    <X size={11} className="text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>

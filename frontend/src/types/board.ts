@@ -65,6 +65,7 @@ export interface PostRequest {
   washSessionId?: number | null
   title: string
   content: string
+  imageUrls: string[]
 }
 
 export interface CommentRequest {

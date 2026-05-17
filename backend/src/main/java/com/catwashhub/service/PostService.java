@@ -2,6 +2,7 @@ package com.catwashhub.service;
 
 import com.catwashhub.domain.Comment;
 import com.catwashhub.domain.Post;
+import com.catwashhub.domain.PostImage;
 import com.catwashhub.domain.PostLike;
 import com.catwashhub.domain.User;
 import com.catwashhub.domain.WashSession;
@@ -13,6 +14,7 @@ import com.catwashhub.dto.response.PostResponse;
 import com.catwashhub.exception.CustomException;
 import com.catwashhub.exception.ErrorCode;
 import com.catwashhub.repository.CommentRepository;
+import com.catwashhub.repository.PostImageRepository;
 import com.catwashhub.repository.PostLikeRepository;
 import com.catwashhub.repository.PostRepository;
 import com.catwashhub.repository.UserRepository;
@@ -30,6 +32,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository m_PostRepository;
+    private final PostImageRepository m_PostImageRepository;
     private final PostLikeRepository m_PostLikeRepository;
     private final CommentRepository m_CommentRepository;
     private final UserRepository m_UserRepository;
@@ -107,6 +110,7 @@ public class PostService {
                 .content(_request.content())
                 .build();
         m_PostRepository.save(post);
+        addImages(post, _request.imageUrls());
         return PostResponse.from(post, false);
     }
 
@@ -118,6 +122,8 @@ public class PostService {
         Post post = getPostById(_postId);
         checkPostOwner(post, user.getId());
         post.update(_request.title(), _request.content());
+        post.getImages().clear();
+        addImages(post, _request.imageUrls());
         return PostResponse.from(post, m_PostLikeRepository.existsByPostIdAndUserId(_postId, user.getId()));
     }
 
@@ -210,6 +216,20 @@ public class PostService {
     }
 
     // ==================== 초기화 함수 ====================
+
+    private void addImages(Post _post, List<String> _imageUrls) {
+        if (_imageUrls == null || _imageUrls.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < _imageUrls.size(); i++) {
+            PostImage image = PostImage.builder()
+                    .post(_post)
+                    .imageUrl(_imageUrls.get(i))
+                    .sortOrder(i)
+                    .build();
+            m_PostImageRepository.save(image);
+        }
+    }
 
     private User getUser(String _email) {
         return m_UserRepository.findByEmail(_email)

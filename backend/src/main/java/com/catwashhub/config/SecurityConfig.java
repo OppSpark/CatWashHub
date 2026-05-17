@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("GET", "/api/products", "/api/products/{id}").permitAll()
                         .requestMatchers("GET", "/api/categories").permitAll()
                         .requestMatchers("GET", "/api/recipes", "/api/recipes/{id}", "/api/recipes/top").permitAll()
+                        .requestMatchers("GET", "/uploads/**").permitAll()
                         // .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )

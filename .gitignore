@@ -45,3 +45,7 @@ Thumbs.db
 *.log
 logs/
 CLAUDE.md
+
+# ===== 업로드 이미지 =====
+backend/uploads/*
+!backend/uploads/.gitkeep

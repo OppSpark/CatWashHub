@@ -496,6 +496,15 @@ const BoardDetailPage = () => {
 
           <p className="text-[15px] text-[#191F28] whitespace-pre-wrap leading-[1.7]">{post.content}</p>
 
+          {/* 이미지 */}
+          {post.imageUrls.length > 0 && (
+            <div className="flex flex-col gap-2 mt-4">
+              {post.imageUrls.map((url, i) => (
+                <img key={i} src={url} alt="" className="w-full rounded-2xl object-cover" />
+              ))}
+            </div>
+          )}
+
           {/* 반응 */}
           <div className="flex items-center gap-4 mt-5 pt-4 border-t border-[#F2F4F6]">
             <span className="flex items-center gap-1.5 text-[13px] text-[#ADB5C0]">

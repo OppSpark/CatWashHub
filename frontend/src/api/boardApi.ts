@@ -37,6 +37,17 @@ export const toggleLike = async (id: number): Promise<boolean> => {
   return res.data.data
 }
 
+// ==================== 이미지 업로드 ====================
+
+export const uploadImage = async (file: File): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await apiClient.post('/upload/image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return res.data.data
+}
+
 // ==================== 댓글 ====================
 
 export const getComments = async (postId: number): Promise<Comment[]> => {

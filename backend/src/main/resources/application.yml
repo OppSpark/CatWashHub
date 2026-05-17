@@ -39,3 +39,7 @@ jwt:
 
 server:
   port: 8080
+
+upload:
+  path: ${UPLOAD_PATH:./uploads}
+  url-prefix: ${UPLOAD_URL_PREFIX:http://localhost:8080/uploads}
