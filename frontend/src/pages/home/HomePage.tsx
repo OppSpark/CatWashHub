@@ -6,6 +6,7 @@ import type { WashDashboard, WashSession } from '@/types/wash'
 import { HOME_MSGS } from '@/constants/messages'
 import PageLayout from '@/layouts/PageLayout'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useWeather } from '@/hooks/useWeather'
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr)
@@ -127,6 +128,82 @@ const WashCalendar = ({ sessions }: { sessions: WashSession[] }) => {
   )
 }
 
+// ==================== 날씨 세차 타이밍 카드 ====================
+const WeatherCard = () => {
+  const { data, isLoading, error, locationName, washScore, weatherLabel } = useWeather()
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-2xl px-5 py-4 animate-pulse">
+        <div className="h-4 bg-[#F2F4F6] rounded w-24 mb-3" />
+        <div className="h-8 bg-[#F2F4F6] rounded w-40 mb-2" />
+        <div className="h-3 bg-[#F2F4F6] rounded w-56" />
+      </div>
+    )
+  }
+
+  if (error === 'permission_denied') {
+    return (
+      <div className="bg-white rounded-2xl px-5 py-4">
+        <p className="text-[13px] font-semibold text-[#6B7684] mb-1">세차 타이밍</p>
+        <p className="text-[13px] text-[#ADB5C0]">위치 권한을 허용하면 날씨 기반 세차 타이밍을 알려드려요</p>
+      </div>
+    )
+  }
+
+  if (error || !data || !washScore) { return null }
+
+  return (
+    <div className="bg-white rounded-2xl px-5 py-4">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[13px] font-semibold text-[#6B7684]">
+          세차 타이밍 {locationName && <span className="font-normal">· {locationName}</span>}
+        </p>
+        <span className="text-[12px] text-[#ADB5C0]">{weatherLabel}</span>
+      </div>
+
+      {/* 점수 바 */}
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-[32px]">{washScore.emoji}</span>
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-[15px] font-bold" style={{ color: washScore.color }}>
+              {washScore.score}점
+            </p>
+            <p className="text-[11px] text-[#ADB5C0]">세차 추천 지수</p>
+          </div>
+          <div className="h-2 bg-[#F2F4F6] rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${washScore.score}%`, backgroundColor: washScore.color }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <p className="text-[13px] text-[#6B7684]">{washScore.message}</p>
+
+      {/* 3일 예보 */}
+      <div className="flex gap-2 mt-3 pt-3 border-t border-[#F2F4F6]">
+        {data.forecast.map((day) => {
+          const date = new Date(day.date)
+          const label = `${date.getMonth() + 1}/${date.getDate()}`
+          const hasRain = day.precipitation > 1
+          return (
+            <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
+              <span className="text-[11px] text-[#ADB5C0]">{label}</span>
+              <span className="text-[16px]">{day.precipitation > 1 ? '🌧️' : day.weatherCode <= 1 ? '☀️' : '⛅'}</span>
+              {hasRain && (
+                <span className="text-[10px] text-[#3182F6] font-medium">{day.precipitation.toFixed(1)}mm</span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 const HomePage = () => {
   const navigate = useNavigate()
   const nickname = useAuthStore(s => s.nickname)
@@ -169,6 +246,9 @@ const HomePage = () => {
             </p>
           </div>
         </div>
+
+        {/* 날씨 세차 타이밍 카드 */}
+        <WeatherCard />
 
         {/* 세차 시작 버튼 */}
         <button
