@@ -163,12 +163,14 @@ const BottomSheet = ({ open, onClose, title, children, footer, bottomOffset = 0 
       {/* 시트 본체 */}
       <div
         ref={sheetRef}
-        className="relative bg-white rounded-t-3xl flex flex-col pointer-events-auto"
+        className="relative bg-white rounded-t-3xl pointer-events-auto overflow-hidden"
         style={{
           height: SNAP_HEIGHTS[snap],
           transform: `translateY(${translateY}px)`,
           transition: isDragging ? 'none' : 'transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), height 0.32s cubic-bezier(0.32, 0.72, 0, 1)',
           marginBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : bottomOffset > 0 ? `${bottomOffset}px` : undefined,
+          display: 'flex',
+          flexDirection: 'column',
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -187,14 +189,17 @@ const BottomSheet = ({ open, onClose, title, children, footer, bottomOffset = 0 
           </div>
         )}
 
-        {/* 콘텐츠 */}
-        <div data-scroll className="flex-1 overflow-y-auto px-5 pb-2 overscroll-contain">
+        {/* 콘텐츠 — footer가 있으면 하단에서 footer 높이만큼 패딩 */}
+        <div data-scroll className="flex-1 overflow-y-auto px-5 pb-2 overscroll-contain min-h-0">
           {children}
         </div>
 
-        {/* 하단 버튼 */}
+        {/* 하단 버튼 — shrink-0으로 항상 가시 */}
         {footer !== undefined && (
-          <div className="px-5 pt-3 pb-5 shrink-0 border-t border-[#F2F4F6]">
+          <div
+            className="px-5 pt-3 shrink-0 border-t border-[#F2F4F6] bg-white"
+            style={{ paddingBottom: `max(20px, env(safe-area-inset-bottom, 20px))` }}
+          >
             {footer}
           </div>
         )}

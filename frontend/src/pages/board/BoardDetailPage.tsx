@@ -135,6 +135,7 @@ const CommentRow = ({
   onEditSubmit: () => void
   onEditCancel: () => void
 }) => {
+  const navigate = useNavigate()
   const isOwner = currentUserId === comment.authorId
   const isEditing = editingId === comment.id
 
@@ -147,10 +148,20 @@ const CommentRow = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             {isReply && (
-              <span className="text-[11px] text-[#ADB5C0] font-medium">@{comment.authorNickname}</span>
+              <button
+                onClick={() => navigate(`/user/${comment.authorId}`)}
+                className="text-[11px] text-[#ADB5C0] font-medium active:opacity-70"
+              >
+                @{comment.authorNickname}
+              </button>
             )}
             {!isReply && (
-              <span className="text-[13px] font-semibold text-[#191F28]">{comment.authorNickname}</span>
+              <button
+                onClick={() => navigate(`/user/${comment.authorId}`)}
+                className="text-[13px] font-semibold text-[#191F28] active:opacity-70"
+              >
+                {comment.authorNickname}
+              </button>
             )}
             <span className="text-[11px] text-[#ADB5C0]">{formatRelative(comment.createdAt)}</span>
           </div>

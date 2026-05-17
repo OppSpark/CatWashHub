@@ -13,6 +13,11 @@ export const getMyWashSessions = async (): Promise<WashSessionEmbed[]> => {
   return res.data.data
 }
 
+export const getMyPosts = async (): Promise<PostSummary[]> => {
+  const res = await apiClient.get('/posts/my')
+  return res.data.data
+}
+
 export const getPost = async (id: number): Promise<Post> => {
   const res = await apiClient.get(`/posts/${id}`)
   return res.data.data

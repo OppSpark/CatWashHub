@@ -23,6 +23,7 @@ import GatheringListPage from '@/pages/gathering/GatheringListPage'
 import GatheringDetailPage from '@/pages/gathering/GatheringDetailPage'
 import GatheringNewPage from '@/pages/gathering/GatheringNewPage'
 import GatheringHistoryPage from '@/pages/gathering/GatheringHistoryPage'
+import UserProfilePage from '@/pages/user/UserProfilePage'
 import MobileShell from '@/layouts/MobileShell'
 import BottomNav from '@/layouts/BottomNav'
 import Toast from '@/components/Toast'
@@ -87,6 +88,9 @@ const App = () => {
 
         {/* 벙 상세는 비로그인도 조회 가능 */}
         <Route path="/gathering/:id" element={<GatheringDetailPage />} />
+
+        {/* 유저 프로필은 공개 */}
+        <Route path="/user/:userId" element={<UserProfilePage />} />
 
         {/* 기본 진입 — 비로그인: 게시판, 로그인: 홈 */}
         <Route path="*" element={<DefaultRedirect />} />

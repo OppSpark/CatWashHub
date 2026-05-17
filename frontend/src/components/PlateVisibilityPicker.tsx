@@ -45,7 +45,8 @@ const PlateVisibilityPicker = ({
 
   const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
     <button
-      onClick={() => onChange(!value)}
+      type="button"
+      onClick={e => { e.stopPropagation(); onChange(!value) }}
       className={`w-11 h-6 rounded-full transition-colors shrink-0 ${value ? 'bg-[#3182F6]' : 'bg-[#E5E8EB]'}`}
     >
       <div className={`w-5 h-5 bg-white rounded-full shadow m-0.5 transition-transform ${value ? 'translate-x-5' : ''}`} />
@@ -72,7 +73,8 @@ const PlateVisibilityPicker = ({
               {[2, 3, 4].map(d => (
                 <button
                   key={d}
-                  onClick={() => onChangePlateDigits(d)}
+                  type="button"
+                  onClick={e => { e.stopPropagation(); onChangePlateDigits(d) }}
                   className={`flex-1 py-2 rounded-xl text-[13px] font-semibold border transition-colors ${
                     plateDigits === d
                       ? 'bg-[#3182F6] text-white border-[#3182F6]'
