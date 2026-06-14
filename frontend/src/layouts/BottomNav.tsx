@@ -8,7 +8,7 @@ const c_NavItems = [
   { path: '/calculator', label: '희석계산기', icon: Droplets,      authRequired: false },
   { path: '/gathering',  label: '세차벙',    icon: Users,         authRequired: false },
   { path: '/board',      label: '게시판',   icon: MessageSquare, authRequired: false },
-  { path: '/mypage',     label: '마이페이지', icon: User,          authRequired: true  },
+  { path: '/mypage',     label: '전체',      icon: User,          authRequired: true  },
 ]
 
 const BottomNav = () => {
