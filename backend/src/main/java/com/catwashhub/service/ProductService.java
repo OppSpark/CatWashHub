@@ -7,6 +7,7 @@ import com.catwashhub.dto.request.ProductReviewRequest;
 import com.catwashhub.dto.response.CalculationResponse;
 import com.catwashhub.dto.response.CategoryResponse;
 import com.catwashhub.dto.response.ProductResponse;
+import com.catwashhub.dto.response.MyProductReviewResponse;
 import com.catwashhub.dto.response.ProductReviewResponse;
 import com.catwashhub.dto.response.ProductReviewSummaryResponse;
 import com.catwashhub.repository.ProductReviewRepository;
@@ -175,6 +176,22 @@ public class ProductService {
                         .build();
             }
             return ProductReviewResponse.from(m_ReviewRepository.save(review));
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyProductReviewResponse> getMyReviews(String _email) {
+        try {
+            User user = m_UserRepository.findByEmail(_email)
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            return m_ReviewRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
+                    .stream()
+                    .map(MyProductReviewResponse::from)
+                    .toList();
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {

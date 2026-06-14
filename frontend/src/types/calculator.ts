@@ -34,6 +34,16 @@ export interface ProductReview {
   createdAt: string
 }
 
+export interface MyProductReview {
+  id: number
+  productId: number
+  productName: string
+  productBrand: string | null
+  rating: number
+  content: string | null
+  createdAt: string
+}
+
 export interface ProductReviewSummary {
   avgRating: number | null
   totalCount: number

@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Droplets, MessageSquare, User, Users } from 'lucide-react'
+import { Home, Droplets, MessageSquare, Menu, Users } from 'lucide-react'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import LoginPromptSheet from '@/components/LoginPromptSheet'
 
@@ -8,7 +8,7 @@ const c_NavItems = [
   { path: '/calculator', label: '희석계산기', icon: Droplets,      authRequired: false },
   { path: '/gathering',  label: '세차벙',    icon: Users,         authRequired: false },
   { path: '/board',      label: '게시판',   icon: MessageSquare, authRequired: false },
-  { path: '/mypage',     label: '전체',      icon: User,          authRequired: true  },
+  { path: '/mypage',     label: '전체',      icon: Menu,          authRequired: true  },
 ]
 
 const BottomNav = () => {

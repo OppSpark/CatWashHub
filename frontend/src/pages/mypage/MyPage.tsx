@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/hooks/useToast'
 import {
-  User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet, BarChart2, BookOpen, Bookmark, Car, Users, FileText, Droplets, ThumbsUp,
+  User, LogOut, ChevronRight, Lock, Edit3, Trash2, Star, Wallet, BarChart2, BookOpen, Bookmark, Car, Users, FileText, Droplets, ThumbsUp, Package,
 } from 'lucide-react'
 import PageLayout from '@/layouts/PageLayout'
 import BottomSheet from '@/components/BottomSheet'
@@ -13,15 +13,17 @@ import { getDashboard, getSessions } from '@/api/washApi'
 import { getMyRecipes, getSavedRecipes } from '@/api/recipeApi'
 import { getMyCar, saveMyCar, getMyGatheringHistory } from '@/api/gatheringApi'
 import { getMyPosts } from '@/api/boardApi'
+import { getMyProductReviews } from '@/api/calculatorApi'
 import type { WashDashboard, WashSession } from '@/types/wash'
 import type { Recipe } from '@/types/recipe'
 import type { UserCar, GatheringSummary } from '@/types/gathering'
 import type { PostSummary } from '@/types/board'
+import type { MyProductReview } from '@/types/calculator'
 import { STEP_TYPE_COLORS } from '@/types/recipe'
 import { formatCost, formatRating } from '@/utils/format'
 
 // ==================== 활동 시트 타입 ====================
-type ActivitySheetType = 'posts' | 'wash' | 'gathering' | null
+type ActivitySheetType = 'posts' | 'wash' | 'gathering' | 'reviews' | null
 
 // ==================== 레시피 목록 시트 ====================
 type RecipeSheetType = 'my' | 'saved' | null
@@ -117,6 +119,7 @@ const MyPage = () => {
   const [activityPosts, setActivityPosts] = useState<PostSummary[]>([])
   const [activityWash, setActivityWash] = useState<WashSession[]>([])
   const [activityGathering, setActivityGathering] = useState<GatheringSummary[]>([])
+  const [activityReviews, setActivityReviews] = useState<MyProductReview[]>([])
   const [activityLoading, setActivityLoading] = useState(false)
   const [myCar, setMyCar] = useState<UserCar | null>(null)
   const [showCarSheet, setShowCarSheet] = useState(false)
@@ -216,6 +219,8 @@ const MyPage = () => {
       getSessions().then(sessions => setActivityWash(sessions.filter(s => s.status === 'DONE'))).catch(() => {}).finally(() => setActivityLoading(false))
     } else if (type === 'gathering') {
       getMyGatheringHistory().then(setActivityGathering).catch(() => {}).finally(() => setActivityLoading(false))
+    } else if (type === 'reviews') {
+      getMyProductReviews().then(setActivityReviews).catch(() => {}).finally(() => setActivityLoading(false))
     }
   }
 
@@ -334,6 +339,12 @@ const MyPage = () => {
             label="참여한 벙"
             onClick={() => openActivitySheet('gathering')}
           />
+          <div className="h-px bg-[#F2F4F6] mx-5" />
+          <MenuItem
+            icon={<Package size={18} className="text-[#3182F6]" />}
+            label="내가 쓴 용품 리뷰"
+            onClick={() => openActivitySheet('reviews')}
+          />
           <div className="pb-2" />
         </div>
 
@@ -414,6 +425,7 @@ const MyPage = () => {
         title={
           activitySheet === 'posts' ? '내가 쓴 게시글'
           : activitySheet === 'wash' ? '내 세차 일지'
+          : activitySheet === 'reviews' ? '내가 쓴 용품 리뷰'
           : '참여한 벙'
         }
       >
@@ -469,7 +481,7 @@ const MyPage = () => {
                 })}
               </div>
             )
-          ) : (
+          ) : activitySheet === 'gathering' ? (
             activityGathering.length === 0 ? (
               <p className="py-10 text-center text-[14px] text-[#ADB5C0]">참여한 벙이 없어요</p>
             ) : (
@@ -489,6 +501,27 @@ const MyPage = () => {
                     </button>
                   )
                 })}
+              </div>
+            )
+          ) : (
+            activityReviews.length === 0 ? (
+              <p className="py-10 text-center text-[14px] text-[#ADB5C0]">작성한 리뷰가 없어요</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {activityReviews.map(r => (
+                  <div key={r.id} className="bg-[#F8F9FA] rounded-2xl p-4">
+                    <div className="flex items-start justify-between mb-1">
+                      <p className="text-[14px] font-bold text-[#191F28]">{r.productName}</p>
+                      <span className="text-[13px] text-[#FFB800] shrink-0">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                    </div>
+                    {r.productBrand && (
+                      <p className="text-[12px] text-[#ADB5C0] mb-1">{r.productBrand}</p>
+                    )}
+                    {r.content && (
+                      <p className="text-[13px] text-[#6B7684]">{r.content}</p>
+                    )}
+                  </div>
+                ))}
               </div>
             )
           )}

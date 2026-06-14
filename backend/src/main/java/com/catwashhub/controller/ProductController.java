@@ -7,6 +7,7 @@ import com.catwashhub.dto.request.ProductReviewRequest;
 import com.catwashhub.dto.response.CalculationResponse;
 import com.catwashhub.dto.response.CategoryResponse;
 import com.catwashhub.dto.response.ProductResponse;
+import com.catwashhub.dto.response.MyProductReviewResponse;
 import com.catwashhub.dto.response.ProductReviewResponse;
 import com.catwashhub.dto.response.ProductReviewSummaryResponse;
 import com.catwashhub.service.ProductService;
@@ -73,6 +74,12 @@ public class ProductController {
             @PathVariable Long productId,
             @RequestBody ProductReviewRequest request) {
         return ApiResponse.ok(m_ProductService.createReview(userDetails.getUsername(), productId, request));
+    }
+
+    @GetMapping("/products/reviews/my")
+    public ApiResponse<List<MyProductReviewResponse>> getMyReviews(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ApiResponse.ok(m_ProductService.getMyReviews(userDetails.getUsername()));
     }
 
     @DeleteMapping("/products/reviews/{reviewId}")

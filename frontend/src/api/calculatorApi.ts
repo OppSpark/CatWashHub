@@ -1,5 +1,5 @@
 import apiClient from '@/api/axios'
-import type { Category, Product, CalculationResult, ProductReview, ProductReviewSummary } from '@/types/calculator'
+import type { Category, Product, CalculationResult, ProductReview, ProductReviewSummary, MyProductReview } from '@/types/calculator'
 
 export const getCategories = async (): Promise<Category[]> => {
   const res = await apiClient.get('/categories')
@@ -44,4 +44,9 @@ export const createProductReview = async (productId: number, rating: number, con
 
 export const deleteProductReview = async (reviewId: number): Promise<void> => {
   await apiClient.delete(`/products/reviews/${reviewId}`)
+}
+
+export const getMyProductReviews = async (): Promise<MyProductReview[]> => {
+  const res = await apiClient.get('/products/reviews/my')
+  return res.data.data
 }
