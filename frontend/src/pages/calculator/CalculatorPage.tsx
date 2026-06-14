@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronDown, Clock, Bookmark, BadgeCheck, User, Info } from 'lucide-react'
-import { calculate, getHistory } from '@/api/calculatorApi'
-import type { Product, DilutionRatio, CalculationResult } from '@/types/calculator'
+import { ChevronDown, Clock, Bookmark, BadgeCheck, User, Info, Star } from 'lucide-react'
+import { calculate, getHistory, getProductReviews } from '@/api/calculatorApi'
+import type { Product, DilutionRatio, CalculationResult, ProductReviewSummary } from '@/types/calculator'
 import PageLayout from '@/layouts/PageLayout'
 import ProductPickerSheet from '@/components/ProductPickerSheet'
 import BottomSheet from '@/components/BottomSheet'
+import ProductReviewSheet from '@/components/ProductReviewSheet'
 
 type TabType = 'calculator' | 'history'
 type RatioMode = 'preset' | 'custom'
@@ -16,6 +17,8 @@ const CalculatorPage = () => {
   const [m_SelectedProduct, setM_SelectedProduct] = useState<Product | null>(null)
   const [m_ShowProductSheet, setM_ShowProductSheet] = useState(false)
   const [m_ShowProductDetail, setM_ShowProductDetail] = useState(false)
+  const [m_ShowReviewSheet, setM_ShowReviewSheet] = useState(false)
+  const [m_ReviewSummary, setM_ReviewSummary] = useState<ProductReviewSummary | null>(null)
 
   // 희석비 선택
   const [m_RatioMode, setM_RatioMode] = useState<RatioMode>('preset')
@@ -105,6 +108,8 @@ const CalculatorPage = () => {
     setM_SelectedRatio(null)
     setM_RatioMode('preset')
     setM_ShowProductSheet(false)
+    setM_ReviewSummary(null)
+    getProductReviews(product.id).then(setM_ReviewSummary).catch(() => {})
   }
 
 
@@ -172,11 +177,32 @@ const CalculatorPage = () => {
             </button>
             {m_SelectedProduct && (
               <div className="flex items-center justify-between mt-2 px-1">
-                <p className="text-[12px] text-[#6B7684]">
-                  {m_SelectedProduct.brand}
-                  {m_SelectedProduct.categoryName && ` · ${m_SelectedProduct.categoryName}`}
-                  {m_SelectedProduct.capacityMl && ` · ${m_SelectedProduct.capacityMl}ml`}
-                </p>
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[12px] text-[#6B7684]">
+                    {m_SelectedProduct.brand}
+                    {m_SelectedProduct.categoryName && ` · ${m_SelectedProduct.categoryName}`}
+                    {m_SelectedProduct.capacityMl && ` · ${m_SelectedProduct.capacityMl}ml`}
+                  </p>
+                  {m_ReviewSummary && m_ReviewSummary.totalCount > 0 && (
+                    <button
+                      onClick={() => setM_ShowReviewSheet(true)}
+                      className="flex items-center gap-1 w-fit"
+                    >
+                      <Star size={11} className="text-[#FFB800] fill-[#FFB800]" />
+                      <span className="text-[12px] text-[#6B7684] font-medium">
+                        {m_ReviewSummary.avgRating?.toFixed(1)} ({m_ReviewSummary.totalCount})
+                      </span>
+                    </button>
+                  )}
+                  {m_ReviewSummary && m_ReviewSummary.totalCount === 0 && (
+                    <button
+                      onClick={() => setM_ShowReviewSheet(true)}
+                      className="text-[12px] text-[#ADB5C0] w-fit"
+                    >
+                      리뷰 없음 · 첫 리뷰 작성
+                    </button>
+                  )}
+                </div>
                 <button
                   onClick={() => setM_ShowProductDetail(true)}
                   className="flex items-center gap-1 text-[12px] text-[#3182F6] font-medium"
@@ -352,6 +378,15 @@ const CalculatorPage = () => {
         onClose={() => setM_ShowProductSheet(false)}
         onSelect={handleSelectProduct}
       />
+
+      {m_SelectedProduct && (
+        <ProductReviewSheet
+          open={m_ShowReviewSheet}
+          onClose={() => setM_ShowReviewSheet(false)}
+          productId={m_SelectedProduct.id}
+          productName={m_SelectedProduct.name}
+        />
+      )}
 
       {/* 제품 상세 모달 */}
       <BottomSheet

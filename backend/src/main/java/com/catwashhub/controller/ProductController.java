@@ -3,9 +3,12 @@ package com.catwashhub.controller;
 import com.catwashhub.common.ApiResponse;
 import com.catwashhub.dto.request.CalculationRequest;
 import com.catwashhub.dto.request.ProductRequest;
+import com.catwashhub.dto.request.ProductReviewRequest;
 import com.catwashhub.dto.response.CalculationResponse;
 import com.catwashhub.dto.response.CategoryResponse;
 import com.catwashhub.dto.response.ProductResponse;
+import com.catwashhub.dto.response.ProductReviewResponse;
+import com.catwashhub.dto.response.ProductReviewSummaryResponse;
 import com.catwashhub.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +58,29 @@ public class ProductController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid ProductRequest request) {
         return ApiResponse.ok(m_ProductService.createProduct(userDetails.getUsername(), request));
+    }
+
+    // ==================== 리뷰 ====================
+
+    @GetMapping("/products/{productId}/reviews")
+    public ApiResponse<ProductReviewSummaryResponse> getReviews(@PathVariable Long productId) {
+        return ApiResponse.ok(m_ProductService.getReviews(productId));
+    }
+
+    @PostMapping("/products/{productId}/reviews")
+    public ApiResponse<ProductReviewResponse> createReview(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long productId,
+            @RequestBody ProductReviewRequest request) {
+        return ApiResponse.ok(m_ProductService.createReview(userDetails.getUsername(), productId, request));
+    }
+
+    @DeleteMapping("/products/reviews/{reviewId}")
+    public ApiResponse<Void> deleteReview(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long reviewId) {
+        m_ProductService.deleteReview(userDetails.getUsername(), reviewId);
+        return ApiResponse.ok();
     }
 
     // ==================== 희석 계산 ====================

@@ -25,6 +25,21 @@ export interface Product {
   isOfficial: boolean  // user_id가 null이면 관리자 등록 (공식 제품)
 }
 
+export interface ProductReview {
+  id: number
+  userId: number
+  nickname: string
+  rating: number
+  content: string | null
+  createdAt: string
+}
+
+export interface ProductReviewSummary {
+  avgRating: number | null
+  totalCount: number
+  reviews: ProductReview[]
+}
+
 export interface CalculationResult {
   productId: number | null
   productName: string

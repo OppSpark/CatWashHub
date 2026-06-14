@@ -3,9 +3,13 @@ package com.catwashhub.service;
 import com.catwashhub.domain.*;
 import com.catwashhub.dto.request.CalculationRequest;
 import com.catwashhub.dto.request.ProductRequest;
+import com.catwashhub.dto.request.ProductReviewRequest;
 import com.catwashhub.dto.response.CalculationResponse;
 import com.catwashhub.dto.response.CategoryResponse;
 import com.catwashhub.dto.response.ProductResponse;
+import com.catwashhub.dto.response.ProductReviewResponse;
+import com.catwashhub.dto.response.ProductReviewSummaryResponse;
+import com.catwashhub.repository.ProductReviewRepository;
 import com.catwashhub.exception.CustomException;
 import com.catwashhub.exception.ErrorCode;
 import com.catwashhub.repository.*;
@@ -25,6 +29,7 @@ public class ProductService {
     private final CategoryRepository m_CategoryRepository;
     private final UserRepository m_UserRepository;
     private final CalculationHistoryRepository m_HistoryRepository;
+    private final ProductReviewRepository m_ReviewRepository;
 
     // ==================== 카테고리 ====================
     @Transactional(readOnly = true)
@@ -126,6 +131,73 @@ public class ProductService {
                 productMl,
                 _request.memo()
         );
+    }
+
+    // ==================== 리뷰 ====================
+
+    @Transactional(readOnly = true)
+    public ProductReviewSummaryResponse getReviews(Long _productId) {
+        try {
+            List<ProductReviewResponse> reviews = m_ReviewRepository
+                    .findByProductIdOrderByCreatedAtDesc(_productId)
+                    .stream()
+                    .map(ProductReviewResponse::from)
+                    .toList();
+            Double avg = m_ReviewRepository.findAverageRatingByProductId(_productId);
+            return new ProductReviewSummaryResponse(avg, reviews.size(), reviews);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public ProductReviewResponse createReview(String _email, Long _productId, ProductReviewRequest _req) {
+        try {
+            if (_req.rating() == null || _req.rating() < 1 || _req.rating() > 5) {
+                throw new CustomException(ErrorCode.INVALID_INPUT);
+            }
+            User user = m_UserRepository.findByEmail(_email)
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            Product product = m_ProductRepository.findById(_productId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INPUT));
+
+            // 이미 리뷰 작성한 경우 수정으로 처리
+            ProductReview review = m_ReviewRepository.findByProductIdAndUserId(_productId, user.getId())
+                    .orElse(null);
+            if (review != null) {
+                review.update(_req.rating(), _req.content());
+            } else {
+                review = ProductReview.builder()
+                        .user(user)
+                        .product(product)
+                        .rating(_req.rating())
+                        .content(_req.content())
+                        .build();
+            }
+            return ProductReviewResponse.from(m_ReviewRepository.save(review));
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public void deleteReview(String _email, Long _reviewId) {
+        try {
+            User user = m_UserRepository.findByEmail(_email)
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            ProductReview review = m_ReviewRepository.findById(_reviewId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INPUT));
+            if (!review.getUser().getId().equals(user.getId())) {
+                throw new CustomException(ErrorCode.FORBIDDEN);
+            }
+            m_ReviewRepository.delete(review);
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Transactional(readOnly = true)
